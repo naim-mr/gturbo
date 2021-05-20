@@ -1,0 +1,58 @@
+.sidenav {
+    border: 3px solid rgb(64, 138, 236);
+    height: 96vh;
+    width: 200px;
+}
+
+.sidenav button {
+    width: 100%;
+    border: 2px solid rgb(112, 112, 112);
+}
+
+.nav-link:hover {
+    background-color: rgb(164, 163, 241);
+}
+
+.cy {
+    background-color: rgb(255, 224, 183);
+    border: 3px solid black;
+    height: 90vh;
+    width: 50%;
+    z-index: 1;
+}
+
+.cyto_conteneur {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    width: 100%;
+}
+
+.cyto_conteneur button {
+    width: 40%
+}
+
+.w100 {
+    width: 100%;
+    display: flex;
+}
+
+html,
+body {
+    width: 100%;
+}
+
+#content_flex {
+    width: 100%;
+    margin-left: 0;
+    padding-left: 0;
+    flex-direction: row;
+    display: flex;
+}
+
+.title {
+    font-size: 30px;
+    font-weight: bold;
+    margin-right: 350px;
+    margin-left: 350px;
+}
