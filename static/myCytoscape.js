@@ -1,13 +1,12 @@
 //Objet de gestion d'un cytoscape
 
-
-
 class myCytoscape {
     constructor(id) {
         this.drawmode = false;
         this.selectedEles = {};
         this.store = new Store();
         this.boxing = false;
+
         this.cy = cytoscape({
             container: document.getElementById(id),
             layout: {
@@ -94,58 +93,51 @@ class myCytoscape {
                 edges: []
             }
         });
-
-
-
-
         this.cy.on('click', event => {
-            console.log(this.drawmode);
             if (this.drawmode) {
-
                 this.cy.add({ group: 'nodes', position: event.position });
             }
         });
-
         this.cy.on('box', event => {
             this.boxing = true;
 
         });
-
         this.cb = this.cy.clipboard();
-
         document.addEventListener("keydown", event => {
-            if (this.boxing) {
-                if (event.ctrlKey) {
-                    if (event.key === 'c') {
-                        this.selectedEles = this.cy.$(':selected');
-                    } else if (event.key == '   v' && this.selectedEles != {}) {
-                        this.cy.paste(this.cb.copy(this.selectedEles));
-                        this.selectedEles = {};
-                        this.boxing = false;
+            console.log(this.oncursor);
+            if (this.oncursor) {
+                if (this.boxing) {
+                    if (event.ctrlKey) {
+                        if (event.key === 'c') {
+                            this.selectedEles = this.cy.$(':selected');
+                        } else if (event.key == '   v' && this.selectedEles != {}) {
+                            this.cy.paste(this.cb.copy(this.selectedEles));
+                            this.selectedEles = {};
+                            this.boxing = false;
+                        }
+                    }
+                }
+                if (event.ctrlKey && event.key == 'z') {
+
+                    this.store.eles = this.cy.elements('');
+
+                    if (!this.store.isEmpty()) {
+
+                        this.store.ele = this.store.eles[this.store.eles.length - 1];
+                        this.store.push(this.store.ele);
+                        this.cy.remove(this.store.ele);
+                        this.store.cursor--;
+                    }
+
+                }
+                if (event.ctrlKey && event.key == 'y') {
+                    if (this.store.storage.length > 0 && this.store.cursor < this.store.storage.length) {
+                        this.store.ele = this.store.pop();
+                        this.store.ele.restore();
+                        this.store.cursor++;
                     }
                 }
             }
-            if (event.ctrlKey && event.key == 'z') {
-
-                this.store.eles = this.cy.elements('');
-
-                if (!this.store.isEmpty()) {
-
-                    this.store.ele = this.store.eles[this.store.eles.length - 1];
-                    this.store.push(this.store.ele);
-                    this.cy.remove(this.store.ele);
-                    this.store.cursor--;
-                }
-
-            }
-            if (event.ctrlKey && event.key == 'y') {
-                if (this.store.storage.length > 0 && this.store.cursor < this.store.storage.length) {
-                    this.store.ele = this.store.pop();
-                    this.store.ele.restore();
-                    this.store.cursor++;
-                }
-            }
-
         })
         this.eh = this.cy.edgehandles();
 
