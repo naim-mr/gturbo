@@ -8,10 +8,12 @@ var cylist = new CytoList();
 var nparent; //TODO : gestion des compound box
 
 const sauvegarde = () => {
+
+
+    let n = cylist.getCounter();
+    document.getElementById('ruleset').innerHTML += '<li class="nav-item"><button type="button" onclick="changeGraph(event)" id="' + n + '"class="btn btn-light"><img id=rulelhs' + n + '><img id=rulerhs' + n + '></button></li>';
     cylist.saveRule();
     cylist.clear();
-    let n = cylist.getCounter();
-    document.getElementById('ruleset').innerHTML += '<li class="nav-item"><button type="button" onclick="changeGraph(event)" id="' + n + '"class="btn btn-light">Rule ' + n + '</button></li>';
     document.getElementById("lhs").setAttribute("style", "display:none");
     document.getElementById("rhs").setAttribute("style", "display:none");
     document.getElementById("save").setAttribute("style", "display:none");
@@ -66,7 +68,7 @@ function handleInclusion(event) {
     cylist.clear();
     cylist.freeStorage();
     nparent = undefined;
-
+    this.cylist.changeState('inclusion');
     if (cylist.length() > 0) {
         var inclusionset = document.getElementById("inclusionset");
         for (var i = 1; i < cylist.length; i++) {
@@ -85,13 +87,9 @@ const draw = (event) => {
 }
 
 
-function printRule(event) {
-    nparent = undefined;
+const printRult = event => {
 
-    let id = event.target.id;
-    console.log(id);
-    cyleft.add(cylist[id].lhs.nodes);
-    cyright.add(cylist[id].rhs.nodes);
-    cyleft.add(cylist[id].lhs.edges);
-    cyright.add(cylist[id].rhs.edges)
+
+    this.cylist.current = event.target.id;
+    cylist.update();
 }

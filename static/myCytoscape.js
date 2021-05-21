@@ -1,20 +1,28 @@
 //Objet de gestion d'un cytoscape
+//TODO : suppresion des élement en accord avec le ctrl z/y
+//TODO : gestion des images plus fine 
+//TODO : Créer un patern state pour myctoscape
 
 
 
 
+const State = {
+    RULES: 'rules',
+    INCLUSION: 'inclusions'
+}
 
 
 class myCytoscape {
 
     constructor(id) {
-
+        this.state = State.RULES;
         this.drawmode = false;
         this.selectedEles = {};
         this.store = new Store();
         this.boxing = false;
 
         this.cy = cytoscape({
+
             container: document.getElementById(id),
             layout: {
                 name: 'grid',
@@ -156,6 +164,24 @@ class myCytoscape {
 
     }
 
+    saveRule(n, handside) {
+
+        let jpeg = this.cy.jpeg({ bg: 'rgb(255, 224, 183)' });
+        let img = document.getElementById('rule' + handside + n)
+        console.log(img);
+        img.setAttribute('src', jpeg);
+        img.setAttribute('style', 'width:50%;padding:1%');
+
+
+    }
+    changeState(option) {
+        switch (option) {
+            case 'rule':
+                this.state = State.RULE;
+            case 'inclusion':
+                this.state = State.INCLUSION;
+        }
+    }
 
     freeStorage() {
         this.store.free();
@@ -193,7 +219,7 @@ class CytoList {
         this.graphlist[0] = { lhs: { nodes: null, edges: null }, rhs: { nodes: null, edges: null } };
         this.cyleft = new myCytoscape("lhs");
         this.cyright = new myCytoscape("rhs");
-        console.log(this.cyleft);
+
         this.graphlist[0].lhs.nodes = this.cyleft.nodes('');
         this.graphlist[0].lhs.edges = this.cyleft.edges('');
         this.graphlist[0].rhs.nodes = this.cyright.nodes('');
@@ -241,6 +267,9 @@ class CytoList {
     }
 
     saveRule() {
+        this.cyleft.saveRule(this.counter, 'lhs');
+        this.cyright.saveRule(this.counter, 'rhs');
+
         let neweleLeft = { nodes: this.leftNodes(''), edges: this.leftEdges('') };
         let neweleright = { nodes: this.rightNodes(''), edges: this.rightEdges('') };
         let newRule = { lhs: neweleLeft, rhs: neweleright };
