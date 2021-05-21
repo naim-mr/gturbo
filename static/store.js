@@ -18,4 +18,11 @@ class Store {
     isEmpty() {
         return (this.eles.length == 0);
     }
+
+    free() {
+        this.storage = [];
+        this.cursor = 0;
+
+
+    }
 }

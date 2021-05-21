@@ -16,7 +16,7 @@ const sauvegarde = () => {
     document.getElementById("rhs").setAttribute("style", "display:none");
     document.getElementById("save").setAttribute("style", "display:none");
     document.getElementById("draw").setAttribute("style", "display:none");
-
+    cylist.freeStorage();
     cylist.drawmode();
     //nparent = undefined;
 }
@@ -28,12 +28,14 @@ const changeGraph = (event) => {
 
     //on retire l'affichage de lancien graph
     cylist.clear();
+    //
+    cylist.freeStorage();
     //on affihe l'actuel
     let m = parseInt(event.target.id);
     console.log(m);
     cylist.setCurrent(m);
     cylist.update();
-    console.log("coucouc");
+
     document.getElementById("lhs").setAttribute("style", "display:inline-flex");
     document.getElementById("rhs").setAttribute("style", "display:inline-flex");
     document.getElementById("save").setAttribute("style", "display:none");
@@ -57,23 +59,23 @@ const handleCreateRule = (event) => {
 
 
 function handleInclusion(event) {
-    /*
-        cyleft.remove(cyleft.nodes(''));
-        cyright.remove(cyright.nodes(''));
-        cyleft.remove(cyleft.edges(''));
-        cyright.remove(cyright.edges(''));
-        nparent = undefined;
-        document.getElementById("lhs").setAttribute("style", "display:inline-flex");
-        document.getElementById("rhs").setAttribute("style", "display:inline-flex");
-        if (cylist.length > 0) {
-            var inclusionset = document.getElementById("inclusionset");
-            for (var i = 1; i < cylist.length; i++) {
-                inclusionset.innerHTML += '<li class="nav-item"><button type="button" onclick="printRule(event)" id="' + i + '"class="btn btn-light">Rule ' + i + '</button></li>';
-            }
+    document.getElementById("lhs").setAttribute("style", "display:inline-flex");
+    document.getElementById("rhs").setAttribute("style", "display:inline-flex");
+    document.getElementById("save").setAttribute("style", "display:none");
+    document.getElementById("draw").setAttribute("style", "display:block");
+    cylist.clear();
+    cylist.freeStorage();
+    nparent = undefined;
 
-
+    if (cylist.length() > 0) {
+        var inclusionset = document.getElementById("inclusionset");
+        for (var i = 1; i < cylist.length; i++) {
+            inclusionset.innerHTML += '<li class="nav-item"><button type="button" onclick="printRule(event)" id="' + i + '"class="btn btn-light">Rule ' + i + '</button></li>';
         }
-    */
+
+
+    }
+
 }
 
 const draw = (event) => {
@@ -82,7 +84,7 @@ const draw = (event) => {
 
 }
 
-/*
+
 function printRule(event) {
     nparent = undefined;
 
@@ -93,4 +95,3 @@ function printRule(event) {
     cyleft.add(cylist[id].lhs.edges);
     cyright.add(cylist[id].rhs.edges)
 }
-*/

@@ -1,7 +1,14 @@
 //Objet de gestion d'un cytoscape
 
+
+
+
+
+
 class myCytoscape {
+
     constructor(id) {
+
         this.drawmode = false;
         this.selectedEles = {};
         this.store = new Store();
@@ -104,43 +111,54 @@ class myCytoscape {
         });
         this.cb = this.cy.clipboard();
         document.addEventListener("keydown", event => {
-            console.log(this.oncursor);
-            if (this.oncursor) {
-                if (this.boxing) {
-                    if (event.ctrlKey) {
-                        if (event.key === 'c') {
-                            this.selectedEles = this.cy.$(':selected');
-                        } else if (event.key == '   v' && this.selectedEles != {}) {
-                            this.cy.paste(this.cb.copy(this.selectedEles));
-                            this.selectedEles = {};
-                            this.boxing = false;
-                        }
-                    }
-                }
-                if (event.ctrlKey && event.key == 'z') {
 
-                    this.store.eles = this.cy.elements('');
 
-                    if (!this.store.isEmpty()) {
-
-                        this.store.ele = this.store.eles[this.store.eles.length - 1];
-                        this.store.push(this.store.ele);
-                        this.cy.remove(this.store.ele);
-                        this.store.cursor--;
-                    }
-
-                }
-                if (event.ctrlKey && event.key == 'y') {
-                    if (this.store.storage.length > 0 && this.store.cursor < this.store.storage.length) {
-                        this.store.ele = this.store.pop();
-                        this.store.ele.restore();
-                        this.store.cursor++;
+            if (this.boxing) {
+                if (event.ctrlKey) {
+                    if (event.key === 'c') {
+                        this.selectedEles = this.cy.$(':selected');
+                    } else if (event.key == '   v' && this.selectedEles != {}) {
+                        this.cy.paste(this.cb.copy(this.selectedEles));
+                        this.selectedEles = {};
+                        this.boxing = false;
                     }
                 }
             }
-        })
+            if (event.ctrlKey && event.key == 'z') {
+
+                this.store.eles = this.cy.elements('');
+
+                if (!this.store.isEmpty()) {
+
+                    this.store.ele = this.store.eles[this.store.eles.length - 1];
+                    this.store.push(this.store.ele);
+                    this.cy.remove(this.store.ele);
+                    this.store.cursor++;
+                }
+
+            }
+            if (event.ctrlKey && event.key == 'y') {
+                if (this.store.storage.length > 0 && this.store.cursor > 0) {
+                    this.store.ele = this.store.pop();
+                    this.store.ele.restore();
+                    this.store.cursor--;
+                }
+
+            }
+            if (event.key == "Delete") {
+
+                this.cy.remove(this.cy.elements(':selected'));
+
+
+            }
+        });
         this.eh = this.cy.edgehandles();
 
+    }
+
+
+    freeStorage() {
+        this.store.free();
     }
     drawModeUpdate() {
         this.drawmode = !(this.drawmode);
@@ -184,6 +202,13 @@ class CytoList {
         this.current = 0;
 
 
+    }
+    freeStorage() {
+        this.cyright.freeStorage();
+        this.cyleft.freeStorage();
+    }
+    length() {
+        return this.graphlist.length;
     }
     drawmode() {
         this.cyleft.drawModeUpdate();
