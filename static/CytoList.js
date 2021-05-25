@@ -2,31 +2,33 @@
 //TODO : suppresion des élement en accord avec le ctrl z/y
 //TODO : gestion des images plus fine 
 //TODO : Créer un patern state pour myctoscape
+//TODO: gérer la duplication des images INCLUSION / JEU DE REGLE 
 
 
 
 
-const State = {
-    RULES: 'rules',
-    INCLUSION: 'inclusions'
+
+
+
+const Mode = {
+    DRAW: 'draw',
+    EDIT: 'edit'
 }
 
+class MyCytoscape {
 
-class myCytoscape {
-
-    constructor(id) {
-        this.state = State.RULES;
-        this.drawmode = false;
+    constructor(id, mode) {
+        this.mode = mode;
+        this.state = new EditState();
         this.selectedEles = {};
         this.store = new Store();
         this.boxing = false;
 
         this.cy = cytoscape({
-
+            zoomEnabled: false,
             container: document.getElementById(id),
             layout: {
                 name: 'grid',
-                zoomEnabled: false,
                 rows: 2,
                 cols: 2
             },
@@ -108,86 +110,40 @@ class myCytoscape {
                 edges: []
             }
         });
-        this.cy.on('click', event => {
-            if (this.drawmode) {
-                this.cy.add({ group: 'nodes', position: event.position });
-            }
-        });
-        this.cy.on('box', event => {
-            this.boxing = true;
-
-        });
         this.cb = this.cy.clipboard();
-        document.addEventListener("keydown", event => {
-
-
-            if (this.boxing) {
-                if (event.ctrlKey) {
-                    if (event.key === 'c') {
-                        this.selectedEles = this.cy.$(':selected');
-                    } else if (event.key == '   v' && this.selectedEles != {}) {
-                        this.cy.paste(this.cb.copy(this.selectedEles));
-                        this.selectedEles = {};
-                        this.boxing = false;
-                    }
-                }
-            }
-            if (event.ctrlKey && event.key == 'z') {
-
-                this.store.eles = this.cy.elements('');
-
-                if (!this.store.isEmpty()) {
-
-                    this.store.ele = this.store.eles[this.store.eles.length - 1];
-                    this.store.push(this.store.ele);
-                    this.cy.remove(this.store.ele);
-                    this.store.cursor++;
-                }
-
-            }
-            if (event.ctrlKey && event.key == 'y') {
-                if (this.store.storage.length > 0 && this.store.cursor > 0) {
-                    this.store.ele = this.store.pop();
-                    this.store.ele.restore();
-                    this.store.cursor--;
-                }
-
-            }
-            if (event.key == "Delete") {
-
-                this.cy.remove(this.cy.elements(':selected'));
-
-
-            }
-        });
         this.eh = this.cy.edgehandles();
 
-    }
 
+    }
+    changeStateTo(mode) {
+        this.state.removeListener();
+        switch (mode) {
+            case Mode.DRAW:
+
+                return new DrawState(this);
+            case Mode.EDIT:
+                return new EditState(this);
+        }
+    }
     saveRule(n, handside) {
 
         let jpeg = this.cy.jpeg({ bg: 'rgb(255, 224, 183)' });
         let img = document.getElementById('rule' + handside + n)
-        console.log(img);
+
         img.setAttribute('src', jpeg);
         img.setAttribute('style', 'width:50%;padding:1%');
 
 
     }
-    changeState(option) {
-        switch (option) {
-            case 'rule':
-                this.state = State.RULE;
-            case 'inclusion':
-                this.state = State.INCLUSION;
-        }
-    }
+
 
     freeStorage() {
         this.store.free();
     }
-    drawModeUpdate() {
-        this.drawmode = !(this.drawmode);
+    changeState(mode) {
+        this.state.removeListener();
+        if (mode == Mode.DRAW) this.changeStateTo(Mode.EDIT);
+        else this.changeStateTo(Mode.DRAW)
     }
     nodes(str) {
         return this.cy.nodes('');
@@ -197,8 +153,9 @@ class myCytoscape {
         return this.cy.edges('');
 
     }
-    add(option) {
-        this.cy.add(option);
+    add(ele) {
+        this.cy.add(ele);
+
     }
     remove(option) {
         this.cy.remove(option);
@@ -211,21 +168,14 @@ class CytoList {
     cyleft;
     cyright;
     graphlist;
-    counter;
-    current;
+
     constructor() {
 
-        this.graphlist = [];
-        this.graphlist[0] = { lhs: { nodes: null, edges: null }, rhs: { nodes: null, edges: null } };
-        this.cyleft = new myCytoscape("lhs");
-        this.cyright = new myCytoscape("rhs");
-
-        this.graphlist[0].lhs.nodes = this.cyleft.nodes('');
-        this.graphlist[0].lhs.edges = this.cyleft.edges('');
-        this.graphlist[0].rhs.nodes = this.cyright.nodes('');
-        this.graphlist[0].rhs.edges = this.cyright.edges('');
-        this.counter = 0;
-        this.current = 0;
+        this.graphlist = new GraphList();
+        this.cyleft = new MyCytoscape("lhs");
+        this.cyright = new MyCytoscape("rhs");
+        this.graphlist.getRule(0).updateNodes(this.cyleft.nodes(''), this.cyright.nodes(''));
+        this.graphlist.getRule(0).updateEdges(this.cyleft.edges(''), this.cyright.edges(''));
 
 
     }
@@ -236,9 +186,13 @@ class CytoList {
     length() {
         return this.graphlist.length;
     }
-    drawmode() {
-        this.cyleft.drawModeUpdate();
-        this.cyright.drawModeUpdate();
+    changeMode(mode) {
+        this.cyleft.changeStateTo(mode)
+        this.cyright.changeStateTo(mode);
+    }
+    changeState() {
+        this.cyleft.changeState();
+        this.cyright.changeState();
     }
     push(ele) {
         this.graphlist.push(ele);
@@ -267,58 +221,30 @@ class CytoList {
     }
 
     saveRule() {
-        this.cyleft.saveRule(this.counter, 'lhs');
-        this.cyright.saveRule(this.counter, 'rhs');
-
-        let neweleLeft = { nodes: this.leftNodes(''), edges: this.leftEdges('') };
-        let neweleright = { nodes: this.rightNodes(''), edges: this.rightEdges('') };
-        let newRule = { lhs: neweleLeft, rhs: neweleright };
+        this.cyleft.saveRule(this.getCounter(), 'lhs');
+        this.cyright.saveRule(this.getCounter(), 'rhs');
+        let newRule = new Rule();
+        newRule.updateNodes(this.leftNodes(''), this.rightNodes(''));
+        newRule.updateEdges(this.leftEdges(''), this.rightEdges(''));
         this.push(newRule);
-        this.counter++;
     }
     getCounter() {
-        return this.counter;
+        return this.graphlist.counter;
     }
     setCurrent(n) {
-        this.current = n;
+        this.graphlist.setCurrent(n);
 
+    }
+    getCurrent() {
+        return this.graphlist.getCurrent();
     }
     update() {
-        this.cyleft.add(this.graphlist[this.current].lhs.nodes);
-        this.cyright.add(this.graphlist[this.current].rhs.nodes);
-        this.cyleft.add(this.graphlist[this.current].lhs.edges);
-        this.cyright.add(this.graphlist[this.current].rhs.edges)
+        let currentRule = this.getCurrent();
+        this.cyleft.add(currentRule.lhs.getNodes());
+        this.cyleft.add(currentRule.lhs.getEdges());
+        this.cyright.add(currentRule.rhs.getNodes());
+        this.cyright.add(currentRule.rhs.getEdges());
+
     }
+
 }
-
-
-
-
-/*
-        cy.on('box',function(event){
-            console.log('ok');
-            event.target.style({'background-color':'orange'});
-            
-        });
-        */
-
-
-// console.log(event);
-/*if(nparent==undefined){
-    console.log('ici');
-    nparent = {
-        group: 'nodes',
-        position: event.position,
-        data: {id:'nparent'+counter+id}
-    }
-    console.log(nparent);
-    cy.add(nparent);    
-    
-}else{
-    let element = {
-        group: 'nodes',
-        position: event.position,
-        data:{parent:'nparent'+counter+id}
-    }
-    cy.add(element);
-}*/
