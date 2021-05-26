@@ -64,14 +64,14 @@ const handleCreateRule = (event) => {
 }
 
 
-function handleInclusion(event) {
+const handleInclusion = (event) => {
     document.getElementById("lhs").setAttribute("style", "display:none");
     document.getElementById("rhs").setAttribute("style", "display:none");
     document.getElementById("save").setAttribute("style", "display:none");
     document.getElementById("draw").setAttribute("style", "display:none");
     cylist.clear();
     cylist.freeStorage();
-    cylist.changeStateTo(Mode.DRAW);
+    cylist.changeStateTo(Mode.EDIT);
 
 
 }

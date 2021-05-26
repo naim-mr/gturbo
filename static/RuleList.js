@@ -1,4 +1,4 @@
-class GraphList {
+class RuleList {
     constructor() {
         this.list = [new Rule()];
         this.counter = 0;

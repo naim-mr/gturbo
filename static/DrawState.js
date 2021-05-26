@@ -1,9 +1,10 @@
 class DrawState extends CytoState {
     constructor(myCy) {
         super(myCy);
+        this.mode = Mode.DRAW;
 
         this.mycytoscape.cy.on('click', event => {
-            console.log(this.mycytoscape);
+            console.log("draw");
             let element = {
                 group: 'nodes',
                 position: event.position,
@@ -16,7 +17,7 @@ class DrawState extends CytoState {
 
     }
     removeListener() {
-
+        console.log("ok");
         this.mycytoscape.cy.off("click");
 
     }

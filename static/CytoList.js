@@ -19,7 +19,7 @@ class MyCytoscape {
 
     constructor(id, mode) {
         this.mode = mode;
-        this.state = new EditState();
+        this.state = new EditState(this);
         this.selectedEles = {};
         this.store = new Store();
         this.boxing = false;
@@ -125,25 +125,22 @@ class MyCytoscape {
                 return new EditState(this);
         }
     }
-    saveRule(n, handside) {
 
+    saveRule(n, handside) {
         let jpeg = this.cy.jpeg({ bg: 'rgb(255, 224, 183)' });
         let img = document.getElementById('rule' + handside + n)
-
         img.setAttribute('src', jpeg);
         img.setAttribute('style', 'width:50%;padding:1%');
-
-
     }
-
 
     freeStorage() {
         this.store.free();
     }
-    changeState(mode) {
+    changeState() {
+        console.log("coucu")
         this.state.removeListener();
-        if (mode == Mode.DRAW) this.changeStateTo(Mode.EDIT);
-        else this.changeStateTo(Mode.DRAW)
+        if (this.state.mode == Mode.DRAW) this.state = this.changeStateTo(Mode.EDIT);
+        else this.state = this.changeStateTo(Mode.DRAW)
     }
     nodes(str) {
         return this.cy.nodes('');
