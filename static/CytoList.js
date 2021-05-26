@@ -164,15 +164,15 @@ class MyCytoscape {
 class CytoList {
     cyleft;
     cyright;
-    graphlist;
+    rulelist;
 
     constructor() {
 
-        this.graphlist = new GraphList();
+        this.rulelist = new RuleList();
         this.cyleft = new MyCytoscape("lhs");
         this.cyright = new MyCytoscape("rhs");
-        this.graphlist.getRule(0).updateNodes(this.cyleft.nodes(''), this.cyright.nodes(''));
-        this.graphlist.getRule(0).updateEdges(this.cyleft.edges(''), this.cyright.edges(''));
+        this.rulelist.getRule(0).updateNodes(this.cyleft.nodes(''), this.cyright.nodes(''));
+        this.rulelist.getRule(0).updateEdges(this.cyleft.edges(''), this.cyright.edges(''));
 
 
     }
@@ -181,7 +181,7 @@ class CytoList {
         this.cyleft.freeStorage();
     }
     length() {
-        return this.graphlist.length;
+        return this.rulelist.length;
     }
     changeMode(mode) {
         this.cyleft.changeStateTo(mode)
@@ -192,7 +192,7 @@ class CytoList {
         this.cyright.changeState();
     }
     push(ele) {
-        this.graphlist.push(ele);
+        this.rulelist.push(ele);
     }
     clear() {
         this.cyleft.remove(this.cyleft.nodes(''));
@@ -226,14 +226,14 @@ class CytoList {
         this.push(newRule);
     }
     getCounter() {
-        return this.graphlist.counter;
+        return this.rulelist.counter;
     }
     setCurrent(n) {
-        this.graphlist.setCurrent(n);
+        this.rulelist.setCurrent(n);
 
     }
     getCurrent() {
-        return this.graphlist.getCurrent();
+        return this.rulelist.getCurrent();
     }
     update() {
         let currentRule = this.getCurrent();

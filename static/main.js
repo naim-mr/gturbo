@@ -7,22 +7,37 @@ const cylist = new CytoList();
 
 
 
-const sauvegarde = () => {
-
-
-    let n = cylist.getCounter();
-
-    document.getElementById('ruleset').innerHTML += '<li class="nav-item"><button type="button" onclick="changeGraph(event)" id="' + n + '"class="btn btn-light"><img id="rulelhs' + n + '"><img  id="rulerhs' + n + '" ></button></li > ';
-    //document.getElementById('inclusionset').innerHTML += '<li class="nav-item"><button type="button" onclick="printRule(event)" id="' + n + '"class="btn btn-light"><img id="irulelhs' + n + '"><img  id="irulerhs' + n + '"> </button></li > ';
-    cylist.saveRule();
-    cylist.clear();
+const hide = () => {
     document.getElementById("lhs").setAttribute("style", "display:none");
     document.getElementById("rhs").setAttribute("style", "display:none");
     document.getElementById("save").setAttribute("style", "display:none");
     document.getElementById("draw").setAttribute("style", "display:none");
+
+}
+
+const show = () => {
+    document.getElementById("lhs").setAttribute("style", "display:inline-flex");
+    document.getElementById("rhs").setAttribute("style", "display:inline-flex");
+    document.getElementById("save").setAttribute("style", "display:none");
+    document.getElementById("draw").setAttribute("style", "display:block");
+
+}
+
+const addRuleButton = (n) => {
+    document.getElementById('ruleset').innerHTML += '<li class="nav-item"><button type="button" onclick="changeGraph(event)" id="' + n + '"class="btn btn-light"><img id="rulelhs' + n + '"><img  id="rulerhs' + n + '" ></button></li > ';
+}
+const sauvegarde = () => {
+
+
+    let n = cylist.getCounter();
+    addRuleButton(n);
+    //document.getElementById('inclusionset').innerHTML += '<li class="nav-item"><button type="button" onclick="printRule(event)" id="' + n + '"class="btn btn-light"><img id="irulelhs' + n + '"><img  id="irulerhs' + n + '"> </button></li > ';
+    cylist.saveRule();
+    cylist.clear();
+    hide();
     cylist.freeStorage();
     cylist.changeState(Mode.EDIT);
-    //nparent = undefined;
+
 }
 
 const parseId = str => {
@@ -44,10 +59,8 @@ const changeGraph = (event) => {
     let m = parseId(event.target.id) + 1;
     cylist.setCurrent(m);
     cylist.update();
-    document.getElementById("lhs").setAttribute("style", "display:inline-flex");
-    document.getElementById("rhs").setAttribute("style", "display:inline-flex");
-    document.getElementById("save").setAttribute("style", "display:none");
-    document.getElementById("draw").setAttribute("style", "display:block");
+    show();
+
 }
 
 const handleCreateRule = (event) => {
@@ -57,18 +70,12 @@ const handleCreateRule = (event) => {
         cylist.setCurrent(0);
         cylist.update();
     }
-    document.getElementById("lhs").setAttribute("style", "display:inline-flex");
-    document.getElementById("rhs").setAttribute("style", "display:inline-flex");
-    document.getElementById("save").setAttribute("style", "display:block");
-    document.getElementById("draw").setAttribute("style", "display:block");
+    show();
 }
 
 
 const handleInclusion = (event) => {
-    document.getElementById("lhs").setAttribute("style", "display:none");
-    document.getElementById("rhs").setAttribute("style", "display:none");
-    document.getElementById("save").setAttribute("style", "display:none");
-    document.getElementById("draw").setAttribute("style", "display:none");
+    hide();
     cylist.clear();
     cylist.freeStorage();
     cylist.changeStateTo(Mode.EDIT);
@@ -86,9 +93,5 @@ const changeMode = (event) => {
 const printRule = (event) => {
 
     cylist.update();
-
-    document.getElementById("lhs").setAttribute("style", "display:inline-flex");
-    document.getElementById("rhs").setAttribute("style", "display:inline-flex");
-    document.getElementById("save").setAttribute("style", "display:block");
-    document.getElementById("draw").setAttribute("style", "display:block");
+    show();
 }
