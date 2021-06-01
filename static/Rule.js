@@ -2,6 +2,29 @@ const HS = {
     RHS: 'rhs',
     LHS: 'lhs'
 }
+class RuleList {
+    constructor() {
+        this.list = [new Rule()];
+        this.counter = 0;
+        this.current = 0;
+    }
+    push(rule) {
+        this.list.push(rule);
+        this.counter++;
+    }
+    getRule(n) {
+        return this.list[n];
+    }
+    length() {
+        return this.list.length;
+    }
+    getCurrent() {
+        return this.list[this.current];
+    }
+    setCurrent(n) {
+        this.current = n;
+    }
+}
 class Rule {
     constructor() {
         this.rhs = new Handside(HS.RHS);
@@ -18,8 +41,6 @@ class Rule {
     }
 
 }
-
-
 
 class Handside {
     constructor(hs) {

@@ -16,29 +16,33 @@
 .cy {
     background-color: rgb(255, 224, 183);
     border: 3px solid black;
-    height: 90vh;
+    height: 100%;
     width: 50%;
-    z-index: 1;
 }
 
-.cyto_conteneur {
+.cyhalf {
+    background-color: rgb(255, 224, 183);
+    border: 3px solid black;
+    height: 50%;
+    width: 50%;
+}
+
+#cyto_conteneur {
     display: flex;
-    flex-wrap: wrap;
     flex-direction: column;
     width: 100%;
 }
 
-.cyto_conteneur button {
-    width: 40%
-}
-
 .w100 {
+    height: 100%;
     width: 100%;
     display: flex;
+    flex-wrap: wrap;
 }
 
 html,
 body {
+    height: 100%;
     width: 100%;
 }
 

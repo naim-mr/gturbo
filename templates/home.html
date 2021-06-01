@@ -15,10 +15,10 @@
 
     <ul class="nav nav-tabs navbar-light" style="background-color: #e3f2fd;" id="myTab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link " id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true"><a>Jeu de règle</a></button>
+            <button class="nav-link " onclick="switchVueRule()" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true"><a>Jeu de règle</a></button>
         </li>
         <li class="nav-item" role="presentation">
-            <button onclick="handleInclusion()" class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Inclusion</button>
+            <button onclick="switchVueInclusion()" class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Inclusion</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">???</button>
@@ -41,19 +41,17 @@
             <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
         </div>
         <!-- Les conteneurs des cytoscapes gauche/droite-->
-        <div class="cyto_conteneur">
-            <div class="w100">
-                <div id="lhs" class="cy" style="display:none"></div>
-                <div id="rhs" class="cy" style="display:none"></div>
+        <div id="cyto_conteneur">
+            <div id="vue" class="w100">
+
             </div>
-            <button id="save" onclick="sauvegarde()" style="display:none;">Sauvegarder</button>
-            <button id="draw" onclick="changeMode()" style="display:none;">Dessin/Edition</button>
 
         </div>
-    </div>
 
+    </div>
     <script>
         //Crétation du bouton "create rule" à clear 
+
         var create_rule;
         let body = document.getElementById("myTabContent");
         var vide = true;
@@ -63,19 +61,21 @@
             create_rule = document.getElementById("create");
             vide = false;
         }
+        var inclusion = document.getElementById("inclusionset");
+        inclusion.innerHTML = '<li class="nav-item"><button type="button" onclick="handleCreateInclusion()" id="icreate" class="btn btn-light">Create Inclusion</button></li>';
     </script>
-
     <script src="/home/naiminux/gtwebeditor/static/Store.js"></script>
     <script src="/home/naiminux/gtwebeditor/static/libext/clipboard.js"></script>
     <script src="/home/naiminux/gtwebeditor/static/libext/edgehandles/cytoscape-edgehandles.js"></script>
-    <script src="/home/naiminux/gtwebeditor/static/CytoState.js"></script>
-    <script src="/home/naiminux/gtwebeditor/static/DrawState.js"></script>
-    <script src="/home/naiminux/gtwebeditor/static/EditState.js"></script>
+    <script src="/home/naiminux/gtwebeditor/static/MyCytoscapeState.js"></script>
     <script src="/home/naiminux/gtwebeditor/static/Rule.js"></script>
-    <script src="/home/naiminux/gtwebeditor/static/RuleList.js"></script>
+    <script src="/home/naiminux/gtwebeditor/static/Inclusion.js"></script>
+    <script src="/home/naiminux/gtwebeditor/static/CytoListState.js"></script>
     <script src="/home/naiminux/gtwebeditor/static/CytoList.js"></script>
     <script src="/home/naiminux/gtwebeditor/static/main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js " integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4 " crossorigin="anonymous "></script>
+
+
 </body>
 
 </html>
