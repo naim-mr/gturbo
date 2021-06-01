@@ -41,10 +41,10 @@ class EditState extends MyCyState {
         document.addEventListener("keydown", event => {
             if (this.mycytoscape.boxing) {
                 if (event.ctrlKey) {
-                    console.log("ok");
+
                     if (event.key === 'c') {
                         this.mycytoscape.selectedEles = this.mycytoscape.cy.$(':selected');
-                        console.log(this.mycytoscape.selectedEles);
+
                     } else if (event.key == 'v' && this.mycytoscape.selectedEles != {}) {
                         this.mycytoscape.cb.paste(this.mycytoscape.cb.copy(this.mycytoscape.selectedEles));
                         this.mycytoscape.selectedEles = {};

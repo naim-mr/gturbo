@@ -5,13 +5,24 @@ class InclusionList {
         this.current = 0;
     }
     push(inclusion) {
-        this.inclusions.push(inclusion);
+        let bool = true;
+        this.inclusions.forEach(i => {
+            if (i.src == inclusion.src && i.dest == inclusion.dest) {
+                i.addMorphism(inclusion.morphisms);
+                bool = false;
+
+            }
+
+        })
+        if (bool) this.inclusions.push(inclusion);
+        this.counter++;
     }
-    addInclusion(src, dest, morphisms) {
-        this.inclusions.push(new Inclusion(src, dest, morphisms));
+    setCurrent(n) {
+        this.current = n;
     }
-    getInclusion(n) {
-        if (n < this.inclusions.length) return this.inclusions[n];
+    getCurrent() {
+
+        if (n < this.inclusions.length) return this.inclusions[this.current];
         else throw "Error: out of bound morphisms length is smaller than " + n;
     }
     length() {
@@ -20,11 +31,11 @@ class InclusionList {
 
 }
 class Inclusion {
-    constructor(src, dest, morphisms) {
+    constructor(src, dest, morphisms, id) {
         this.src = src;
         this.dest = dest;
-        this.morphisms = [];
-
+        this.morphisms = morphisms;
+        this.id = id;
     }
     addMorphism(eleSrc, eleDest) {
         this.morphisms.push(new Morphism(eleSrc, eleDest));
@@ -43,6 +54,5 @@ class Morphism {
     constructor(eleSrc, eleDest) {
         this.eleSrc = eleSrc;
         this.eleDest = eleDest;
-
     }
 }

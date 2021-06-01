@@ -1,20 +1,16 @@
 //TODO : clean le début 
-// gestion inclusion avec create inclusion 
-// réediter une règle 
 // suppr + ctrl z/y
-// switch 
 // origine graph
-//couleur style deprecated   
-
-
+// pb de bouton 
+// gestion inclusion null
 let cylist;
 let onglet_t = {
     RULE: "rule",
     INCLUSION: "inclusion"
 }
 let init1 = true;
-
 let init2 = true;
+let printcursor = 0;
 let onglet = "";
 const div_str = (n, id) => {
     if (n == 0) return '<div id="' + id + '" class="cy" style="display:none"></div>';
@@ -29,7 +25,7 @@ const createVue = (str) => {
 }
 const ruleVue = () => {
     createVue(div_str(0, 'lhs') + div_str(0, 'rhs'));
-    if (init1) document.getElementById("cyto_conteneur").innerHTML += '<button id="save" onclick="sauvegarde()" style="display:none">Sauvegarder</button><button id="draw" onclick="changeMode()" style="display:non">Dessin/Edition</button>';
+    if (init1) document.getElementById("cyto_conteneur").innerHTML += '<button id="save" onclick="sauvegarde()" style="display:none">Sauvegarder</button><button id="draw" onclick="changeMode()" style="display:none">Dessin/Edition</button>';
     init1 = false;
 }
 
@@ -38,7 +34,7 @@ const inclusionVue = () => {
     let str = (div_str(1, 'lhs') + div_str(1, 'rhs') + div_str(2, 'lhs') + div_str(2, 'rhs'));
     console.log(str);
     createVue(str);
-    if (init2) document.getElementById("cyto_conteneur").innerHTML += '<button id="saveI" onclick="sauvegarde()">Sauvegarder</button>';
+    if (init2) document.getElementById("cyto_conteneur").innerHTML += '<button id="saveI" onclick="sauvegardeI()" style="display:none">Sauvegarder</button>';
     init2 = false;
 }
 
@@ -72,27 +68,60 @@ const showInclusionVue = () => {
     document.getElementById("rhs1").setAttribute("style", "display:flex");
     document.getElementById("lhs2").setAttribute("style", "display:flex");
     document.getElementById("rhs2").setAttribute("style", "display:flex");
+    document.getElementById("saveI").setAttribute("style", "display:block");;
+
+}
+
+
+const hideRulesButtonI = () => {
+
+    let htmlcollection = document.getElementsByClassName("navrule");
+    console.log(htmlcollection);
+    for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:none");
 
 
 }
 
+const hideIncButtonI = () => {
+
+    let htmlcollection = document.getElementsByClassName("navinc");
+    console.log(htmlcollection);
+    for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:none");
+
+
+}
 
 const addRuleButton = (n) => {
     document.getElementById('ruleset').innerHTML += '<li class="nav-item"><button type="button" onclick="changeGraph(event)" id="' + n + '"class="btn btn-light"><img id="rulelhs' + n + '"><img  id="rulerhs' + n + '" ></button></li > ';
     document.getElementById('inclusionset').innerHTML += '<li class="nav-item navrule" style="display:none" ><button type="button" onclick="printRule(event)" id="i' + n + '"class="btn btn-light"><img id="irulelhs' + n + '"><img  id="irulerhs' + n + '" ></button></li > ';
 }
 
+const addInclusionButton = (n) => {
+    document.getElementById('inclusionset').innerHTML += '<li class="nav-item navinc" style="display:none id="inclusion' + n + '" ><button type="button" onclick="printInclusion(event)" id="' + n + '"class="btn btn-light">Inclusion ' + n + '</button></li > ';
+}
 
 const sauvegarde = () => {
 
 
-    let n = cylist.getCounter();
+    let n = cylist.getCounterRule();
     addRuleButton(n);
     cylist.save();
+    hide();
     cylist.clear();
     //hide();
     cylist.freeStorage();
     cylist.changeState(Mode.EDIT);
+
+}
+
+const sauvegardeI = () => {
+    let n = cylist.getCounterRule();
+    addInclusionButton(n);
+    cylist.save();
+    cylist.clear();
+    cylist.freeStorage();
+    cylist.changeState(Mode.EDIT);
+    hideInclusionVue();
 
 }
 
@@ -122,14 +151,13 @@ const changeGraph = (event) => {
 const handleCreateRule = (event) => {
 
 
-
     if (cylist == undefined) {
         ruleVue();
         onglet = onglet_t.RULE;
         cylist = new CytoList("rule");
-    } else if (cylist.getCounter() > 0) {
+    } else if (cylist.getCounterRule() > 0) {
         cylist.clear();
-        cylist.setCurrent(0);
+        cylist.setCurrentRule(0);
         cylist.update();
     }
     show();
@@ -137,9 +165,9 @@ const handleCreateRule = (event) => {
 
 const handleCreateInclusion = () => {
 
+    hideIncButtonI();
     if (cylist.length() < 2) {
         alert("Vous devez designer au moins deux règles avant de pouvoir créer une inclusion ")
-
     } else {
         let htmlcollection = document.getElementsByClassName("navrule");
         for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:flex");
@@ -165,12 +193,6 @@ const switchVueRule = (event) => {
 }
 
 const switchVueInclusion = (event) => {
-
-
-    let htmlcollection = document.getElementsByClassName("navrule");
-    for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:none");
-
-
     if (cylist == undefined) {
         inclusionVue();
         cylist = new CytoList("inclusion");
@@ -181,6 +203,7 @@ const switchVueInclusion = (event) => {
         cylist.clear();
         cylist.freeStorage();
         cylist.changeCytoState("inclusion");
+
     }
 
 
@@ -193,6 +216,8 @@ const changeMode = (event) => {
 
 const printRule = (event) => {
     //
+    printcursor++;
+
     cylist.freeStorage();
     //on affihe l'actuel
     let m = 0;
@@ -201,6 +226,19 @@ const printRule = (event) => {
     else m = parseInt(str.slice(8, 9));
     console.log(m)
     m++;
-    cylist.setCurrent(m);
+    cylist.setCurrentRule(m);
     cylist.update();
+    if (printcursor == 2) {
+        console.log('printcurs');
+        console.log(printcursor);
+        hideRulesButtonI();
+        printcursor = 0;
+    }
+}
+
+const printInclusion = (event) => {
+    let m = parseInt(event.target.id);
+    cylist.setCurrentInclusion(m);
+    cylist.showInclusion();
+    showInclusionVue();
 }
