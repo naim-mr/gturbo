@@ -1,25 +1,42 @@
-VueState = {
-    RULE = "rule",
-    INCLUSION = "inclusion",
-    GLOBAL = "global"
+const VueState = {
+    RULE: "rule",
+    INCLUSION: "inclusion",
+    GLOBAL: "global"
 
 }
 
 class MyVue {
-    constructor() {
-        this.state = new MyVueState(VueState.RULE);
+    constructor(cylist) {
+        this.cylist;
+        this.state = new MyVueStateRule(this);
+        this.stateToStr = VueState.RULE;
 
     }
+    stateStr() {
+
+        return this.stateToStr;
+    }
     switchVue(vueState) {
-        switch (vuestate) {
+        this.stateToStr = vueState;
+        switch (vueState) {
             case (VueState.RULE):
-                this.state = new MyVueStateRule(this);
+                {
+
+                    this.state = new MyVueStateRule(this);
+                    break;
+                }
             case (VueState.INCLUSION):
-                this.state = new MyVueStateInclusion(this);
+                {
+
+                    this.state = new MyVueStateInclusion(this);
+                    break;
+                }
             case (VueState.GLOBAL):
                 this.state = new MyVueStateGlobal(this);
+                break;
         }
-
+        console.log("FIN SWITCH");
+        console.log(this.state);
     }
     div_str(n, id) {
         if (n == 0) return '<div id="' + id + '" class="cy" style="display:none"></div>';
@@ -55,8 +72,11 @@ class MyVue {
     cancel() {
         this.state.cancel();
     }
-    printRule() {
-        this.state.printRule();
+    delete() {
+
+    }
+    printRule(event) {
+        this.state.printRule(event);
     }
 }
 
@@ -67,21 +87,22 @@ class MyVueState {
         this.myVue = myVue;
         this.init = true;
     }
-    printVue() {
+    printVue() {}
 
-    }
+    printRule(event) {};
     hide() {}
     show() {}
     save() {}
     cancel() {}
+
     supprimer() {
         //TODO
-        let m = cylist.rulelist.current - 1;
-        let ruleset = document.getElementById("ruleset");
+        let m = this.myVue.cylist.rulelist.current - 1;
         let id = 'navrule' + m;
-        cylist.deleteRule(m);
-        cylist.clear();
-        cylist.freeStorage();
+        let ruleset = document.getElementById("ruleset");
+        this.myVue.cylist.deleteRule(m);
+        this.myVue.cylist.clear();
+        this.myVue.cylist.freeStorage();
         let htmlcollection = document.getElementsByClassName("ruleset");
         for (let i = 0; i < htmlcollection.length; i++) {}
         this.hide();
@@ -91,12 +112,14 @@ class MyVueState {
 
 class MyVueStateRule extends MyVueState {
     constructor(myVue) {
-        super(myvue);
+        super(myVue);
+
     }
 
     printVue() {
-        this.myVue.createVue(div_str(0, 'lhs') + div_str(0, 'rhs'));
-        if (this.init) document.getElementById("cyto_button").innerHTML += '<button id="save" onclick="sauvegarde()" style="display:none">Sauvegarder</button><button id="cancel" onclick="cancel()" style="display:none">Annuler</button><button id="draw" onclick="changeMode()" style="display:none">Dessin/Edition</button><button id="delete" onclick="supprimer()" style="display:none">Supprimer</button>';
+        console.log("icirule");
+        this.myVue.createVue(this.myVue.div_str(0, 'lhs') + this.myVue.div_str(0, 'rhs'));
+        if (this.init) document.getElementById("cyto_button").innerHTML += '<button id="save" onclick="onSave()" style="display:none">Sauvegarder</button><button id="cancel" onclick="cancel()" style="display:none">Annuler</button><button id="draw" onclick="onChangeMode()" style="display:none">Dessin/Edition</button><button id="delete" onclick="onDelete()" style="display:none">Supprimer</button>';
         this.init = false;
     }
     hide() {
@@ -115,47 +138,46 @@ class MyVueStateRule extends MyVueState {
         document.getElementById("draw").setAttribute("style", "display:block");
         document.getElementById("delete").setAttribute("style", "display:block");
     }
-    addRuleButton() {
-        document.getElementById('ruleset').innerHTML += '<li class="nav-item" id="navrule' + n + '"><button type="button" onclick="changeGraph(event)" id="' + n + '"class="btn btn-light"><img id="rulelhs' + n + '"><img  id="rulerhs' + n + '" ></button></li > ';
-        document.getElementById('inclusionset').innerHTML += '<li class="nav-item navrule"  style="display:none" ><button type="button" onclick="printRule(event)" id="i' + n + '"class="btn btn-light"><img id="irulelhs' + n + '"><img  id="irulerhs' + n + '" ></button></li > ';
-        document.getElementById('globalset').innerHTML += '<li class="nav-item" id="navrule' + n + '"><button type="button" onclick="changeGraphG(event)" id="g' + n + '"class="btn btn-light"><img id="grulelhs' + n + '"><img  id="grulerhs' + n + '" ></button></li > ';
-    }
     save() {
-        let n = cylist.getCounterRule();
-        addRuleButton(n);
-        cylist.save();
-        hide();
-        cylist.clear();
-        cylist.freeStorage();
-        cylist.changeState(Mode.EDIT);
+        let n = this.myVue.cylist.getCounterRule();
+        console.log("n :" + n);
+        this.addRuleButton(n);
+        this.myVue.cylist.save();
+        this.hide();
+        this.myVue.cylist.clear();
+        this.myVue.cylist.freeStorage();
+        this.myVue.cylist.changeState(Mode.EDIT);
     }
+    addRuleButton(n) {
+        document.getElementById('ruleset').innerHTML += '<li class="nav-item" id="navrule' + n + '"><button type="button" onclick="printRule(event)" id="' + n + '"class="btn btn-light"><img id="rulelhs' + n + '"><img  id="rulerhs' + n + '" ></button></li > ';
+        document.getElementById('inclusionset').innerHTML += '<li class="nav-item navrule"  style="display:none" ><button type="button" onclick="printRule(event)" id="i' + n + '"class="btn btn-light"><img id="irulelhs' + n + '"><img  id="irulerhs' + n + '" ></button></li > ';
+        document.getElementById('globalset').innerHTML += '<li class="nav-item" id="navrule' + n + '"><button type="button" onclick="printRule(event)" id="g' + n + '"class="btn btn-light"><img id="grulelhs' + n + '"><img  id="grulerhs' + n + '" ></button></li > ';
+    }
+
     cancel() {
-        cylist.clear();
-        cylist.freeStorage();
-        cylist.changeState(Mode.EDIT);
+        this.myVue.cylist.clear();
+        this.myVue.cylist.freeStorage();
+        this.myVue.cylist.changeState(Mode.EDIT);
         this.hide();
     }
     printRule(event) {
-        let m = parseId(event.target.id, 0) + 1;
-        cylist.clear();
-        cylist.freeStorage();
-        cylist.setCurrentRule(m);
-        console.log(cylist.rulelist);
-        cylist.update();
-        cylist.fit();
+        let m = this.myVue.parseId(event.target.id, 0) + 1;
+        this.myVue.cylist.clear();
+        this.myVue.cylist.freeStorage();
+        this.myVue.cylist.setCurrentRule(m);
+        this.myVue.cylist.update();
         this.show();
         document.getElementById("save").setAttribute("style", "display:none");
         document.getElementById("cancel").setAttribute("style", "display:none");
     }
     createRule() {
-        if (cylist == undefined) {
+        if (this.myVue.cylist == undefined) {
             this.printVue();
-            onglet = onglet_t.RULE;
-            cylist = new CytoList("rule");
-        } else if (cylist.getCounterRule() > 0) {
-            cylist.clear();
-            cylist.setCurrentRule(0);
-            cylist.update();
+            this.myVue.cylist = new CytoList("rule");
+        } else if (this.myVue.cylist.getCounterRule() > 0) {
+            this.myVue.cylist.clear();
+            this.myVue.cylist.setCurrentRule(0);
+            this.myVue.cylist.update();
         }
         this.show();
     }
@@ -164,15 +186,11 @@ class MyVueStateRule extends MyVueState {
 
 class MyVueStateInclusion extends MyVueState {
     constructor(myVue) {
-        super(myvue);
+        console.log("instance in");
+        super(myVue);
         this.printcounter = 0;
     }
-    printVue() {
-        let str = (div_str(1, 'lhs') + div_str(1, 'rhs') + div_str(2, 'lhs') + div_str(2, 'rhs'));
-        createVue(str);
-        if (this.init) document.getElementById("cyto_button").innerHTML += '<button id="saveI" onclick="sauvegardeI()" style="display:none">Sauvegarder</button><button id="cancelI" onclick="cancelI()" style="display:none">Annuler</button>';
-        this.init = false;
-    }
+
     hide() {
         document.getElementById("lhs1").setAttribute("style", "display:none");
         document.getElementById("rhs1").setAttribute("style", "display:none");
@@ -191,49 +209,47 @@ class MyVueStateInclusion extends MyVueState {
     }
     hideRulesButton() {
         let htmlcollection = document.getElementsByClassName("navrule");
-        console.log(htmlcollection);
         for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:none");
     }
     hideInclusionButton() {
         let htmlcollection = document.getElementsByClassName("navinc");
-        console.log(htmlcollection);
         for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:none");
     }
     showInclusionButton() {
         let htmlcollection = document.getElementsByClassName("navinc");
         for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:blok");
     }
-    addInclusionButton() {
-        document.getElementById('inclusionset').innerHTML += '<li class="nav-item navinc" id="inclusion' + n + '" ><button type="button" onclick="printInclusion(event)"  id="' + n + '"class="btn btn-light">Inclusion ' + n + '</button></li > ';
+    addInclusionButton(n) {
+        document.getElementById('inclusionset').innerHTML += '<li class="nav-item navinc" id="inclusion' + n + '" ><button type="button" onclick="onPrintInclusion(event)"  id="' + n + '"class="btn btn-light">Inclusion ' + n + '</button></li > ';
     }
 
     save() {
-        let n = cylist.getCounterInclusion();
+        let n = this.myVue.cylist.getCounterInclusion();
         let m = 0;
         if (n % 2 == 1) m = (n - 1) / 2;
         else m = n / 2;
         this.addInclusionButton(m);
-        cylist.save();
+        this.myVue.cylist.save();
         this.hide();
-        cylist.clear();
-        cylist.freeStorage();
-        cylist.changeState(Mode.EDIT);
+        this.myVue.cylist.clear();
+        this.myVue.cylist.freeStorage();
+        this.myVue.cylist.changeState(Mode.EDIT);
         this.showInclusionButton();
     }
 
     cancel() {
-        cylist.clear();
-        cylist.freeStorage();
-        cylist.changeState(Mode.EDIT);
+        this.myVue.cylist.clear();
+        this.myVue.cylist.freeStorage();
+        this.myVue.cylist.changeState(Mode.EDIT);
         let htmlcollection = document.getElementsByClassName("navinc");
         for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:blok");
         this.hideRulesButton();
         this.hide();
     }
     createInclusion() {
-        cylist.clear();
+        this.myVue.cylist.clear();
         this.hideInclusionButton();
-        if (cylist.length() < 2) {
+        if (this.myVue.cylist.length() < 2) {
             alert("Vous devez designer au moins deux règles avant de pouvoir créer une inclusion ")
         } else {
             let htmlcollection = document.getElementsByClassName("navrule");
@@ -245,13 +261,14 @@ class MyVueStateInclusion extends MyVueState {
 
     }
     printRule(event) {
-        this.printcouter++;
-        cylist.freeStorage();
-        let m = parseId(event.target.id, 1);
+        this.printcounter++;
+        console.log("th :" + this.printcounter);
+        this.myVue.cylist.freeStorage();
+        let m = this.myVue.parseId(event.target.id, 1);
         m++;
-        cylist.setCurrentRule(m);
-        cylist.fit();
-        cylist.update();
+        this.myVue.cylist.setCurrentRule(m);
+        this.myVue.cylist.fit();
+        this.myVue.cylist.update();
         if (this.printcounter == 2) {
             this.hideRulesButton()
             this.printcounter = 0;
@@ -259,20 +276,27 @@ class MyVueStateInclusion extends MyVueState {
     }
 
     printInclusion(event) {
-        cylist.changeState(Mode.EDIT);
+        this.myVue.cylist.changeState(Mode.EDIT);
         let m = parseInt(event.target.id);
         m *= 2;
-        cylist.clear();
-        cylist.freeStorage();
-        cylist.setCurrentInclusion(m);
-        cylist.fit();
-        cylist.showInclusion(m);
+        this.myVue.cylist.clear();
+        this.myVue.cylist.freeStorage();
+        this.myVue.cylist.setCurrentInclusion(m);
+        this.myVue.cylist.fit();
+        this.myVue.cylist.showInclusion(m);
         this.show();
+    }
+    printVue() {
+        let str = (this.myVue.div_str(1, 'lhs') + this.myVue.div_str(1, 'rhs') + this.myVue.div_str(2, 'lhs') + this.myVue.div_str(2, 'rhs'));
+        console.log("printV " + str);
+        this.myVue.createVue(str);
+        if (this.init) document.getElementById("cyto_button").innerHTML += '<button id="saveI" onclick="onSave()" style="display:none">Sauvegarder</button><button id="cancelI" onclick="onCancel()" style="display:none">Annuler</button>';
+        this.init = false;
     }
 }
 
 class MyVueStateGlobal extends MyVueState {
     constructor(myVue) {
-        super(myvue);
+        super(myVue);
     }
 }
