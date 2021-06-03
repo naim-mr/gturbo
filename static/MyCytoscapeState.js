@@ -13,7 +13,8 @@ class DrawState extends MyCyState {
     constructor(myCy) {
         super(myCy);
         this.mode = Mode.DRAW;
-
+        this.mycytoscape.cy.boxSelectionEnabled(false);
+        this.mycytoscape.eh.enable();
         this.mycytoscape.cy.on('click', event => {
             let element = {
                 group: 'nodes',
@@ -34,12 +35,17 @@ class DrawState extends MyCyState {
 class EditState extends MyCyState {
     constructor(myCy) {
         super(myCy);
+        this.edit = true;
         this.mode = Mode.EDIT;
+        this.mycytoscape.cy.boxSelectionEnabled(true);
+        this.mycytoscape.eh.disable();
         this.mycytoscape.cy.on("box", event => {
             this.mycytoscape.boxing = true;
         });
+
         document.addEventListener("keydown", event => {
-            if (this.mycytoscape.boxing) {
+            console.log("edit : ", this.edit);
+            if (this.mycytoscape.boxing && this.edit == true) {
                 if (event.ctrlKey) {
 
                     if (event.key === 'c') {
@@ -52,7 +58,7 @@ class EditState extends MyCyState {
                     }
                 }
             }
-            if (event.ctrlKey && event.key == 'z') {
+            if (event.ctrlKey && event.key == 'z' && this.edit == true) {
                 this.mycytoscape.store.eles = this.mycytoscape.cy.elements('');
                 if (!this.mycytoscape.store.isEmpty()) {
                     this.mycytoscape.store.ele = this.mycytoscape.store.eles[this.mycytoscape.store.eles.length - 1];
@@ -61,7 +67,7 @@ class EditState extends MyCyState {
                     this.mycytoscape.store.cursor++;
                 }
             }
-            if (event.ctrlKey && event.key == 'y') {
+            if (event.ctrlKey && event.key == 'y' && this.edit == true) {
                 if (this.mycytoscape.store.storage.length > 0 && this.mycytoscape.store.cursor > 0) {
                     this.mycytoscape.store.ele = this.mycytoscape.store.pop();
                     this.mycytoscape.store.ele.restore();
@@ -69,7 +75,7 @@ class EditState extends MyCyState {
                     console.log(this.mycytoscape.store.cursor);
                 }
             }
-            if (event.key == "Delete") {
+            if (event.key == "Delete" && this.edit == true) {
 
                 this.mycytoscape.cy.remove(this.mycytoscape.cy.elements(':selected'));
             }
@@ -78,7 +84,7 @@ class EditState extends MyCyState {
 
     }
     removeListener() {
-        //BUG
-        //document.removeEventListener("keydown");
+        this.edit = false;
+
     }
 }

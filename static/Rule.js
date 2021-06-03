@@ -11,6 +11,7 @@ class RuleList {
     push(rule) {
         this.list.push(rule);
         this.counter++;
+
     }
     getRule(n) {
         return this.list[n];
@@ -23,6 +24,13 @@ class RuleList {
     }
     setCurrent(n) {
         this.current = n;
+    }
+    deleteRule(n) {
+        if (this.current == n + 1) this.current = 0;
+        this.counter--;
+        console.log("splice +" + n);
+        this.list.splice(n + 1, 1);
+
     }
 }
 class Rule {

@@ -21,7 +21,7 @@
             <button onclick="switchVueInclusion()" class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Inclusion</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Global View</button>
+            <button onclick="switchVueGlobal()" class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Global View</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Global Transformation</button>
@@ -33,22 +33,27 @@
         <div class="tab-content" id="myTabContent">
             <!--Onglet jeu de règle -->
             <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                <ul id="ruleset" class=" nav flex-column sidenav">
+                <ul id="ruleset" class="ruleset nav flex-column sidenav">
                 </ul>
             </div>
             <!--Onglet inclusions-->
             <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                <ul id="inclusionset" class=" nav flex-column sidenav">
+                <ul id="inclusionset" class="ruleset nav flex-column sidenav">
                 </ul>
             </div>
-            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
+            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                <ul id="globalset" class="ruleset nav flex-column sidenav">
+                </ul>
+            </div>
         </div>
-        <!-- Les conteneurs des cytoscapes gauche/droite-->
+        <!-- Les conteneurs des cytoscape-->
         <div id="cyto_conteneur">
             <div id="vue" class="w100">
 
             </div>
+            <div id="cyto_button">
 
+            </div>
         </div>
 
     </div>

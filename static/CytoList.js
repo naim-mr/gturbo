@@ -101,12 +101,14 @@
                     edges: []
                 }
             });
-            this.state = new EditState(this);
             this.cb = this.cy.clipboard();
             this.eh = this.cy.edgehandles();
+            this.state = new EditState(this);
+
         }
         changeStateTo(mode) {
             this.state.removeListener();
+
             switch (mode) {
                 case Mode.DRAW:
 
@@ -120,6 +122,7 @@
         saveRule(n, handside) {
             this.savefactor('', n, handside);
             this.savefactor('i', n, handside);
+            this.savefactor('g', n, handside);
 
         }
         savefactor(str, n, handside) {
@@ -134,11 +137,20 @@
         freeStorage() {
             this.store.free();
         }
-        changeState() {
-            console.log("coucu")
+        changeState(mode) {
+
             this.state.removeListener();
-            if (this.state.mode == Mode.DRAW) this.state = this.changeStateTo(Mode.EDIT);
-            else this.state = this.changeStateTo(Mode.DRAW)
+            if (mode == Mode.DRAW) {
+                this.state = this.changeStateTo(Mode.DRAW)
+            } else if (mode == Mode.EDIT) {
+                this.state = this.changeStateTo(Mode.EDIT);
+                this.state.edit = true;
+            } else {
+                if (this.state.mode == Mode.DRAW) {
+                    this.state = this.changeStateTo(Mode.EDIT);
+                    this.state.edit = true;
+                } else this.state = this.changeStateTo(Mode.DRAW)
+            }
         }
         nodes(str) {
             return this.cy.nodes('');
@@ -196,14 +208,17 @@
         changeMode(mode) {
             this.cylist_state.changeMode(mode);
         }
-        changeState() {
-            this.cylist_state.changeState();
+        changeState(mode) {
+            this.cylist_state.changeState(mode);
         }
         push(ele) {
             this.rulelist.push(ele);
         }
         clear() {
             this.cylist_state.clear();
+        }
+        showInclusion(m) {
+            this.cylist_state.showInclusion(m);
         }
 
         save() {
@@ -213,11 +228,15 @@
             return this.rulelist.counter;
         }
         setCurrentRule(n) {
+            console.log("ici");
             this.rulelist.setCurrent(n);
 
         }
+        deleteRule(n) {
+            this.rulelist.deleteRule(n);
+        }
         getCounterInclusion() {
-            return this.inclusion.counter;
+            return this.inclusionlist.counter;
         }
         setCurrentInclusion(n) {
             this.inclusionlist.setCurrent(n);
@@ -231,6 +250,10 @@
         }
         update() {
             this.cylist_state.update();
+        }
+        fit() {
+            console.log("cytolistift");
+            this.cylist_state.fit();
         }
 
     }
