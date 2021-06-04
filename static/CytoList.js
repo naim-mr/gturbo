@@ -6,17 +6,20 @@
 
     const Mode = {
         DRAW: 'draw',
-        EDIT: 'edit'
+        EDIT: 'edit',
+        GLOBAL: 'global'
     }
 
     class MyCytoscape {
         constructor(id) {
+
             this.id = id;
             this.index = 0;
             this.selectedEles = {};
             this.store = new Store();
             this.boxing = true;
             this.cy = cytoscape({
+                id: "cy",
                 zoomEnabled: false,
                 container: document.getElementById(id),
                 layout: {
@@ -29,7 +32,7 @@
 
                         selector: 'node[name]',
                         style: {
-                            'content': 'data(name)'
+                            'content': 'data(name)',
                         }
                     },
 
@@ -105,6 +108,7 @@
             this.eh = this.cy.edgehandles();
             this.state = new EditState(this);
 
+
         }
         changeStateTo(mode) {
             this.state.removeListener();
@@ -116,6 +120,9 @@
                 case Mode.EDIT:
 
                     return new EditState(this);
+                case Mode.GLOBAL:
+                    return new GlobalState(this);
+
             }
         }
 
@@ -128,7 +135,6 @@
         savefactor(str, n, handside) {
             let jpeg = this.cy.jpeg({ bg: 'rgb(255, 224, 183)' });
             let img = document.getElementById(str + 'rule' + handside + n)
-            console.log(img);
             img.setAttribute('src', jpeg);
             img.setAttribute('style', 'width:50%;padding:1%');
         }
@@ -145,6 +151,8 @@
             } else if (mode == Mode.EDIT) {
                 this.state = this.changeStateTo(Mode.EDIT);
                 this.state.edit = true;
+            } else if (mode == Mode.GLOBAL) {
+                this.state = this.changeStateTo(Mode.GLOBAL);
             } else {
                 if (this.state.mode == Mode.DRAW) {
                     this.state = this.changeStateTo(Mode.EDIT);
@@ -178,7 +186,6 @@
             this.rulelist = new RuleList();
             this.inclusionlist = new InclusionList()
             this.statut = str;
-            console.log("satut : " + str);
             if (str === "rule") {
                 this.cylist_state = new RuleState(this);
 
@@ -186,6 +193,9 @@
             } else if (str === "inclusion") {
 
                 this.cylist_state = new InclusionState(this);
+            } else if (str == "global") {
+
+                this.cylist_state = new GlobalCytolistState(this);
             }
         }
         changeCytoState(str) {
@@ -196,6 +206,10 @@
             } else if (str == "inclusion") {
                 this.statut = "inclusion";
                 this.cylist_state = new InclusionState(this);
+            } else if (str == "global") {
+
+                this.statut = "global";
+                this.cylist_state = new GlobalCytolistState(this);
             }
         }
         freeStorage() {
@@ -228,7 +242,6 @@
             return this.rulelist.counter;
         }
         setCurrentRule(n) {
-            console.log("ici");
             this.rulelist.setCurrent(n);
 
         }
@@ -252,7 +265,6 @@
             this.cylist_state.update();
         }
         fit() {
-            console.log("cytolistift");
             this.cylist_state.fit();
         }
 

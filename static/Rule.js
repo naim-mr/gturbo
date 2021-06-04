@@ -28,9 +28,7 @@ class RuleList {
     deleteRule(n) {
         if (this.current == n + 1) this.current = 0;
         this.counter--;
-        console.log("splice +" + n);
         this.list.splice(n + 1, 1);
-
     }
 }
 class Rule {

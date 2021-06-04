@@ -13,7 +13,6 @@ class MyVue {
 
     }
     stateStr() {
-
         return this.stateToStr;
     }
     switchVue(vueState) {
@@ -35,8 +34,6 @@ class MyVue {
                 this.state = new MyVueStateGlobal(this);
                 break;
         }
-        console.log("FIN SWITCH");
-        console.log(this.state);
     }
     div_str(n, id) {
         if (n == 0) return '<div id="' + id + '" class="cy" style="display:none"></div>';
@@ -117,7 +114,6 @@ class MyVueStateRule extends MyVueState {
     }
 
     printVue() {
-        console.log("icirule");
         this.myVue.createVue(this.myVue.div_str(0, 'lhs') + this.myVue.div_str(0, 'rhs'));
         if (this.init) document.getElementById("cyto_button").innerHTML += '<button id="save" onclick="onSave()" style="display:none">Sauvegarder</button><button id="cancel" onclick="cancel()" style="display:none">Annuler</button><button id="draw" onclick="onChangeMode()" style="display:none">Dessin/Edition</button><button id="delete" onclick="onDelete()" style="display:none">Supprimer</button>';
         this.init = false;
@@ -140,7 +136,6 @@ class MyVueStateRule extends MyVueState {
     }
     save() {
         let n = this.myVue.cylist.getCounterRule();
-        console.log("n :" + n);
         this.addRuleButton(n);
         this.myVue.cylist.save();
         this.hide();
@@ -151,7 +146,7 @@ class MyVueStateRule extends MyVueState {
     addRuleButton(n) {
         document.getElementById('ruleset').innerHTML += '<li class="nav-item" id="navrule' + n + '"><button type="button" onclick="printRule(event)" id="' + n + '"class="btn btn-light"><img id="rulelhs' + n + '"><img  id="rulerhs' + n + '" ></button></li > ';
         document.getElementById('inclusionset').innerHTML += '<li class="nav-item navrule"  style="display:none" ><button type="button" onclick="printRule(event)" id="i' + n + '"class="btn btn-light"><img id="irulelhs' + n + '"><img  id="irulerhs' + n + '" ></button></li > ';
-        document.getElementById('globalset').innerHTML += '<li class="nav-item" id="navrule' + n + '"><button type="button" onclick="printRule(event)" id="g' + n + '"class="btn btn-light"><img id="grulelhs' + n + '"><img  id="grulerhs' + n + '" ></button></li > ';
+        document.getElementById('globalset').innerHTML += '<li class="nav-item gnavrule" id="navrule' + n + '"><button type="button" onclick="printRule(event)" id="g' + n + '"class="btn btn-light"><img id="grulelhs' + n + '"><img  id="grulerhs' + n + '" ></button></li > ';
     }
 
     cancel() {
@@ -186,7 +181,6 @@ class MyVueStateRule extends MyVueState {
 
 class MyVueStateInclusion extends MyVueState {
     constructor(myVue) {
-        console.log("instance in");
         super(myVue);
         this.printcounter = 0;
     }
@@ -198,6 +192,7 @@ class MyVueStateInclusion extends MyVueState {
         document.getElementById("rhs2").setAttribute("style", "display:none");;
         document.getElementById("saveI").setAttribute("style", "display:none");;
         document.getElementById("cancelI").setAttribute("style", "display:none");
+        this.hideRulesButton();
     }
     show() {
         document.getElementById("lhs1").setAttribute("style", "display:flex");
@@ -235,6 +230,7 @@ class MyVueStateInclusion extends MyVueState {
         this.myVue.cylist.freeStorage();
         this.myVue.cylist.changeState(Mode.EDIT);
         this.showInclusionButton();
+        this.myVue.cylist.inclusionlist.printInclusions();
     }
 
     cancel() {
@@ -262,7 +258,6 @@ class MyVueStateInclusion extends MyVueState {
     }
     printRule(event) {
         this.printcounter++;
-        console.log("th :" + this.printcounter);
         this.myVue.cylist.freeStorage();
         let m = this.myVue.parseId(event.target.id, 1);
         m++;
@@ -288,15 +283,61 @@ class MyVueStateInclusion extends MyVueState {
     }
     printVue() {
         let str = (this.myVue.div_str(1, 'lhs') + this.myVue.div_str(1, 'rhs') + this.myVue.div_str(2, 'lhs') + this.myVue.div_str(2, 'rhs'));
-        console.log("printV " + str);
         this.myVue.createVue(str);
         if (this.init) document.getElementById("cyto_button").innerHTML += '<button id="saveI" onclick="onSave()" style="display:none">Sauvegarder</button><button id="cancelI" onclick="onCancel()" style="display:none">Annuler</button>';
         this.init = false;
     }
+
 }
 
 class MyVueStateGlobal extends MyVueState {
     constructor(myVue) {
         super(myVue);
+        this.printcounter = 0;
     }
+    hideRulesButton() {
+        let htmlcollection = document.getElementsByClassName("gnavrule");
+        for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:none");
+    }
+    printRule(event) {
+        this.printcounter++;
+        this.myVue.cylist.freeStorage();
+        let m = this.myVue.parseId(event.target.id, 1);
+        m++;
+        this.myVue.cylist.setCurrentRule(m);
+        this.myVue.cylist.fit();
+        this.myVue.cylist.update();
+        if (this.printcounter == 2) {
+            this.hideRulesButton()
+            this.printcounter = 0;
+        }
+    }
+    printVue() {
+        this.myVue.createVue(this.myVue.div_str(0, 'lhs') + this.myVue.div_str(0, 'rhs'));
+        if (this.init) document.getElementById("cyto_button").innerHTML += '<button id="globalInc" onclick="globalInclusion()" style="display:none">Afficher Inclusions</button><button id="gcancel" onclick="onCancel()" style="display:none">Clear</button>';
+        this.init = false;
+
+    }
+
+    hide() {
+        document.getElementById("lhs").setAttribute("style", "display:none");
+        document.getElementById("rhs").setAttribute("style", "display:none");
+        document.getElementById("globalInc").setAttribute("style", "display:none");;
+        document.getElementById("gcancel").setAttribute("style", "display:none");;
+    }
+    show() {
+        document.getElementById("lhs").setAttribute("style", "display:flex");
+        document.getElementById("rhs").setAttribute("style", "display:flex");
+        document.getElementById("gcancel").setAttribute("style", "display:block");;
+        document.getElementById("globalInc").setAttribute("style", "display:block");;
+    }
+    cancel() {
+        this.myVue.cylist.clear();
+        this.myVue.cylist.freeStorage();
+        this.myVue.cylist.changeState(Mode.EDIT);
+        let htmlcollection = document.getElementsByClassName("gnavrule");
+        for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:block");
+    }
+
+
 }

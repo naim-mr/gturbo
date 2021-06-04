@@ -1,6 +1,8 @@
 //TODO : clean le début 
 // suppr + ctrl z/y
 // origine graph
+// node handle eh
+
 let cylist;
 
 let myVue = new MyVue(cylist);
@@ -15,16 +17,30 @@ const onCancel = () => myVue.cancel();
 const onDelete = () => myVue.delete();
 
 const printRule = (event) => {
-    console.log("printRule");
     myVue.printRule(event);
-
 }
 
 const onCreateRule = (event) => { myVue.state.createRule() }
 
 const onCreateInclusion = (event) => { myVue.state.createInclusion() }
 
-const onSwitchVueGlobal = (event) => {}
+const onSwitchVueGlobal = (event) => {
+    if (myVue.cylist == undefined) {
+        myVue.switchVue(VueState.GLOBAL);
+        myVue.printVue();
+        myVue.show()
+        myVue.cylist = new CytoList("global");
+    } else {
+
+        myVue.hide();
+        myVue.switchVue(VueState.GLOBAL);
+        myVue.printVue();
+        myVue.show()
+        myVue.cylist.clear();
+        myVue.cylist.freeStorage();
+        myVue.cylist.changeCytoState("global");
+    }
+}
 const onSwitchVueRule = (event) => {
     if (myVue.cylist == undefined) {
         myVue.printVue();
@@ -41,11 +57,8 @@ const onSwitchVueRule = (event) => {
 }
 
 const onSwitchVueInclusion = (event) => {
-
     if (myVue.cylist == undefined) {
-        console.log(myVue.state);
         myVue.switchVue(VueState.INCLUSION);
-        console.log(myVue.state);
         myVue.printVue();
         myVue.cylist = new CytoList("inclusion");
     } else {
@@ -55,9 +68,9 @@ const onSwitchVueInclusion = (event) => {
         myVue.cylist.clear();
         myVue.cylist.fit();
         myVue.cylist.freeStorage();
+        console.log(myVue.cylist);
         myVue.cylist.changeCytoState("inclusion");
     }
-
 
 }
 const onChangeMode = (event) => {

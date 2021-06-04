@@ -104,7 +104,6 @@ function getRandomRgb() {
     var b = num & 255;
     return 'rgb(' + r + ', ' + g + ', ' + b + ')';
 }
-
 class InclusionState extends CytoListState {
 
     constructor(cytolist) {
@@ -113,6 +112,7 @@ class InclusionState extends CytoListState {
         this.cyright = [];
         this.cyleft = [];
         this.cyright[0] = new MyCytoscape("rhs1");
+
         this.cyleft[0] = new MyCytoscape("lhs1");
         this.cyright[1] = new MyCytoscape("rhs2");
         this.cyleft[1] = new MyCytoscape("lhs2");
@@ -161,7 +161,6 @@ class InclusionState extends CytoListState {
         });
     }
     fit() {
-        console.log("cytolistatefit");
         this.cyright.forEach((element) => {
             element.cy.zoom(0.5);
         });
@@ -172,22 +171,22 @@ class InclusionState extends CytoListState {
     }
 
     saveLeft() {
-
-
-
-
-
-        let morphism = new Morphism(this.cyleft[1].cy.elements(''), this.cyleft[0].cy.$(':selected'));
-        console.log("saveleft");
-        console.log(morphism);
+        let selected = this.cyleft[0].cy.$(':selected');
+        for (let i = 0; i < selected.length; i++) {
+            selected[i].style({ 'background-color': 'blue' });
+        }
+        let morphism = new Morphism(this.cyleft[1].cy.elements(''), selected);
         let src = this.bottomrule.lhs;
         let dest = this.toprule.lhs;
-        console.log(dest);
         let inclusion = new Inclusion(src, dest, morphism);
         this.cytolist.inclusionlist.push(inclusion);
     }
     saveRight() {
-        let morphism = new Morphism(this.cyright[1].cy.elements(''), this.cyright[0].cy.$(':selected'));
+        let selected = this.cyright[0].cy.$(':selected');
+        for (let i = 0; i < selected.length; i++) {
+            selected[i].style({ 'background-color': 'blue' });
+        }
+        let morphism = new Morphism(this.cyright[1].cy.elements(''), selected);
 
         let src = this.bottomrule.rhs;
         let dest = this.toprule.rhs;
@@ -201,10 +200,7 @@ class InclusionState extends CytoListState {
 
     }
     update() {
-
-
         let currentRule = this.cytolist.getCurrentRule();
-
         if (this.index == 1) {
             this.bottomrule = currentRule;
             let rgb = getRandomRgb();
@@ -217,8 +213,13 @@ class InclusionState extends CytoListState {
             this.cyright[this.index].add(currentRule.rhs.getNodes());
             this.cyright[this.index].add(currentRule.rhs.getEdges());
         }
+        this.cyleft[this.index].nodes().ungrabify();
+        this.cyleft[this.index].edges().ungrabify();
+        this.cyright[this.index].nodes().ungrabify();
+        this.cyright[this.index].edges().ungrabify();
         if (this.index == 0) this.index++;
         else this.index = 0;
+
     }
     showInclusion(m) {
         let currentInclusion = this.cytolist.getCurrentInclusion();
@@ -240,12 +241,8 @@ class InclusionState extends CytoListState {
         let idIn = true;
         for (let j = 0; j < currentInclusion.dest.nodes.length; j++) {
             for (let i = 0; i < currentInclusion.morphism.eleDest.length; i++) {
-                console.log('egal id:');
-                //console.log(currentInclusion.morphism.eleDest[i].id() == currentInclusion.dest.nodes[j].id())
                 if (currentInclusion.morphism.eleDest[i].id() == currentInclusion.dest.nodes[j].id()) idIn = false;
             }
-            console.log("---");
-            console.log(idIn);
             currentInclusion.dest.edges[j]
             if (idIn) cy.add(currentInclusion.dest.nodes[j]);
             idIn = true;
@@ -261,12 +258,8 @@ class InclusionState extends CytoListState {
         let idIn = true;
         for (let j = 0; j < currentInclusion.dest.edges.length; j++) {
             for (let i = 0; i < currentInclusion.morphism.eleDest.length; i++) {
-                console.log('egal id:');
-                //console.log(currentInclusion.morphism.eleDest[i].id() == currentInclusion.dest.edges[j].id())
                 if (currentInclusion.morphism.eleDest[i].id() == currentInclusion.dest.edges[j].id()) idIn = false;
             }
-            console.log("---");
-            console.log(idIn);
             currentInclusion.dest.edges[j]
             if (idIn) cy.add(currentInclusion.dest.edges[j]);
             idIn = true;
@@ -279,6 +272,8 @@ class InclusionState extends CytoListState {
 }
 
 
+
+
 function coloredRule(ruleHs, rgb, cyto) {
 
     let nodes = ruleHs.getNodes();
@@ -289,14 +284,16 @@ function coloredRule(ruleHs, rgb, cyto) {
 
 
     for (let i = 0; i < nodes.length; i++) {
-        nodescopy = {
-            group: 'nodes',
-            position: nodes[i].position(),
-            data: nodes[i].data(),
-            style: { 'background-color': rgb }
+        if (!nodes[i].hasClass("eh-handle")) {
+            nodescopy = {
+                group: 'nodes',
+                position: nodes[i].position(),
+                data: nodes[i].data(),
+                style: { 'background-color': rgb }
 
-        };
-        cyto.add(nodescopy);
+            };
+            cyto.add(nodescopy);
+        }
     }
     for (let j = 0; j < edges.length; j++) {
         edgescopy = {
@@ -304,7 +301,6 @@ function coloredRule(ruleHs, rgb, cyto) {
             data: edges[j].data(),
             style: { 'line-color': rgb, 'target-arrow-color': rgb }
         }
-        console.log(edgescopy);
         cyto.add(edgescopy);
 
     }
@@ -314,7 +310,6 @@ function coloredRule(ruleHs, rgb, cyto) {
 //this.cyleft[0].add(currentInclusion.morphism.eleDest);
 
 function coloredMorphism(rgb, morphism) {
-    console.log("ici --");
     let dest = { length: morphism.eleDest.length };
     for (let i = 0; i < morphism.eleDest.length; i++) {
 
@@ -327,7 +322,130 @@ function coloredMorphism(rgb, morphism) {
         };
 
     }
-    console.log("ici --");
-    console.log(dest);
     morphism.eleDest = dest;
+}
+
+
+
+
+class GlobalCytolistState extends CytoListState {
+
+    constructor(cytolist) {
+        super(cytolist);
+        this.index = 0;
+        this.cyright = new MyCytoscape("rhs");
+        this.cyleft = new MyCytoscape("lhs");
+        this.cyright.changeState(Mode.GLOBAL);
+        this.cyleft.changeState(Mode.GLOBAL);
+    }
+
+
+    freeStorage() {
+        this.cyright.freeStorage();
+        this.cyleft.freeStorage();
+
+
+    }
+
+    changeMode(mode) {
+        this.cyright.changeStateTo(mode)
+
+
+        this.cyleft.changeStateTo(mode);
+
+    }
+    changeState(mode) {
+        this.cyright.changeState(mode)
+        this.cyleft.changeState(mode);
+
+    }
+    clear() {
+        this.cyright.remove(this.cyright.nodes(''));
+        this.cyright.remove(this.cyright.edges(''))
+        this.cyleft.remove(this.cyleft.nodes(''));
+        this.cyleft.remove(this.cyleft.edges(''));
+
+    }
+    fit() {
+        this.cyright.cy.zoom(0.5);
+        this.cyleft.cy.zoom(0.5);
+
+
+    }
+
+    update() {
+
+
+        let currentRule = this.cytolist.getCurrentRule();
+        let nodescopy = [];
+        nodescopy.push({ group: 'nodes', data: { id: 'n0' + this.index }, position: { x: 0, y: 0 } });
+
+
+        //if (this.index == 1) {
+        /*this.bottomrule = currentRule;
+        let rgb = getRandomRgb();
+        coloredRule(currentRule.lhs, "", this.cyleft[1]);
+        coloredRule(currentRule.rhs, "", this.cyright[1]);*/
+        for (let i = 0; i < currentRule.lhs.nodes.length; i++) {
+            nodescopy.push({
+                group: "nodes",
+                data: { id: currentRule.lhs.nodes[i].id(), parent: 'n0' + this.index },
+                position: currentRule.lhs.nodes[i].position(),
+                classes: currentRule.lhs.nodes[i].classes(),
+            })
+        }
+        this.cyleft.cy.add(nodescopy);
+        this.cyleft.cy.add(currentRule.lhs.edges);
+        //} else {
+        this.toprule = currentRule;
+        //this.cyleft[this.index].add(currentRule.lhs.getNodes());
+        //this.cyleft[this.index].add(currentRule.lhs.getEdges());
+        //  this.cyright[this.index].add(currentRule.rhs.getNodes());
+        //this.cyright[this.index].add(currentRule.rhs.getEdges());
+        //}
+        if (this.index == 0) this.index++;
+        else this.index = 0;
+    }
+    showInclusion(m) {
+        let currentInclusion = this.cytolist.getCurrentInclusion();
+        this.cyleft[1].add(currentInclusion.morphism.eleSrc);
+        this.addOnlyNodes(currentInclusion, this.cyleft[0]);
+        this.cyleft[0].add(currentInclusion.morphism.eleDest);
+        this.addOnlyEdge(currentInclusion, this.cyleft[0]);
+        this.cytolist.setCurrentInclusion(m + 1);
+        currentInclusion = this.cytolist.getCurrentInclusion();
+        this.cyright[1].add(currentInclusion.morphism.eleSrc);
+        this.addOnlyNodes(currentInclusion, this.cyright[0]);
+        this.cyright[0].add(currentInclusion.morphism.eleDest);
+        this.addOnlyEdge(currentInclusion, this.cyright[0]);
+    }
+
+    addOnlyNodes(currentInclusion, cy) {
+        let idIn = true;
+        for (let j = 0; j < currentInclusion.dest.nodes.length; j++) {
+            for (let i = 0; i < currentInclusion.morphism.eleDest.length; i++) {
+                if (currentInclusion.morphism.eleDest[i].id() == currentInclusion.dest.nodes[j].id()) idIn = false;
+            }
+            currentInclusion.dest.edges[j]
+            if (idIn) cy.add(currentInclusion.dest.nodes[j]);
+            idIn = true;
+
+        }
+
+    }
+    addOnlyEdge(currentInclusion, cy) {
+        let idIn = true;
+        for (let j = 0; j < currentInclusion.dest.edges.length; j++) {
+            for (let i = 0; i < currentInclusion.morphism.eleDest.length; i++) {
+                if (currentInclusion.morphism.eleDest[i].id() == currentInclusion.dest.edges[j].id()) idIn = false;
+            }
+            currentInclusion.dest.edges[j]
+            if (idIn) cy.add(currentInclusion.dest.edges[j]);
+            idIn = true;
+
+        }
+
+    }
+
+
 }

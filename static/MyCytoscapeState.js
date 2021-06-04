@@ -29,6 +29,32 @@ class DrawState extends MyCyState {
         this.mycytoscape.cy.off("click");
     }
 }
+class GlobalState extends MyCyState {
+    mode;
+    constructor(myCy) {
+        super(myCy);
+
+        this.mode = Mode.GLOBAL;
+        this.mycytoscape.cy.boxSelectionEnabled(false);
+        this.mycytoscape.eh.disable();
+        this.mycytoscape.cy.on('mouseover', 'node', event => {
+            if (event.target.isNode()) {
+                if (event.target.isParent())
+                    event.target.animate({
+                        style: { 'background-color': 'cyan' }
+                    }, {
+                        duration: 10000,
+                        complete: function() {
+                            event.target.style({ 'background-color': '' });
+                        }
+                    });
+            }
+
+        });
+
+    }
+    removeListener() {};
+}
 
 
 
@@ -44,7 +70,6 @@ class EditState extends MyCyState {
         });
 
         document.addEventListener("keydown", event => {
-            console.log("edit : ", this.edit);
             if (this.mycytoscape.boxing && this.edit == true) {
                 if (event.ctrlKey) {
 
@@ -72,7 +97,6 @@ class EditState extends MyCyState {
                     this.mycytoscape.store.ele = this.mycytoscape.store.pop();
                     this.mycytoscape.store.ele.restore();
                     this.mycytoscape.store.cursor--;
-                    console.log(this.mycytoscape.store.cursor);
                 }
             }
             if (event.key == "Delete" && this.edit == true) {
