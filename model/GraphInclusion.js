@@ -105,4 +105,27 @@ class GraphInclusion extends Observable {
         }
     }
 
+    toJSON() {
+        return JSON.stringify({
+            nodeMap: this.nodeMap,
+            edgeMap: this.edgeMap,
+        })
+    }
+
+    static ofJSON(dom, cod, str) {
+        let o = JSON.parse(str);
+        let i = new GraphInclusion(dom, cod);
+        i.nodeMap = o.nodeMap;
+        i.edgeMap = o.edgeMap;
+        i.nodeInvMap = Object.keys(i.nodeMap).reduce(function(result, key) {
+            result[i.nodeMap[key]] = key
+            return result
+        }, {});
+        i.edgeInvMap = Object.keys(i.edgeMap).reduce(function(result, key) {
+            result[i.edgeMap[key]] = key
+            return result
+        }, {});
+        return i;
+    }
+
 }
