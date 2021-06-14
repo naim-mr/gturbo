@@ -3,7 +3,7 @@
 
 
      
-class GraphComponent {
+class GraphComponent extends Observable{
 
     static GraphObs= class extends GraphObserver{
         constructor(gc,g){
@@ -23,7 +23,6 @@ class GraphComponent {
             if(this.gc.idInCy[ide]==undefined)isInCyto=false;
             if(!isInCyto){ 
                 let idC=this.gc.cy.add({group:'edges',data:{source:src,target:dest}});
-                console.log('add '+ide+':'+idC.id())    ;
                 this.gc.idInCy[ide]=idC.id();
                 this.gc.idInGraph[idC.id()]=ide;
             }
@@ -39,6 +38,7 @@ class GraphComponent {
     }
     // typeof(g): Graph
     constructor(g, idComp) {
+
         this.graph = g;
         this.graphObs = new GraphComponent.GraphObs(this,g);
         this.idInCy={};
@@ -180,7 +180,7 @@ class GraphComponent {
 
        }
     }
-     onClick(event){
+    onClick(event){
         this.lastClick=event.renderedPosition;
         if(this.ctrlKey){
            this.graph.addNode(event.renderedPosition['x'],event.renderedPosition['y']);

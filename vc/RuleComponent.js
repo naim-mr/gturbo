@@ -10,8 +10,8 @@ class RuleComponent{
         this.rule=rule;
         this.lgc=lgc;
         this.rgc=rgc;
-        this.nodeRgc={};
-        this.edgeRgc={}
+       // this.nodeRgc={};
+        //this.edgeRgc={}
     }
     save(n){
         this.lgc.save(n,"lhs");

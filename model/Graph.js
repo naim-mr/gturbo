@@ -57,9 +57,8 @@ class Graph extends Observable {
         this.edges = {};
     }
     // pre-cond:
-    //    px, py: double
+    //    
     addNode() {
-        
         let id = this.nodeCpt;
         this.nodeCpt++;
         this.nodes[id] = {

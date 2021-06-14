@@ -8,7 +8,7 @@ class RuleObserver extends Observer {
 }
 
 class Rule extends Observable {
-
+    //checker si c'est nécessaire 
     static Lhs = class extends GraphObserver {
         constructor(rule, g) {
             super(g);
@@ -53,37 +53,3 @@ class Rule extends Observable {
 
 }
 
-
-class RuleInclusionObserver extends Observer {
-
-    constructor(rinc) {
-        super(rinc);
-    }
-
-}
-
-class RuleInclusion extends Observable {
-
-    static Sub = class extends RuleObserver {
-        constructor(rinc, r) {
-            super(r);
-            this.rinc = rinc;
-        }
-    }
-
-    static Over = class extends RuleObserver {
-        constructor(rinc, r) {
-            super(r);
-            this.rinc = rinc;
-        }
-    }
-
-    constructor(sub, over) {
-        super();
-        this.sub = sub;
-        this.over = over;
-        new RuleInclusion.Sub(this, sub);
-        new RuleInclusion.Over(this, over);
-    }
-
-}
