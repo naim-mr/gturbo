@@ -19,6 +19,7 @@ class Vue {
         createVue(str);
         createVue(this.div_str(0, 'lhs') + this.div_str(0, 'rhs'));
         document.getElementById("cyto_button").innerHTML='<button id="save" style="display:none" onClick="onSave()">Save</button>'
+        document.getElementById("cyto_button").innerHTML+='<button id="cancel" style="display:none" onClick="onCancel()">Cancel</button>'
       
     }
     stateStr() {
@@ -69,6 +70,9 @@ class Vue {
     switch(n){
         this.state.switch(n);
     }
+    cancel(){
+        this.state.cancel();
+    }
 }
 
 
@@ -104,6 +108,7 @@ class VueStateRule extends VueState {
 
     createRule(){
         //if(this.vue.rsc.cpt>0)this.vue.rsc.save(this.vue.rsc.cur);
+        //document.getElementById("cancel").setAttribute("style", "display:block");
         this.vue.rsc.removeEles();
         this.onCreate=true;
         let n=this.vue.rsc.createRule();
@@ -114,13 +119,17 @@ class VueStateRule extends VueState {
 
     switch(n){  
         //Si on switch depuis une autre règle on sauvegarde la règle  précèdente
+      //  document.getElementById("cancel").setAttribute("style", "display:none");
         if(!this.onCreate)this.save(); 
         this.onCreate=false;
         this.vue.rsc.removeEles();
+       
         let rule= this.vue.rsc.getRule(n);
         this.vue.rsc.setRule(rule);
         this.vue.rsc.setGraph(rule.lhs,rule.rhs);
         //à clean 
+        console.log("idx");
+        console.log(n);
         n--;
         this.vue.rsc.rc.lgc.edgesInCy=this.vue.rsc.edgesInCy[n]['left'];
         this.vue.rsc.rc.rgc.edgesInCy=this.vue.rsc.edgesInCy[n]['right'];
@@ -134,20 +143,29 @@ class VueStateRule extends VueState {
     }
     save(){
         if(this.onCreate){
-            this.vue.rsc.rc.save(this.vue.rsc.cur)
+            this.vue.rsc.rc.save(this.vue.rsc.rc.cur);
             this.vue.rsc.pushEdgesIds(this.vue.rsc.rc.rgc.edgesInCy,this.vue.rsc.rc.rgc.edgesInGraph,this.vue.rsc.rc.lgc.edgesInCy,this.vue.rsc.rc.lgc.edgesInGraph);
             this.vue.rsc.removeEles();
         }else {
-            let n =this.vue.rsc.cur+1;
+           
+            let n =this.vue.rsc.rc.cur-1;
+            console.log("idx save")
+            console.log(n);
             this.vue.rsc.saveEdgesIds(n,this.vue.rsc.rc.lgc.edgesInCy,this.vue.rsc.rc.rgc.edgesInCy,this.vue.rsc.rc.rgc.edgesInGraph,this.vue.rsc.rc.lgc.edgesInGraph);
             this.vue.rsc.save(n);
 
         }
     }
-  
+    cancel(){
+        this.hide();
+        this.removeRuleButton(this.vue.rsc.rc.cpt)
+        this.vue.rsc.cancelRule();
+        
+    }
     hide() {
         document.getElementById("lhs").setAttribute("style", "display:none");
         document.getElementById("rhs").setAttribute("style", "display:none");
+        document.getElementById("cancel").setAttribute("style", "display:none");
         document.getElementById("save").setAttribute("style", "display:none");
     }
     show() {
@@ -158,8 +176,15 @@ class VueStateRule extends VueState {
     
     addRuleButton(n) {
         document.getElementById('ruleset').innerHTML += '<li class="nav-item" id="navrule' + n + '"><button type="button" onclick="onSwitchRule(event)" id="' + n + '"class="btn btn-light"><img id="rulelhs' + n + '"><img  id="rulerhs' + n + '" ></button></li > ';
-        document.getElementById('inclusionset').innerHTML += '<li class="nav-item inavrule"  style="display:none" ><button type="button" onclick="printRule(event)" id="i' + n + '"class="btn btn-light"><img id="irulelhs' + n + '"><img  id="irulerhs' + n + '" ></button></li > ';
+        document.getElementById('inclusionset').innerHTML += '<li class="nav-item inavrule" id="inavrule'+n+'" style="display:none" ><button type="button" onclick="printRule(event)" id="i' + n + '"class="btn btn-light"><img id="irulelhs' + n + '"><img  id="irulerhs' + n + '" ></button></li > ';
         document.getElementById('globalset').innerHTML += '<li class="nav-item gnavrule" id="navrule' + n + '"><button type="button" onclick="printRule(event)" id="g' + n + '"class="btn btn-light"><img id="grulelhs' + n + '"><img  id="grulerhs' + n + '" ></button></li > ';
+    }
+    removeRuleButton(n){
+        let button= document.getElementById("navrule"+n);
+        document.getElementById('ruleset').removeChild(button);
+        button= document.getElementById("inavrule"+n);
+        document.getElementById('inclusionset').removeChild(button);
+        
     }
 
     
@@ -191,7 +216,7 @@ class VueStateInclusion extends VueState {
         document.getElementById("save").setAttribute("style", "display:block");
     }
     createInclusion(){
-        if(this.vue.rsc.cpt==0) alert("You have to create at least 1 rule ");
+        if(this.vue.rsc.rc.cpt==0) alert("You have to create at least 1 rule ");
         else {
             this.hideInclusionButton();
             this.vue.rsc.removeElesI();
@@ -202,10 +227,10 @@ class VueStateInclusion extends VueState {
     printRule(n){
         this.hideInclusionButton();
         this.showRulesButton();
-        if(n>this.vue.rsc.cpt)  throw  "Error: printRule n is greater than the number of rule";
+        if(n>this.vue.rsc.rc.cpt)  throw  "Error: printRule n is greater than the number of rule";
         if(this.index){       
                this.over=n;
-               let cpt=this.vue.rsc.createInclusion(this.sub,this.over);
+               let  cpt=this.vue.rsc.createInclusion(this.sub,this.over);
                this.addInclusionButton(cpt);
                this.vue.rsc.coloredInclusion();
                this.index=0;
@@ -220,9 +245,7 @@ class VueStateInclusion extends VueState {
         this.vue.rsc.loadInclusion(n);
     }
     addInclusionButton(n) {
-        console.log("coucou");
         let inclusionset=document.getElementById('inclusionset');
-        console.log(inclusionset)
         inclusionset.innerHTML += '<li class="nav-item navinc" style="display:none" id="inclusion' + n + '" ><button type="button" onclick="onSwitchInclusionRule(event)"  id="' + n + '"class="btn btn-light">Inclusion ' + n + '</button></li > ';
     }
     showRulesButton(){
@@ -246,7 +269,6 @@ class VueStateInclusion extends VueState {
     showInclusionButton() {
         
         let htmlcollection = document.getElementsByClassName("navinc");
-        console.log(htmlcollection);
         for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:block");
     }
     

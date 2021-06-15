@@ -38,13 +38,16 @@ class GraphComponent extends Observable{
         }
         on_removeEdge(id){           
             this.gc.cy.remove(this.gc.cy.getElementById(this.gc.edgesInCy[id]));
+       
         }
         on_removeNode(id){
             this.gc.cy.remove(this.gc.cy.getElementById(id));
+           
         }
 
     }
     // typeof(g): Graph
+    //s'auto gère sur les changements
     constructor(g, idComp) {
         super();
         this.graph = g;
@@ -199,7 +202,8 @@ class GraphComponent extends Observable{
         }
      }
     save(n, handside) {
-
+        this.index=n;
+        this.id=handside;
         this.savefactor('', n, handside);
         this.savefactor('i', n, handside);
         this.savefactor('g', n, handside);

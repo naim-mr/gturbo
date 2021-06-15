@@ -3,8 +3,11 @@
 // origine graph
 // node handle eh
 
-
-
+let rs= new RuleSystem();
+let vue = new Vue();
+let rsc= new RuleSystemComponent(rs);
+vue.rsc=rsc;
+const onCancel = ()=> vue.cancel();
 const onHide = () => vue.hide();
 const onShow = () => vue.show();
 

@@ -36,7 +36,6 @@ class GraphInclusionComponent{
 
     }
     
-    
     constructor(graphI,idComp){
         this.graphI=graphI;
         new GraphInclusionComponent.GraphIObs(this,graphI);

@@ -4,8 +4,16 @@ class RuleSystemComponent {
             super(rs);
             this.rsc=rsc;
         }
+      
         updateEdgesIds(sub,over){
-            this.rsc.ric.updateEdgesIds(sub,over);
+            this.rsc.ric.lgcI.domComp.edgesInCy=this.rsc.edgesInCy[sub]['left'];
+            this.rsc.ric.lgcI.codComp.edgesInCy=this.rsc.edgesInCy[over]['left'];
+            this.rsc.ric.lgcI.domComp.edgesInGraph=this.rsc.edgesInGraph[sub]['left'];
+            this.rsc.ric.lgcI.codComp.edgesInGraph=this.rsc.edgesInGraph[over]['left'];
+            this.rsc.ric.rgcI.domComp.edgesInCy=this.rsc.edgesInCy[sub]['right'];
+            this.rsc.ric.rgcI.codComp.edgesInCy=this.rsc.edgesInCy[over]['right'];
+            this.rsc.ric.rgcI.domComp.edgesInGraph=this.rsc.edgesInGraph[sub]['right'];
+            this.rsc.ric.rgcI.codComp.edgesInGraph=this.rsc.edgesInGraph[over]['right'];
         }
         on_createRule(rule){
             new GraphComponent.GraphObs(this.rsc.rc.lgc,rule.lhs);
@@ -38,7 +46,7 @@ class RuleSystemComponent {
     constructor(rs){
         this.rs=rs;
         let rule = this.rs.createRule();
-        this.rc= new RuleComponent(new GraphComponent(rule.rhs,"rhs"),new GraphComponent(rule.lhs,"lhs"),rule);
+        this.rc= new RuleComponent(new GraphComponent(rule.rhs,"lhs"),new GraphComponent(rule.lhs,"rhs"),rule);
         this.edgesInCy=[];
         this.edgesInGraph=[];
         this.rsObs=new RuleSystemComponent.RuleSystemObs(this,rs);
@@ -48,7 +56,11 @@ class RuleSystemComponent {
     
     
    
-
+    cancelRule(){
+        this.rs.deleteRule(this.rc.rule);
+      
+        
+    }
     pushEdgesIds(idrc,idrg,idlc,idlg){
         this.edgesInGraph.push({left:idlg,right:idrg});
         this.edgesInCy.push({left:idlc,right:idrc});
@@ -78,7 +90,9 @@ class RuleSystemComponent {
         let rule = this.rs.createRule();
         return this.rc.cpt;
     }
-
+    getRule(n){
+        return this.rs.rules[n];
+    }
     save(n){
         this.rc.save(n);
         this.setCur(n);
@@ -98,8 +112,6 @@ class RuleSystemComponent {
         this.rc.rgc.cy.remove(this.rc.rgc.cy.elements(''));
     }
    
-
-
     createInclusion(sub,over){
         this.rs.createInclusion(sub,over);    
         return this.ric.cpt; 

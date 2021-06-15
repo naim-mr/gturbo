@@ -4,6 +4,22 @@ class RuleInclusionComponent {
             super(inc);
             this.ric=ric;
         }
+         //Sinon rajouter un paramètre définissant gauche ou droite
+        on_setNodeL(idx, idy) {}
+
+        on_setEdgeL(idx, idy) {}
+
+        on_unsetNodeL(idx,idy) {}
+
+        on_unsetEdgeL(idx,idy) {}
+
+        on_setNodeR(idx, idy) {}
+
+        on_setEdgeR(idx, idy) {}
+
+        on_unsetNodeR(idx,idy) {}
+
+        on_unsetEdgeR(idx,idy) {}
     }
     
     constructor(inc){
@@ -30,19 +46,6 @@ class RuleInclusionComponent {
          //this.ric.incObs.inc.unregister(this.ric.incObs);
         new RuleInclusionComponent.IncObs(this,inc);
     }
-
-
-    updateEdgesIds(sub,over){
-        this.lgcI.domComp.edgesInCy=this.rsc.edgesInCy[sub]['left'];
-        this.lgcI.codComp.edgesInCy=this.rsc.edgesInCy[over]['left'];
-        this.lgcI.domComp.edgesInGraph=this.rsc.edgesInGraph[sub]['left'];
-        this.lgcI.codComp.edgesInGraph=this.rsc.edgesInGraph[over]['left'];
-        this.rgcI.domComp.edgesInCy=this.rsc.edgesInCy[sub]['right'];
-        this.rgcI.codComp.edgesInCy=this.rsc.edgesInCy[over]['right'];
-        this.rgcI.domComp.edgesInGraph=this.rsc.edgesInGraph[sub]['right'];
-        this.rgcI.codComp.edgesInGraph=this.rsc.edgesInGraph[over]['right'];
-    }
-
 
     coloredInclusion(){
         this.lgcI.coloredInclusion();

@@ -14,14 +14,14 @@
     }
     
     .cy {
-        background-color: rgb(255, 224, 183);
+        background-color: rgb(251, 238, 219);
         border: 3px solid black;
         height: 100%;
         width: 50%;
     }
     
     .cyhalf {
-        background-color: rgb(255, 224, 183);
+        background-color: rgb(251, 238, 219);
         border: 3px solid black;
         height: 50%;
         width: 50%;

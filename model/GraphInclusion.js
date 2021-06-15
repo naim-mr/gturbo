@@ -18,10 +18,7 @@ class GraphInclusion extends Observable {
 
     static Dom = class extends GraphObserver {
         constructor(inc, g) {
-            console.log("dom");
-          
-            super(g);
-          
+            super(g);          
             this.inc = inc;
         }
         on_removeNode(id) {
@@ -51,8 +48,6 @@ class GraphInclusion extends Observable {
 
     constructor(dom, cod) {
         super();
-        console.log("grpahI");
-        console.log(dom);
         this.dom = dom;
         this.cod = cod;
         new GraphInclusion.Dom(this, dom);
@@ -64,14 +59,12 @@ class GraphInclusion extends Observable {
     }
 
     setNode(idx, idy) {
-        
         this.unsetNode(idx);
         if (idy in this.nodeInvMap) {
             this.unsetNode(this.nodeInvMap[idy]);
         }
         this.nodeMap[idx] = idy;
         this.nodeInvMap[idy] = idx;
-        console.log("callback node");   
         this.notify("on_setNode", idx, idy);
     }
 
@@ -80,11 +73,18 @@ class GraphInclusion extends Observable {
         if (idy in this.edgeInvMap) {
             this.unsetEdge(this.edgeInvMap[idy]);
         }
-        console.log("idx "+ idx);
-        console.log(this.dom.edges);
-        this.setNode(this.dom.edges[idx].src, this.cod.edges[idy].src);
-        this.setNode(this.dom.edges[idx].dst, this.cod.edges[idy].dst);
-
+        let nidx=this.dom.edges[idx].src;
+        let nidy=this.cod.edges[idy].src;
+        if(this.nodeMap[nidx]!=nidy && this.nodeInvMap[nidy]!=nidx  ){
+            this.setNode(this.dom.edges[idx].src, this.cod.edges[idy].src);
+            
+        }
+        nidx=this.dom.edges[idx].dst;
+        nidy=this.cod.edges[idy].dst;
+        if(this.nodeMap[nidx]!=nidy && this.nodeInvMap[nidy]!=nidx  ){
+            this.setNode(this.dom.edges[idx].dst, this.cod.edges[idy].dst);
+            
+        }
         this.edgeMap[idx] = idy;
         this.edgeInvMap[idy] = idx;
         this.notify("on_setEdge", idx, idy);
@@ -126,11 +126,11 @@ class GraphInclusion extends Observable {
         let i = new GraphInclusion(dom, cod);
         i.nodeMap = o.nodeMap;
         i.edgeMap = o.edgeMap;
-        i.nodeInvMap = Object.keys(i.nodeMap).reduce(function(result, key) {
+        i.nodeInvMap = Object.keys(i.nodeMap).reduce((result, key) =>{
             result[i.nodeMap[key]] = key
             return result
         }, {});
-        i.edgeInvMap = Object.keys(i.edgeMap).reduce(function(result, key) {
+        i.edgeInvMap = Object.keys(i.edgeMap).reduce((result, key) =>{
             result[i.edgeMap[key]] = key
             return result
         }, {});

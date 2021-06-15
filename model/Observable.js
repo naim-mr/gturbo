@@ -11,9 +11,9 @@ class Observable {
         }
     }
     unregister(obs){
-        var index = array.indexOf(elem);
+        var index = this.observers.indexOf(obs);
         if (index > -1) {
-            array.splice(index, 1);
+            this.observers.splice(index, 1);
         }
 
     }
