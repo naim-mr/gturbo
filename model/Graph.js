@@ -73,6 +73,7 @@ class Graph extends Observable {
     // pre-cond:
     //   src, dst in this.nodes
     addEdge(src, dst) {
+       
         let id = this.edgeCpt;
         this.edgeCpt++;
         this.edges[id] = {
@@ -80,6 +81,7 @@ class Graph extends Observable {
             dst: dst,
             data: {},
         };
+        console.log(this);
         this.nodes[src].outgoing.push(id);
         this.nodes[dst].incoming.push(id);
         this.notify("on_addEdge", id, src, dst);
@@ -111,6 +113,8 @@ class Graph extends Observable {
     // pre-cond:
     //   id in this.nodes
     updateNode(id, update) {
+  
+       
         this.nodes[id].data = update(this.nodes[id].data);
         this.notify("on_updateNode", id, this.nodes[id].data);
         /*

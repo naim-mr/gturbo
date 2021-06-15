@@ -13,13 +13,37 @@ const onCreateRule= (event)=> {
     vue.show();
 }
 
+const onCreateInclusion = (event)=> {
+        vue.show();
+        vue.state.createInclusion();
+        
+}
+
+const printRule =(event)=>{
+        let id=event.target.id;
+        let n = 0;
+        if(id.length==2) n= parseInt((id).slice(1,2));
+        else n= parseInt(id.slice(8,9));
+        vue.state.printRule(n);
+
+}
+
+const onSwitchInclusionRule= (event)=> {
+        let id=event.target.id;
+        vue.show();
+        let n = 0;
+        if(id.length==1) n= parseInt(id);
+        else n= parseInt(id.slice(7,8));
+        vue.switch(n);
+
+}
 const onSwitchRule= (event)=>{
         
         let id=event.target.id;
         vue.show();
         let n = 0;
         if(id.length==1) n= parseInt(id);
-        else n= id.splice(7,8);
+        else n= parseInt(id.slice(7,8));
         vue.switch(n);
 }
 const onSave= (event)=> {
@@ -30,20 +54,18 @@ const onSave= (event)=> {
 const onSwitchVueGlobal = (event) => {
         vue.hide();
         vue.state(VueEnum.GLOBAL);
-        vue.create();
-        vue.show()
+        
 }
 const onSwitchVueRule = (event) => {
         vue.hide();
-        vue.state(VueEnum.RULE);
-        vue.create();
-        vue.show()
+        vue.changeState(VueEnum.RULE);
+       
 }
 
 const onSwitchVueInclusion = (event) => {
         vue.hide();
-        vue.state(VueEnum.INCLUSION);
-        vue.create();
-        vue.show()
+        vue.changeState(VueEnum.INCLUSION);
+        
+       
 }
 

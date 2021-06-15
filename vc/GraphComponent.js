@@ -1,7 +1,10 @@
 
 
-
-
+class GraphComponentObserver extends Observer{
+    constructor(g){
+        super(g);
+    }
+}
      
 class GraphComponent extends Observable{
 
@@ -10,26 +13,31 @@ class GraphComponent extends Observable{
             super(g);
             this.gc=gc;
         }
-        on_addNode(idn,px,py){
+        on_addNode(idn){
+            
+            
             this.gc.cy.add({
                 group:'nodes',
-                position:{ x:px, y:py},
+                position:{},
                 data: {id:idn}
             });
+        }
+        on_updateNode(idn,data){
+            let node=this.gc.cy.getElementById(idn);
+            node.position(data);
         }
         on_addEdge(ide,src,dest){
             let isInCyto= true;
             
-            if(this.gc.idInCy[ide]==undefined)isInCyto=false;
+            if(this.gc.edgesInCy[ide]==undefined)isInCyto=false;
             if(!isInCyto){ 
                 let idC=this.gc.cy.add({group:'edges',data:{source:src,target:dest}});
-                this.gc.idInCy[ide]=idC.id();
-                this.gc.idInGraph[idC.id()]=ide;
+                this.gc.edgesInCy[ide]=idC.id();
+                this.gc.edgesInGraph[idC.id()]=ide;
             }
-            console.log(this.gc.idInGraph);
         }
         on_removeEdge(id){           
-            this.gc.cy.remove(this.gc.cy.getElementById(this.gc.idInCy[id]));
+            this.gc.cy.remove(this.gc.cy.getElementById(this.gc.edgesInCy[id]));
         }
         on_removeNode(id){
             this.gc.cy.remove(this.gc.cy.getElementById(id));
@@ -38,11 +46,11 @@ class GraphComponent extends Observable{
     }
     // typeof(g): Graph
     constructor(g, idComp) {
-
+        super();
         this.graph = g;
         this.graphObs = new GraphComponent.GraphObs(this,g);
-        this.idInCy={};
-        this.idInGraph={}
+        this.edgesInCy={};
+        this.edgesInGraph={}
         this.lastClick={};
         this.cy = this.cy = cytoscape({
             zoomEnabled: false,
@@ -125,11 +133,11 @@ class GraphComponent extends Observable{
             }else if(event.key=="Delete"){
                this.onDelete()
                 
-            }if (event.key === 'c' &&  event.ctrlKey) {
+            }/*if (event.key === 'c' &&  event.ctrlKey) {
                     this.selectedEles = this.cy.$(':selected');
             } else if (event.key == 'v' && this.selectedEles != {} && this.lastClick!={}) {                  
                     this.onPaste()
-            }
+            }*/
         });
         document.addEventListener('keyup',(event)=> {
             if(event.ctrlKey){
@@ -142,21 +150,18 @@ class GraphComponent extends Observable{
             
         });
         this.cy.on("ehcomplete", (event, sourceNode, targetNode, addedEles)=>{
-            this.idInCy[this.graph.edgeCpt]=addedEles.id();
-            this.idInGraph[addedEles.id()]=this.graph.edgeCpt;
+            this.edgesInCy[this.graph.edgeCpt]=addedEles.id();
+            this.edgesInGraph[addedEles.id()]=this.graph.edgeCpt;
             this.graph.addEdge(sourceNode.id(),targetNode.id());
            
         })
         
 
     }
-    onDelete(){
-        console.log("ondelete") ;
-        
+    onDelete(){      
         for(let i=0 ; i<this.cy.edges('').length;i++){                
             if(this.cy.edges('')[i].selected()){
-                console.log("ideCY: "+this.cy.edges('')[i].id());
-                this.graph.removeEdge(this.idInGraph[this.cy.edges('')[i].id()]);
+                this.graph.removeEdge(this.edgesInGraph[this.cy.edges('')[i].id()]);
             }
         }
         for(let i=0 ; i< this.cy.nodes('').length;i++){                 
@@ -183,8 +188,13 @@ class GraphComponent extends Observable{
     onClick(event){
         this.lastClick=event.renderedPosition;
         if(this.ctrlKey){
-           this.graph.addNode(event.renderedPosition['x'],event.renderedPosition['y']);
-           this.graph.nodes;
+           let id =this.graph.addNode();
+           this.graph.updateNode(id, (data)=>{
+               data.x=event.renderedPosition['x'];
+               data.y=event.renderedPosition['y'];
+               return data;
+           })
+        
            this.ctrlKey=false;
         }
      }
@@ -198,13 +208,11 @@ class GraphComponent extends Observable{
     savefactor(str, n, handside) {
 
         let jpeg = this.cy.jpeg({ bg: 'rgb(255, 224, 183)' });
-        console.log("img /"+n);
         let img = document.getElementById(str + 'rule' + handside + n)
         img.setAttribute('src', jpeg);
         img.setAttribute('style', 'width:50%;padding:1%');
     }
     refresh(){
-        
         for(const node in this.graph.nodes){
             let id=this.cy.add({
                 
@@ -213,7 +221,7 @@ class GraphComponent extends Observable{
                       id: node
                       
                 },
-                position:{x:this.graph.nodes[node]['x'],y:this.graph.nodes[node]['y']}
+                position:{x:this.graph.nodes[node].data['x'],y:this.graph.nodes[node].data['y']}
             });
         }
         
@@ -222,7 +230,7 @@ class GraphComponent extends Observable{
                 
                 group:'edges',
                 data:{
-                    id:this.idInCy[edge],
+                    id:this.edgesInCy[edge],
                     source: this.graph.edges[edge]['src'],
                     target: this.graph.edges[edge]['dst'],
                 },

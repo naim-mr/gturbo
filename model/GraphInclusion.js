@@ -8,9 +8,9 @@ class GraphInclusionObserver extends Observer {
 
     on_setEdge(idx, idy) {}
 
-    on_unsetNode(idx) {}
+    on_unsetNode(idx,idy) {}
 
-    on_unsetEdge(idx) {}
+    on_unsetEdge(idx,idy) {}
 
 }
 
@@ -18,7 +18,10 @@ class GraphInclusion extends Observable {
 
     static Dom = class extends GraphObserver {
         constructor(inc, g) {
+            console.log("dom");
+          
             super(g);
+          
             this.inc = inc;
         }
         on_removeNode(id) {
@@ -47,6 +50,9 @@ class GraphInclusion extends Observable {
     }
 
     constructor(dom, cod) {
+        super();
+        console.log("grpahI");
+        console.log(dom);
         this.dom = dom;
         this.cod = cod;
         new GraphInclusion.Dom(this, dom);
@@ -58,12 +64,14 @@ class GraphInclusion extends Observable {
     }
 
     setNode(idx, idy) {
+        
         this.unsetNode(idx);
         if (idy in this.nodeInvMap) {
             this.unsetNode(this.nodeInvMap[idy]);
         }
         this.nodeMap[idx] = idy;
         this.nodeInvMap[idy] = idx;
+        console.log("callback node");   
         this.notify("on_setNode", idx, idy);
     }
 
@@ -72,7 +80,8 @@ class GraphInclusion extends Observable {
         if (idy in this.edgeInvMap) {
             this.unsetEdge(this.edgeInvMap[idy]);
         }
-
+        console.log("idx "+ idx);
+        console.log(this.dom.edges);
         this.setNode(this.dom.edges[idx].src, this.cod.edges[idy].src);
         this.setNode(this.dom.edges[idx].dst, this.cod.edges[idy].dst);
 
@@ -90,7 +99,7 @@ class GraphInclusion extends Observable {
                 this.unsetEdge(ide);
             }
             let idy = this.nodeMap[idx];
-            this.notify("on_unsetNode", idx, idy);
+            this.notify("on_unsetNode", idx,idy);
             delete this.nodeMap[idx];
             delete this.nodeInvMap[idy];
         }
@@ -99,7 +108,7 @@ class GraphInclusion extends Observable {
     unsetEdge(idx) {
         if (idx in this.edgeMap) {
             let idy = this.edgeMap[idx];
-            this.notify("on_unsetEdge", idx, idy);
+            this.notify("on_unsetEdge", idx,idy);
             delete this.edgeMap[idx];
             delete this.edgeInvMap[idy];
         }

@@ -1,38 +1,90 @@
-class RuleSystemComponent{
-    
-    constructor(rs,rc){
-       
+class RuleSystemComponent {
+    static RuleSystemObs= class extends RuleSystemObserver{
+        constructor(rsc,rs){
+            super(rs);
+            this.rsc=rsc;
+        }
+        updateEdgesIds(sub,over){
+            this.rsc.ric.updateEdgesIds(sub,over);
+        }
+        on_createRule(rule){
+            new GraphComponent.GraphObs(this.rsc.rc.lgc,rule.lhs);
+            new GraphComponent.GraphObs(this.rsc.rc.rgc,rule.rhs);
+            new RuleComponent.RuleObs(this.rsc.rc,rule);
+            this.rsc.rc.rule=rule;
+            this.rsc.setGraph(rule.lhs,rule.rhs); 
+        }
+
+        on_createInclusion(inc,sub,over){
+            if(this.rsc.ric==undefined) {
+                
+                this.rsc.ric=new RuleInclusionComponent(inc);
+                this.updateEdgesIds(sub-1,over-1);
+                this.rsc.ric.cur=0;
+                this.rsc.ric.cur=0;
+            }
+            else {
+                this.rsc.ric.cpt++;
+                this.rsc.ric.cur++;
+                this.rsc.ric.inc=inc;
+                this.rsc.ric.lgcI.graphI= inc.lgraphI;
+                this.rsc.ric.rgcI.graphI= inc.rgraphI;
+                new GraphInclusionComponent.GraphIObs(this.rsc.ric.lgcI,inc.lgraphI);
+                new GraphInclusionComponent.GraphIObs(this.rsc.ric.rgcI,inc.rgraphI);
+                this.updateEdgesIds(sub-1,over-1);
+            }
+        }
+    }
+    constructor(rs){
         this.rs=rs;
-        this.rc=rc;
+        let rule = this.rs.createRule();
+        this.rc= new RuleComponent(new GraphComponent(rule.rhs,"rhs"),new GraphComponent(rule.lhs,"lhs"),rule);
+        this.edgesInCy=[];
+        this.edgesInGraph=[];
+        this.rsObs=new RuleSystemComponent.RuleSystemObs(this,rs);
+        
 
     }
+    
+    
+   
 
-    pushRule(rule){
-        this.rs.rulelist.push(rule);
-        this.rs.ruleCpt++;
+    pushEdgesIds(idrc,idrg,idlc,idlg){
+        this.edgesInGraph.push({left:idlg,right:idrg});
+        this.edgesInCy.push({left:idlc,right:idrc});
     }
-    pushIds(idrc,idrg,idlc,idlg){
-        this.rs.idInGraph.push({left:idlg,right:idrg});
-        this.rs.idInCy.push({left:idlc,right:idrc});
-    }
-    saveIds(n,idlc,idrc,idrg,idlg){
-        this.rs.idInCy[n]['left']=idlc;
-        this.rs.idInCy[n]['right']=idrc;
-        this.rs.idInGraph[n]['right']=idrg;
-        this.rs.idInGraph[n]['left']=idlg;
+    saveEdgesIds(n,idlc,idrc,idrg,idlg){
+        n--;
+        this.edgesInCy[n]['left']=idlc;
+        this.edgesInCy[n]['right']=idrc;
+        this.edgesInGraph[n]['right']=idrg;
+        this.edgesInGraph[n]['left']=idlg;
 
     }
  
     freeIds(){
-        this.rc.lgc.idInCy={};
-        this.rc.rgc.idInCy={};
-        this.rc.lgc.idInGraph={};
-        this.rc.rgc.idInGraph={};
+        this.rc.lgc.edgesInCy={};
+        this.rc.rgc.edgesInCy={};
+        this.rc.lgc.edgesInGraph={};
+        this.rc.rgc.edgesInGraph={};
         
     }
+
+
+
+    createRule() {       
+        this.rc.cpt++;
+        this.rc.cur=this.rc.cpt;
+        let rule = this.rs.createRule();
+        return this.rc.cpt;
+    }
+
     save(n){
         this.rc.save(n);
         this.setCur(n);
+    }
+    setCur(n){
+        this.cur=n;
     }
     setGraph(g1,g2){        
         this.rc.lgc.graph=g1;
@@ -45,16 +97,34 @@ class RuleSystemComponent{
         this.rc.lgc.cy.remove(this.rc.lgc.cy.elements(''));
         this.rc.rgc.cy.remove(this.rc.rgc.cy.elements(''));
     }
-    setCur(n){
-        this.rs.ruleCur=n;
+   
+
+
+    createInclusion(sub,over){
+        this.rs.createInclusion(sub,over);    
+        return this.ric.cpt; 
+      }
+    loadInclusion(n){
+        if(this.rs.inclusions[n] != this.ric.inc){
+          let inc = this.rs.inclusions[n];
+          this.ric.update(inc);
+  
+        }
+        this.ric.cur=n;
+        this.ric.loadInclusion();
+          
     }
-    getRule(n){
-       
-        if(n<this.rs.rulelist.length)return this.rs.rulelist[n];
-        else throw "Error : ";
+  
+    coloredInclusion(){
+        this.ric.coloredInclusion();
     }
-    cpt(){
-        return this.rs.ruleCpt;
+    removeElesI(){
+        if(this.ric!=undefined){
+            this.ric.lgcI.removeEles();
+            this.ric.rgcI.removeEles();
+        }
     }
+   
+    
 
 }

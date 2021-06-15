@@ -15,8 +15,12 @@ class Rule extends Observable {
 
             this.rule = rule;
         }
-        on_addNode(id, px, py) {
-            let idr= this.rule.rhs.addNode(px,py);          
+      /*  on_addNode(id) {
+            let idr= this.rule.rhs.addNode();
+            let dataL= this.rule.lhs.nodes[id].data["x"];
+            console.log("ajout droite");
+            console.log(dataL); 
+            this.rule.rhs.updateNode(idr, (data)=> {data=dataL;return data;} )     ;    
             this.rule.nodeRgc[id]=idr;
         }
         on_addEdge(ide,src,dest){
@@ -30,7 +34,7 @@ class Rule extends Observable {
             this.rule.rhs.removeNode(this.rule.nodeRgc[id]);
         }
        
-    
+    */
     }
 
     static Rhs = class extends GraphObserver {
@@ -49,6 +53,13 @@ class Rule extends Observable {
         this.rhsObserver=new Rule.Rhs(this, rhs);
         this.nodeRgc={};
         this.edgeRgc={};
+    }
+    
+    toJSON() {
+        return JSON.stringify({
+            lhs: JSON.parse(this.lhs.toJson()),
+            rhs: JSON.parse(this.rhs.toJson()),
+        })
     }
 
 }

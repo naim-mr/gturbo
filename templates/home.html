@@ -34,11 +34,17 @@
             <!--Onglet jeu de règle -->
             <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                 <ul id="ruleset" class="ruleset nav flex-column sidenav">
+                    <li class="nav-item">
+                        <button type="button" onclick="onCreateRule()" id="create" class="btn btn-light">Create Rule</button>
+                    </li>
                 </ul>
             </div>
             <!--Onglet inclusions-->
-            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <div class="tab-pane fade " id="profile" role="tabpanel" aria-labelledby="profile-tab">
                 <ul id="inclusionset" class="ruleset nav flex-column sidenav">
+                    <li class="nav-item">
+                        <button type="button" onclick="onCreateInclusion()" id="icreate" class="btn btn-light">Create Inclusion</button>
+                    </li>
                 </ul>
             </div>
             <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
@@ -57,34 +63,28 @@
         </div>
 
     </div>
-    <script>
-        //Crétation du bouton "create rule" à clear 
-
-        var create_rule;
-        let body = document.getElementById("myTabContent");
-        var vide = true;
-        var ruleset = document.getElementById("ruleset");
-        if (vide) {
-            ruleset.innerHTML = '<li class="nav-item"><button type="button" onclick="onCreateRule()" id="create" class="btn btn-light">Create Rule</button></li>';
-            create_rule = document.getElementById("create");
-            vide = false;
-        }
-        var inclusion = document.getElementById("inclusionset");
-        inclusion.innerHTML = '<li class="nav-item"><button type="button" onclick="onCreateInclusion()" id="icreate" class="btn btn-light">Create Inclusion</button></li>';
-    </script>
-    <script src="/home/naiminux/gtwebeditor/static/Store.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" ></script>
     <script src="/home/naiminux/gtwebeditor/static/libext/clipboard.js"></script>
     <script src="/home/naiminux/gtwebeditor/static/libext/edgehandles/cytoscape-edgehandles.js"></script>
-    <script src="/home/naiminux/gtwebeditor/static/MyCytoscapeState.js"></script>
-    <script src="/home/naiminux/gtwebeditor/static/Rule.js"></script>
-    <script src="/home/naiminux/gtwebeditor/static/Inclusion.js"></script>
-    <script src="/home/naiminux/gtwebeditor/static/CytoListState.js"></script>
-    <script src="/home/naiminux/gtwebeditor/static/CytoList.js"></script>
-    <script src="/home/naiminux/gtwebeditor/static/MyVue.js"></script>
-    <script src="/home/naiminux/gtwebeditor/static/main.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js " integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4 " crossorigin="anonymous "></script>
+    <script src="/home/naiminux/gtwebeditor/model/Observable.js"></script>
+    <script src="/home/naiminux/gtwebeditor/model/Observer.js"></script>
+    <script src="/home/naiminux/gtwebeditor/model/Graph.js"></script>
+    <script src="/home/naiminux/gtwebeditor/model/GraphInclusion.js"></script>
+  
+    <script src="/home/naiminux/gtwebeditor/model/Rules.js"></script>
+    <script src="/home/naiminux/gtwebeditor/model/RulesInclusion.js"></script>
+    <script src="/home/naiminux/gtwebeditor/model/RuleSystem.js"></script>
+    <script src="/home/naiminux/gtwebeditor/vc/eventController.js"></script>
+    <script src="/home/naiminux/gtwebeditor/vc/GraphInclusionComponent.js"></script>
+    <script src="/home/naiminux/gtwebeditor/vc/GraphComponent.js"></script>
+    <script src="/home/naiminux/gtwebeditor/vc/RuleComponent.js"></script>
+    <script src="/home/naiminux/gtwebeditor/vc/RuleInclusionComponent.js"></script>
 
-
+ 
+    <script src="/home/naiminux/gtwebeditor/vc/RuleSystemComponent.js"></script>
+    <script src="/home/naiminux/gtwebeditor/vc/Vue.js"></script>
+    <script src="/home/naiminux/gtwebeditor/vc/main.js"></script>
+ 
 </body>
 
 </html>
