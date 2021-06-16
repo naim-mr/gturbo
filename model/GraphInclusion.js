@@ -8,9 +8,9 @@ class GraphInclusionObserver extends Observer {
 
     on_setEdge(idx, idy) {}
 
-    on_unsetNode(idx,idy) {}
+    on_unsetNode(idx, idy) {}
 
-    on_unsetEdge(idx,idy) {}
+    on_unsetEdge(idx, idy) {}
 
 }
 
@@ -18,7 +18,7 @@ class GraphInclusion extends Observable {
 
     static Dom = class extends GraphObserver {
         constructor(inc, g) {
-            super(g);          
+            super(g);
             this.inc = inc;
         }
         on_removeNode(id) {
@@ -73,17 +73,17 @@ class GraphInclusion extends Observable {
         if (idy in this.edgeInvMap) {
             this.unsetEdge(this.edgeInvMap[idy]);
         }
-        let nidx=this.dom.edges[idx].src;
-        let nidy=this.cod.edges[idy].src;
-        if(this.nodeMap[nidx]!=nidy && this.nodeInvMap[nidy]!=nidx  ){
+        let nidx = this.dom.edges[idx].src;
+        let nidy = this.cod.edges[idy].src;
+        if (this.nodeMap[nidx] != nidy) {
             this.setNode(this.dom.edges[idx].src, this.cod.edges[idy].src);
-            
+
         }
-        nidx=this.dom.edges[idx].dst;
-        nidy=this.cod.edges[idy].dst;
-        if(this.nodeMap[nidx]!=nidy && this.nodeInvMap[nidy]!=nidx  ){
+        nidx = this.dom.edges[idx].dst;
+        nidy = this.cod.edges[idy].dst;
+        if (this.nodeMap[nidx] != nidy) {
             this.setNode(this.dom.edges[idx].dst, this.cod.edges[idy].dst);
-            
+
         }
         this.edgeMap[idx] = idy;
         this.edgeInvMap[idy] = idx;
@@ -99,7 +99,7 @@ class GraphInclusion extends Observable {
                 this.unsetEdge(ide);
             }
             let idy = this.nodeMap[idx];
-            this.notify("on_unsetNode", idx,idy);
+            this.notify("on_unsetNode", idx, idy);
             delete this.nodeMap[idx];
             delete this.nodeInvMap[idy];
         }
@@ -108,7 +108,7 @@ class GraphInclusion extends Observable {
     unsetEdge(idx) {
         if (idx in this.edgeMap) {
             let idy = this.edgeMap[idx];
-            this.notify("on_unsetEdge", idx,idy);
+            this.notify("on_unsetEdge", idx, idy);
             delete this.edgeMap[idx];
             delete this.edgeInvMap[idy];
         }
@@ -126,11 +126,11 @@ class GraphInclusion extends Observable {
         let i = new GraphInclusion(dom, cod);
         i.nodeMap = o.nodeMap;
         i.edgeMap = o.edgeMap;
-        i.nodeInvMap = Object.keys(i.nodeMap).reduce((result, key) =>{
+        i.nodeInvMap = Object.keys(i.nodeMap).reduce((result, key) => {
             result[i.nodeMap[key]] = key
             return result
         }, {});
-        i.edgeInvMap = Object.keys(i.edgeMap).reduce((result, key) =>{
+        i.edgeInvMap = Object.keys(i.edgeMap).reduce((result, key) => {
             result[i.edgeMap[key]] = key
             return result
         }, {});

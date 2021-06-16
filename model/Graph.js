@@ -50,14 +50,14 @@ class LogGraphObserver extends GraphObserver {
 class Graph extends Observable {
 
     constructor() {
-        super();
-        this.nodeCpt = 0;
-        this.edgeCpt = 0;
-        this.nodes = {};
-        this.edges = {};
-    }
-    // pre-cond:
-    //    
+            super();
+            this.nodeCpt = 0;
+            this.edgeCpt = 0;
+            this.nodes = {};
+            this.edges = {};
+        }
+        // pre-cond:
+        //    
     addNode() {
         let id = this.nodeCpt;
         this.nodeCpt++;
@@ -73,7 +73,7 @@ class Graph extends Observable {
     // pre-cond:
     //   src, dst in this.nodes
     addEdge(src, dst) {
-       
+
         let id = this.edgeCpt;
         this.edgeCpt++;
         this.edges[id] = {
@@ -113,8 +113,8 @@ class Graph extends Observable {
     // pre-cond:
     //   id in this.nodes
     updateNode(id, update) {
-  
-       
+
+
         this.nodes[id].data = update(this.nodes[id].data);
         this.notify("on_updateNode", id, this.nodes[id].data);
         /*
@@ -129,16 +129,16 @@ class Graph extends Observable {
 
     // pre-cond:
     //   id in this.edges
-    updateEdge(id, update) {    
+    updateEdge(id, update) {
         this.edges[id].data = update(this.edges[id].data);
         this.notify("on_updateEdge", id, this.edges[id].data);
     }
-   
-    toJSON(toJSONNodeData,toJSONEdgeData) {
+
+    toJSON(toJSONNodeData, toJSONEdgeData) {
         return JSON.stringify({
             nodeCpt: this.nodeCpt,
             edgeCpt: this.edgeCpt,
-            nodes: Object.keys(this.nodes).reduce((result, key)=> {
+            nodes: Object.keys(this.nodes).reduce((result, key) => {
                 result[key] = {
                     incoming: this.nodes[key].incoming,
                     outgoing: this.nodes[key].outgoing,
@@ -147,7 +147,7 @@ class Graph extends Observable {
 
                 return result
             }, {}),
-            edges: Object.keys(this.edges).reduce((result, key) =>{
+            edges: Object.keys(this.edges).reduce((result, key) => {
                 result[key] = {
                     src: this.edges[key].src,
                     dst: this.edges[key].dst,
@@ -163,22 +163,22 @@ class Graph extends Observable {
         let g = new Graph();
         g.nodeCpt = o.nodeCpt;
         g.edgeCpt = o.edgeCpt;
-        g.nodes = Object.keys(o.nodes).reduce((result, key) =>{
-            result[key] = {
-                incoming: o.nodes[key].incoming,
-                outgoing: o.nodes[key].outgoing,
-                data: ofJSONNodeData(o.nodes[key].data)
-            }
-            return result
-        }, {}),
-        g.edges = Object.keys(o.edges).reduce((result, key)=> {
-            result[key] = {
-                src: o.edges[key].src,
-                dst: o.edges[key].dst,
-                data: ofJSONEdgeData(o.edges[key].data)
-            }
-            return result
-        }, {});
+        g.nodes = Object.keys(o.nodes).reduce((result, key) => {
+                result[key] = {
+                    incoming: o.nodes[key].incoming,
+                    outgoing: o.nodes[key].outgoing,
+                    data: ofJSONNodeData(o.nodes[key].data)
+                }
+                return result
+            }, {}),
+            g.edges = Object.keys(o.edges).reduce((result, key) => {
+                result[key] = {
+                    src: o.edges[key].src,
+                    dst: o.edges[key].dst,
+                    data: ofJSONEdgeData(o.edges[key].data)
+                }
+                return result
+            }, {});
         return g;
     }
 

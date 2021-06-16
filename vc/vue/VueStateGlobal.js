@@ -1,4 +1,3 @@
-
 class VueStateGlobal extends VueState {
     constructor(vue) {
         super(vue);
@@ -21,6 +20,6 @@ class VueStateGlobal extends VueState {
         document.getElementById("lhs").setAttribute("style", "display:flex");
         document.getElementById("rhs").setAttribute("style", "display:flex");
     }
-    
+
 
 }

@@ -1,4 +1,3 @@
-
 const VueEnum = {
     RULE: "rule",
     INCLUSION: "inclusion",
@@ -6,7 +5,7 @@ const VueEnum = {
 
 }
 
-const  createVue= (str) =>{
+const createVue = (str) => {
     document.getElementById('vue').innerHTML += str;
 }
 
@@ -14,13 +13,13 @@ class Vue {
     constructor(rsc) {
         this.state = new VueStateRule(this);
         this.stateToStr = VueEnum.RULE;
-        this.rsc=rsc;
+        this.rsc = rsc;
         let str = (this.div_str(1, 'lhs') + this.div_str(1, 'rhs') + this.div_str(2, 'lhs') + this.div_str(2, 'rhs'));
         createVue(str);
         createVue(this.div_str(0, 'lhs') + this.div_str(0, 'rhs'));
-        document.getElementById("cyto_button").innerHTML='<button id="save" style="display:none" onClick="onSave()">Save</button>'
-        document.getElementById("cyto_button").innerHTML+='<button id="cancel" style="display:none" onClick="onCancel()">Cancel</button>'
-      
+        document.getElementById("cyto_button").innerHTML = '<button id="save" style="display:none" onClick="onSave()">Save</button>'
+        document.getElementById("cyto_button").innerHTML += '<button id="cancel" style="display:none" onClick="onCancel()">Cancel</button>'
+
     }
     stateStr() {
         return this.stateToStr;
@@ -57,23 +56,20 @@ class Vue {
             return parseInt(str.slice(7 + n, 8 + n));
         }
     }
-    
+
     hide() {
         this.state.hide();
     }
     show() {
         this.state.show();
     }
-    save(){
+    save() {
         this.state.save();
     }
-    switch(n){
+    switch (n) {
         this.state.switch(n);
     }
-    cancel(){
+    cancel() {
         this.state.cancel();
     }
 }
-
-
-

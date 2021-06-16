@@ -2,7 +2,7 @@ class VueState {
     constructor(vue) {
         this.vue = vue;
         this.init = true;
-        
+
     }
     createVue() {}
 
@@ -13,6 +13,6 @@ class VueState {
     cancel() {}
 
     supprimer() {
-        
+
     }
 }

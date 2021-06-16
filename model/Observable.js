@@ -10,7 +10,7 @@ class Observable {
             obs[op].apply(obs, args);
         }
     }
-    unregister(obs){
+    unregister(obs) {
         var index = this.observers.indexOf(obs);
         if (index > -1) {
             this.observers.splice(index, 1);
