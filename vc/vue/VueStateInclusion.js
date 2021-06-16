@@ -12,7 +12,7 @@ class VueStateInclusion extends VueState {
         document.getElementById("rhs1").setAttribute("style", "display:none");
         document.getElementById("lhs2").setAttribute("style", "display:none");
         document.getElementById("rhs2").setAttribute("style", "display:none");;
-
+        document.getElementById("save").setAttribute("style", "display:none");
 
     }
     show() {
@@ -20,6 +20,7 @@ class VueStateInclusion extends VueState {
         document.getElementById("rhs1").setAttribute("style", "display:flex");
         document.getElementById("lhs2").setAttribute("style", "display:flex");
         document.getElementById("rhs2").setAttribute("style", "display:flex");
+        document.getElementById("save").setAttribute("style", "display:block");
     }
     createInclusion() {
         if (this.vue.rsc.rc.cpt == 0) alert("You have to create at least 1 rule ");
@@ -78,7 +79,7 @@ class VueStateInclusion extends VueState {
         for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:block");
     }
 
-    
+
 
 
 

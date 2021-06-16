@@ -33,6 +33,8 @@ class RuleInclusionComponent {
 
 
     updateEdgesMap(sub, over, edgesInCy, edgesInGraph) {
+        console.log(over);
+        console.log(edgesInCy);
         this.lgcI.updateEdgesMap(edgesInCy[over]['left'], edgesInGraph[over]['left'], true);
         this.lgcI.updateEdgesMap(edgesInCy[sub]['left'], edgesInGraph[sub]['left'], false);
         this.rgcI.updateEdgesMap(edgesInCy[over]['left'], edgesInGraph[over]['left'], true);
@@ -40,9 +42,9 @@ class RuleInclusionComponent {
 
     }
     update(inc) {
-        this.rsc.ric.cpt++;
-        this.rsc.ric.cur = this.cpt;
-        this.ric.inc.unregister(this.ric.incObs);
+        this.cpt++;
+        this.cur = this.cpt;
+        this.inc.unregister(this.incObs);
         this.inc = inc;
         this.lgcI.updateComponent(inc.lgraphI);
         this.rgcI.updateComponent(inc.rgraphI);

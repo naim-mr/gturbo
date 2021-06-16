@@ -17,31 +17,31 @@ class GraphInclusionObserver extends Observer {
 class GraphInclusion extends Observable {
 
     static Dom = class extends GraphObserver {
-        constructor(inc, g) {
+        constructor(ginc, g) {
             super(g);
-            this.inc = inc;
+            this.ginc = ginc;
         }
         on_removeNode(id) {
-            this.inc.unsetNode(id);
+            this.ginc.unsetNode(id);
         }
         on_removeEdge(id) {
-            this.inc.unsetEdge(id);
+            this.ginc.unsetEdge(id);
         }
     }
 
     static Cod = class extends GraphObserver {
-        constructor(inc, g) {
+        constructor(ginc, g) {
             super(g);
-            this.inc = inc;
+            this.ginc = ginc;
         }
         on_removeNode(id) {
-            if (id in this.nodeInvMap) {
-                this.inc.unsetNode(this.nodeInvMap[id]);
+            if (id in this.ginc.nodeInvMap) {
+                this.ginc.unsetNode(this.ginc.nodeInvMap[id]);
             }
         }
         on_removeEdge(id) {
-            if (id in this.edgeInvMap) {
-                this.inc.unsetEdge(this.edgeInvMap[id]);
+            if (id in this.g.edgeInvMap) {
+                this.ginc.unsetEdge(this.g.edgeInvMap[id]);
             }
         }
     }

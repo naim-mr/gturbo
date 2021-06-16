@@ -8,14 +8,15 @@ class GraphInclusionComponent {
 
         on_setNode(idx, idy) {
             let nodeDom = this.gic.domComp.cy.getElementById(idx);
-            this.gic.codComp.cy.getElementById(idy).style(nodeDom.style());
-        }
+            this.gic.codComp.cy.getElementById(idy).style('background-color',nodeDom.style('background-color'));
+        }   
 
         on_setEdge(idx, idy) {
             let edgex = this.gic.domComp.edgesInCy[idx]
             let edgeDom = this.gic.domComp.cy.getElementById(edgex);
             let edgey = this.gic.codComp.edgesInCy[idy];
-            this.gic.codComp.cy.getElementById(edgey).style(edgeDom.style())
+            this.gic.codComp.cy.getElementById(edgey).style('line-color',edgeDom.style('line-color'));
+            this.gic.codComp.cy.getElementById(edgey).style('target-arrow-color',edgeDom.style('target-arrow-color'));
 
         }
 
@@ -96,8 +97,9 @@ class GraphInclusionComponent {
                 position: { x: this.graphI.dom.nodes[node].data['x'], y: this.graphI.dom.nodes[node].data['y'] }
             }).on("click", (event) => {
                 this.selectedEle = event.target;
-
-            });
+                this.selectedEle.addClass('highlight');
+            })
+            this.domComp.cy.getElementById(ele).removeListener('mouseout');;
             ele.style({ 'background-color': rgb })
         }
         for (const edge in this.graphI.dom.edges) {
@@ -111,7 +113,10 @@ class GraphInclusionComponent {
                 },
             }).on("click", (event) => {
                 this.selectedEle = event.target;
-            });
+                this.selectedEle.addClass('highlight');
+            })
+            this.domComp.cy.getElementById(ele).removeListener('mouseout');;
+            console.log(ele);
             ele.style({
                 'line-color': rgb,
                 'target-arrow-color': rgb
@@ -126,7 +131,11 @@ class GraphInclusionComponent {
                     id: node
                 },
                 position: { x: this.graphI.cod.nodes[node].data['x'], y: this.graphI.cod.nodes[node].data['y'] }
-            })
+            }).on("click", (event) => {
+                this.codSelectedEle = event.target;
+                this.codSelectedEle.addClass('highlight');
+
+            });
 
 
         }
@@ -140,7 +149,11 @@ class GraphInclusionComponent {
                 },
 
 
-            });
+            }).on("click", (event) => {
+                this.codSelectedEle = event.target;
+                this.codSelectedEle.addClass('highlight');
+
+            });;
         }
     }
 
@@ -157,8 +170,10 @@ class GraphInclusionComponent {
                 position: { x: this.graphI.dom.nodes[node].data['x'], y: this.graphI.dom.nodes[node].data['y'] }
             }).on("click", (event) => {
                 this.selectedEle = event.target
+                this.selectedEle.addClass('highlight');
 
             });
+            this.domComp.cy.getElementById(ele).removeListener('mouseout');;
             ele.style({ 'background-color': rgb })
             if (this.graphI.nodeMap[node] != undefined) {
                 ele = this.codComp.cy.add({
@@ -188,8 +203,11 @@ class GraphInclusionComponent {
 
             }).on("click", (event) => {
                 this.selectedEle = event.target;
+                this.selectedEle.addClass('highlight');
 
             });
+            this.domComp.cy.getElementById(ele).removeListener('mouseout');;
+
             ele.style({
                 'line-color': rgb,
                 'target-arrow-color': rgb
@@ -224,7 +242,11 @@ class GraphInclusionComponent {
                         id: node
                     },
                     position: { x: this.graphI.cod.nodes[node].data['x'], y: this.graphI.cod.nodes[node].data['y'] }
-                })
+                }).on("click", (event) => {
+                    this.codSelectedEle = event.target;
+                    this.codSelectedEle.addClass('highlight');
+    
+                });
             }
 
         }
@@ -239,7 +261,11 @@ class GraphInclusionComponent {
                     },
 
 
-                });
+                }).on("click", (event) => {
+                    this.codSelectedEle = event.target;
+                    this.codSelectedEle.addClass('highlight');
+    
+                });;
             }
         }
 

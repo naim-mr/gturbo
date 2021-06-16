@@ -17,10 +17,10 @@ class RuleSystemComponent {
         on_createInclusion(inc, sub, over) {
             if (this.rsc.ric == undefined) {
                 this.rsc.ric = new RuleInclusionComponent(inc);
-                this.rsc.ric.updateEdgesMap(sub - 1, over - 1, this.rsc.edgesInCy, this.rsc.edgesInGraph);
+                this.rsc.ric.updateEdgesMap(sub , over , this.rsc.edgesInCy, this.rsc.edgesInGraph);
             } else {
                 this.rsc.ric.update(inc);
-                this.updateEdgesMap(sub - 1, over - 1, this.rsc.edgesInCy, this.rsc.edgesInGraph);
+                this.updateEdgesMap(sub   , over , this.rsc.edgesInCy, this.rsc.edgesInGraph);
             }
         }
     }

@@ -43,7 +43,6 @@ class GraphComponent extends Observable {
                 this.gc.notify("on_update");
             }
             on_removeNode(id) {
-                this.gc.cy.fit();
                 this.gc.cy.remove(this.gc.cy.getElementById(id));
                 this.gc.notify("on_update");
             }
@@ -111,6 +110,20 @@ class GraphComponent extends Observable {
                     }
                 },
                 {
+                    selector: '.highlight',
+                    style: {
+                    'overlay-color': 'rgb(131, 131, 131)',
+                    'overlay-opacity': '0.4' 
+                    }
+                }   ,
+                {
+                    selector: '.highlight2',
+                    style: {
+                    'overlay-color': 'rgb(131, 131, 131)',
+                    'overlay-opacity': '0.4' 
+                    }
+                } ,
+                {
                     selector: '.eh-preview, .eh-ghost-edge',
                     style: {
                         'background-color': 'red',
@@ -124,29 +137,43 @@ class GraphComponent extends Observable {
                     style: {
                         'opacity': 0
                     }
-                }
+                },
+                
+
+                
             ],
             elements: {
                 nodes: [],
                 edges: []
             }
         });
-      
-        this.eh = this.cy.edgehandles({});
-        this.eh.enableDrawMode({});
-        
+        //this.cy.zoomingEnabled(false);
+        this.eh = this.cy.edgehandles();
+        this.eh.enableDrawMode();
+    
         this.ctrlKey = false;
-        
-        
+        this.cy.on('mouseover','node',(event)=>{
+            let ele=event.target;
+            ele.addClass('highlight2');
+        })    
+        this.cy.on('mouseout','node',(event)=>{
+            let ele=event.target;
+            ele.removeClass('highlight2');
+        })  
+        this.cy.on('mouseover','edge',(event)=>{
+            let ele=event.target;
+            ele.addClass('highlight2');
+        })    
+        this.cy.on('mouseout','edge',(event)=>{
+            let ele=event.target;
+            ele.removeClass('highlight2');
+        })      
         
         document.addEventListener('keydown', (event) => {
             if (event.ctrlKey) {
                 this.ctrlKey = true;
             }else if(event.key=="Alt"){
-                this.eh.disableDrawMode();
-        //        this.eh.hide();
-
-                
+             // this.eh.disableDrawMode();
             } else if (event.key == "Delete") {
                 this.onDelete()
 
@@ -162,13 +189,18 @@ class GraphComponent extends Observable {
             if (event.ctrlKey) {
                 this.ctrlKey = false;
             }else if(event.key=="Alt"){
-                this.eh.enableDrawMode();
-                this.eh.hide();
+           //     this.eh.enableDrawMode();
             }
 
         });
         
         this.cy.on('click', (event) => {
+            for(let i=0;i<this.cy.elements('').length;i++){
+                console.log("okok")
+                let e= this.cy.elements('')[i];
+                if(event.target != e && e.hasClass("highlight"))e.removeClass("highlight");
+            }
+            
             this.onClick(event);
 
         });
@@ -180,11 +212,10 @@ class GraphComponent extends Observable {
 
         })
         this.cy.on("dragfree",(event)=>{
-            //pas du tout optimisé
             let id= event.target.id();
             this.graph.updateNode(id, (data) => {
-                data['x'] = event.target.position('x')+this.cy.pan().x;
-                data['y'] = event.target.position('y')+this.cy.pan().y;;
+                data['x'] = event.position['x'];
+                data['y'] = event.position['y'];;
               
                 return data;
             })
@@ -237,10 +268,9 @@ class GraphComponent extends Observable {
         this.lastClick = event.renderedPosition;
         if (this.ctrlKey) {
             let id = this.graph.addNode();
-            console.log(this.cy.pan())
             this.graph.updateNode(id, (data) => {
-                data['x'] = event.renderedPosition['x']-this.cy.pan().x;
-                data['y'] = event.renderedPosition['y']-this.cy.pan().y;
+                data['x'] = (event.position['x']);
+                data['y'] = (event.position['y']);
               
                 return data;
             })
