@@ -64,11 +64,11 @@ class GraphInclusionComponent {
         this.graphI.unregister(this.graphIobs);
     }
 
-    update(graphI) {
+    updateComponent(graphI) {
         this.destructor();
         this.graphI = graphI;
-        this.domComp.graph = graphI.dom;
-        this.codComp.graph = graphI.cod;
+        this.domComp.updateGraph(graphI.dom) ;
+        this.codComp.updateGraph(graphI.cod);
         this.graphIobs = new GraphInclusionComponent.GraphIObs(this, lgraphI);
 
     }
@@ -82,7 +82,8 @@ class GraphInclusionComponent {
         this.selectedEle = null;
     }
 
-    //add eles with random rgb
+    //Diminuer ? 
+    
     coloredInclusion() {
         var rgb;
         for (const node in this.graphI.dom.nodes) {

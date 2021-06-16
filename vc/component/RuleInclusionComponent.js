@@ -44,8 +44,8 @@ class RuleInclusionComponent {
         this.rsc.ric.cur = this.cpt;
         this.ric.inc.unregister(this.ric.incObs);
         this.inc = inc;
-        this.lgcI.update(inc.lgraphI);
-        this.rgcI.update(inc.rgraphI);
+        this.lgcI.updateComponent(inc.lgraphI);
+        this.rgcI.updateComponent(inc.rgraphI);
         this.incObs = new RuleInclusionComponent.IncObs(this, inc);
     }
 

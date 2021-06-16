@@ -24,7 +24,7 @@ class VueStateRule extends VueState {
 
     }
     save() {
-        this.vue.rsc.save(this.onCreate);
+        this.vue.rsc.saveRule(this.onCreate);
 
     }
     cancel() {

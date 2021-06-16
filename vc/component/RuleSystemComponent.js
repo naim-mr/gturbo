@@ -1,3 +1,6 @@
+
+
+
 class RuleSystemComponent {
     static RuleSystemObs = class extends RuleSystemObserver {
         constructor(rsc, rs) {
@@ -29,10 +32,8 @@ class RuleSystemComponent {
         this.edgesInGraph = [];
         this.rsObs = new RuleSystemComponent.RuleSystemObs(this, rs);
     }
-
-    cancelRule() {
-        this.rs.deleteRule(this.rc.rule);
-    }
+    
+    
     pushEdgesIds() {
         this.edgesInGraph.push(this.rc.edgesInGraph());
         this.edgesInCy.push(this.rc.edgesInCy());
@@ -42,6 +43,8 @@ class RuleSystemComponent {
         this.edgesInCy[n] = this.rc.edgesInCy();
         this.edgesInGraph[n] = this.rc.edgesInGraph();
     }
+    
+    
     switch (n) {
         this.removeEles();
         let rule = this.getRule(n);
@@ -55,51 +58,47 @@ class RuleSystemComponent {
     getRule(n) {
         return this.rs.rules[n];
     }
-    save(onCreate) {
+
+    cancelRule() {
+        this.rs.deleteRule(this.rc.rule);
+    }
+    saveRule(onCreate) {
         if (onCreate) {
-            this.saveRule();
+            this.rc.save();
             this.pushEdgesIds();
             this.removeEles();
         } else {
-            this.vue.rsc.saveEdgesIds();
-            this.vue.rsc.saveRule();
+            this.saveEdgesIds();
+            this.rc.save;
 
         }
     }
-    saveRule() {
-        this.rc.save();
-    }
-
-    setGraph(g1, g2) {
-        this.rc.lgc.graph = g1;
-        this.rc.rgc.graph = g2;
-    }
-    setRule(rule) {
-        this.rc.rule = rule;
-    }
+    
     removeEles() {
         this.rc.lgc.cy.remove(this.rc.lgc.cy.elements(''));
         this.rc.rgc.cy.remove(this.rc.rgc.cy.elements(''));
     }
 
+
+
     createInclusion(sub, over) {
         this.rs.createInclusion(sub, over);
         return this.ric.cpt;
     }
+
     loadInclusion(n) {
         if (this.rs.inclusions[n] != this.ric.inc) {
             let inc = this.rs.inclusions[n];
             this.ric.update(inc);
-
         }
         this.ric.cur = n;
         this.ric.loadInclusion();
-
     }
 
     coloredInclusion() {
         this.ric.coloredInclusion();
     }
+
     removeElesI() {
         if (this.ric != undefined) {
             this.ric.lgcI.removeEles();

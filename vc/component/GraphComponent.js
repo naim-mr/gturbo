@@ -48,11 +48,13 @@ class GraphComponent extends Observable {
         //s'auto gère sur les changements
     constructor(g, idComp) {
         super();
-        this.graph = g;
-        this.graphObs = new GraphComponent.GraphObs(this, g);
+        this.updateGraph(g);
+       
         this.edgesInCy = {};
         this.edgesInGraph = {}
+       
         this.lastClick = {};
+       
         this.cy = this.cy = cytoscape({
             zoomEnabled: false,
             container: document.getElementById(idComp),
@@ -159,8 +161,8 @@ class GraphComponent extends Observable {
 
     }
 
-    update(graph) {
-        this.graph.unregister(this.graphObs);
+    updateGraph(graph) {
+        if(this.graphObs!=undefined)this.graph.unregister(this.graphObs);
         this.graph = graph;
         this.graphObs = new GraphComponent.GraphObs(this, graph);
     }

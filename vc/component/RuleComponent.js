@@ -17,17 +17,16 @@ class RuleComponent {
     }
     update(n, rule, edgesInGraph, edgesInCy) {
         this.cur = n;
-        this.rule.unregister(this.ruleObserver);
-        this.rule = rule;
+        this.updateRule(rule)
         this.lgc.updateEdgesMap(edgesInCy[n]['left'], edgesInGraph[n]['right']);
         this.rgc.updateEdgesMap(edgesInCy[n]['right'], edgesInGraph[n]['left']);
         this.refresh();
     }
 
 
-    updateComponents(rule) {
-        this.lgc.update(rule.lhs);
-        this.rgc.update(rule.rhs);
+    updateRule(rule) {
+        this.lgc.updateGraph(rule.lhs);
+        this.rgc.updateGraph(rule.rhs);
         this.rule.unregister(this.ruleObserver);
         this.rule = rule;
         this.ruleObserver = new RuleComponent.RuleObs(this, rule);
