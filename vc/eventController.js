@@ -1,7 +1,7 @@
 //TODO : clean le début 
 // suppr + ctrl z/y
 // origine graph
-// node handle eh
+
 
 let rs= new RuleSystem();
 let vue = new Vue();

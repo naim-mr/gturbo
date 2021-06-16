@@ -38,7 +38,7 @@ class GraphInclusionComponent{
     
     constructor(graphI,idComp){
         this.graphI=graphI;
-        new GraphInclusionComponent.GraphIObs(this,graphI);
+        this.graphIobs= new GraphInclusionComponent.GraphIObs(this,graphI);
         
         this.domComp=new GraphComponent(graphI.dom,idComp[0]);
         this.codComp=  new GraphComponent(graphI.cod,idComp[1])
@@ -56,7 +56,25 @@ class GraphInclusionComponent{
             } 
        });
     }
-    
+
+
+
+    destructor(){
+        this.graphI.unregister(this.graphIobs);
+    }
+
+    update(graphI){
+        this.destructor();
+        this.graphI=graphI;
+        this.domComp.graph=graphI.dom;
+        this.codComp.graph=graphI.cod;
+        this.graphIobs=new GraphInclusionComponent.GraphIObs(this,lgraphI);
+        
+    }
+    udpateEdgesMap(edgesInCy,edgesInGraph,over){
+       if(over) this.codComp.updateEdgesMap(edgesInCy,edgesInGraph);
+       else this.domComp.updateEdgesMap(edgesInCy,edgesInGraph);
+    }
     removeEles(){
         this.domComp.cy.remove(this.domComp.cy.elements(''));
         this.codComp.cy.remove(this.codComp.cy.elements(''));

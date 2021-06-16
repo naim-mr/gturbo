@@ -30,21 +30,23 @@ class RuleInclusionComponent {
         this.cur=0;
         this.cpt=0;
     }
+  
 
+    updateEdgesMap(sub,over,edgesInCy,edgesInGraph){
+        this.lgcI.updateEdgesMap(edgesInCy[over]['left'],edgesInGraph[over]['left'],true);
+        this.lgcI.updateEdgesMap(edgesInCy[sub]['left'],edgesInGraph[sub]['left'],false);
+        this.rgcI.updateEdgesMap(edgesInCy[over]['left'],edgesInGraph[over]['left'],true);
+        this.rgcI.updateEdgesMap(edgesInCy[sub]['left'],edgesInGraph[sub]['left'],false);
 
-
+    }
     update(inc){
+        this.rsc.ric.cpt++;
+        this.rsc.ric.cur=this.cpt;
+        this.ric.inc.unregister(this.ric.incObs);
         this.inc=inc;
-        this.lgcI.graphI=inc.lgraphI;
-        this.lgcI.domComp.graph=inc.lgraphI.dom;
-        this.lgcI.codComp.graph=inc.lgraphI.cod;
-        new GraphInclusionComponent.GraphIObs(this.lgcI,inc.lgraphI);
-        this.rgcI.domComp.graph=inc.rgraphI.dom;
-        this.rgcI.codComp.graph=inc.rgraphI.cod;
-        this.rgcI.graphI=inc.rgraphI;
-        new GraphInclusionComponent.GraphIObs(this.rgcI,inc.rgraphI);
-         //this.ric.incObs.inc.unregister(this.ric.incObs);
-        new RuleInclusionComponent.IncObs(this,inc);
+        this.lgcI.update(inc.lgraphI);
+        this.rgcI.update(inc.rgraphI);
+        this.incObs= new RuleInclusionComponent.IncObs(this,inc);
     }
 
     coloredInclusion(){

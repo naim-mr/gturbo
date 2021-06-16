@@ -159,7 +159,16 @@ class GraphComponent extends Observable{
            
         })
         
+    }
 
+    update(graph){
+        this.graph.unregister(this.graphObs);
+        this.graph=graph;
+        this.graphObs= new GraphComponent.GraphObs(this,graph);
+    }
+    updateEdgesMap(edgesInCy,edgesInGraph){
+        this.edgesInCy=edgesInCy;
+        this.edgesInGraph=edgesInGraph;
     }
     onDelete(){      
         for(let i=0 ; i<this.cy.edges('').length;i++){                
