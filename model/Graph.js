@@ -115,8 +115,8 @@ class Graph extends Observable {
     updateNode(id, update) {
 
 
-        this.nodes[id].data = update(this.nodes[id].data);
-        this.notify("on_updateNode", id, this.nodes[id].data);
+        this.nodes[id]['data']=update(this.nodes[id]['data']);
+        this.notify("on_updateNode", id, this.nodes[id]['data']);
         /*
         updateNode(id, (data) => {
            return JSON.stringify({x:data['x'],y:data['y']})

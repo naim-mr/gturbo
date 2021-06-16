@@ -72,7 +72,7 @@ class GraphInclusionComponent {
         this.graphIobs = new GraphInclusionComponent.GraphIObs(this, lgraphI);
 
     }
-    udpateEdgesMap(edgesInCy, edgesInGraph, over) {
+    updateEdgesMap(edgesInCy, edgesInGraph, over) {
         if (over) this.codComp.updateEdgesMap(edgesInCy, edgesInGraph);
         else this.domComp.updateEdgesMap(edgesInCy, edgesInGraph);
     }
@@ -83,7 +83,7 @@ class GraphInclusionComponent {
     }
 
     //Diminuer ? 
-    
+
     coloredInclusion() {
         var rgb;
         for (const node in this.graphI.dom.nodes) {

@@ -5,6 +5,16 @@ class RuleComponent {
             this.rc = rc;
         }
     }
+    static GraphComponentObs= class extends GraphComponentObserver{
+        constructor(rc , g){
+            super(g);
+            this.rc=rc;
+        }
+        on_update(){
+            this.rc.save();
+        }
+    }
+
     constructor(lgc, rgc, rule) {
         this.ruleObserver = new RuleComponent.RuleObs(this, rule);
         this.rule = rule;
@@ -12,9 +22,11 @@ class RuleComponent {
         this.cur = 0;
         this.lgc = lgc;
         this.rgc = rgc;
-        // this.nodeRgc={};
-        //this.edgeRgc={}
+        new RuleComponent.GraphComponentObs(this,lgc);
+        new RuleComponent.GraphComponentObs(this,rgc);
+        
     }
+    
     update(n, rule, edgesInGraph, edgesInCy) {
         this.cur = n;
         this.updateRule(rule)
@@ -25,6 +37,7 @@ class RuleComponent {
 
 
     updateRule(rule) {
+       
         this.lgc.updateGraph(rule.lhs);
         this.rgc.updateGraph(rule.rhs);
         this.rule.unregister(this.ruleObserver);
@@ -32,9 +45,8 @@ class RuleComponent {
         this.ruleObserver = new RuleComponent.RuleObs(this, rule);
     }
     save() {
-        let n = this.cur;
-        this.lgc.save(n, "lhs");
-        this.rgc.save(n, "rhs");
+        this.lgc.save(this.cur, "lhs");
+        this.rgc.save(this.cur, "rhs");
     }
     refresh() {
         this.lgc.refresh();

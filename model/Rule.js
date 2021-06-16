@@ -3,7 +3,7 @@ class RuleObserver extends Observer {
     constructor(r) {
         super(r);
     }
-
+    
 
 }
 
@@ -15,26 +15,39 @@ class Rule extends Observable {
 
                 this.rule = rule;
             }
-            /*  on_addNode(id) {
-            let idr= this.rule.rhs.addNode();
-            let dataL= this.rule.lhs.nodes[id].data["x"];
-            console.log("ajout droite");
-            console.log(dataL); 
-            this.rule.rhs.updateNode(idr, (data)=> {data=dataL;return data;} )     ;    
-            this.rule.nodeRgc[id]=idr;
+      /* on_addNode(id) {
+           this.rule.rhs.addNode();
+           
         }
         on_addEdge(ide,src,dest){
-            let idr=this.rule.rhs.addEdge(this.rule.nodeRgc[src],this.rule.nodeRgc[dest]);
-            this.rule.edgeRgc[ide]=idr;
+           this.rule.rhs.addEdge(src,dest);
         }
+        /*
+        let idr=this.rule.rhs.addEdge(this.rule.nodeRgc[src],this.rule.nodeRgc[dest]);
+            this.rule.edgeRgc[ide]=idr;
+        
         on_removeEdge(id){
-            this.rule.rhs.removeEdge(this.rule.edgeRgc[id]);
+            this.rule.rhs.removeEdge(id);
         }
         on_removeNode(id){
-            this.rule.rhs.removeNode(this.rule.nodeRgc[id]);
+            this.rule.rhs.removeNode(id);
         }
-       
-    */
+        on_updateNode(id,dataN){
+            this.rule.nodeRgc[id]=
+            this.rule.rhs.updateNode(this.rule.rhsObserver.lastId,(data)=> {
+                    data=dataN ;
+                
+                    return data;
+            })
+        }
+        on_updateEdge(id,dataE){
+            this.rule.rhs.updateEdge(this.rule.rhsObserver.lastEdge,(data)=> {
+                    data=dataE;
+                    return data;
+            })
+        }
+        }*/
+    
     }
 
     static Rhs = class extends GraphObserver {
@@ -42,7 +55,6 @@ class Rule extends Observable {
             super(g);
             this.rule = rule;
         }
-
     }
 
     constructor(lhs, rhs) {

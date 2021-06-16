@@ -17,8 +17,6 @@ class Vue {
         let str = (this.div_str(1, 'lhs') + this.div_str(1, 'rhs') + this.div_str(2, 'lhs') + this.div_str(2, 'rhs'));
         createVue(str);
         createVue(this.div_str(0, 'lhs') + this.div_str(0, 'rhs'));
-        document.getElementById("cyto_button").innerHTML = '<button id="save" style="display:none" onClick="onSave()">Save</button>'
-        document.getElementById("cyto_button").innerHTML += '<button id="cancel" style="display:none" onClick="onCancel()">Cancel</button>'
 
     }
     stateStr() {

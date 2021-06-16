@@ -2,6 +2,7 @@ class GraphComponentObserver extends Observer {
     constructor(g) {
         super(g);
     }
+    on_update(){}
 }
 
 class GraphComponent extends Observable {
@@ -12,17 +13,19 @@ class GraphComponent extends Observable {
                 this.gc = gc;
             }
             on_addNode(idn) {
-
-
+                
                 this.gc.cy.add({
                     group: 'nodes',
                     position: {},
                     data: { id: idn }
                 });
+                this.gc.notify("on_update");
+               
             }
             on_updateNode(idn, data) {
                 let node = this.gc.cy.getElementById(idn);
                 node.position(data);
+                this.gc.notify("on_update");
             }
             on_addEdge(ide, src, dest) {
                 let isInCyto = true;
@@ -33,14 +36,16 @@ class GraphComponent extends Observable {
                     this.gc.edgesInCy[ide] = idC.id();
                     this.gc.edgesInGraph[idC.id()] = ide;
                 }
+                this.gc.notify("on_update");
             }
             on_removeEdge(id) {
                 this.gc.cy.remove(this.gc.cy.getElementById(this.gc.edgesInCy[id]));
-
+                this.gc.notify("on_update");
             }
             on_removeNode(id) {
+                this.gc.cy.fit();
                 this.gc.cy.remove(this.gc.cy.getElementById(id));
-
+                this.gc.notify("on_update");
             }
 
         }
@@ -126,12 +131,22 @@ class GraphComponent extends Observable {
                 edges: []
             }
         });
+      
         this.eh = this.cy.edgehandles({});
         this.eh.enableDrawMode({});
+        
         this.ctrlKey = false;
+        
+        
+        
         document.addEventListener('keydown', (event) => {
             if (event.ctrlKey) {
                 this.ctrlKey = true;
+            }else if(event.key=="Alt"){
+                this.eh.disableDrawMode();
+        //        this.eh.hide();
+
+                
             } else if (event.key == "Delete") {
                 this.onDelete()
 
@@ -142,23 +157,39 @@ class GraphComponent extends Observable {
                                 this.onPaste()
                         }*/
         });
+        
         document.addEventListener('keyup', (event) => {
             if (event.ctrlKey) {
                 this.ctrlKey = false;
+            }else if(event.key=="Alt"){
+                this.eh.enableDrawMode();
+                this.eh.hide();
             }
 
         });
+        
         this.cy.on('click', (event) => {
             this.onClick(event);
 
         });
+        
         this.cy.on("ehcomplete", (event, sourceNode, targetNode, addedEles) => {
             this.edgesInCy[this.graph.edgeCpt] = addedEles.id();
             this.edgesInGraph[addedEles.id()] = this.graph.edgeCpt;
             this.graph.addEdge(sourceNode.id(), targetNode.id());
 
         })
-
+        this.cy.on("dragfree",(event)=>{
+            //pas du tout optimisé
+            let id= event.target.id();
+            this.graph.updateNode(id, (data) => {
+                data['x'] = event.target.position('x')+this.cy.pan().x;
+                data['y'] = event.target.position('y')+this.cy.pan().y;;
+              
+                return data;
+            })
+             
+        })
     }
 
     updateGraph(graph) {
@@ -166,10 +197,14 @@ class GraphComponent extends Observable {
         this.graph = graph;
         this.graphObs = new GraphComponent.GraphObs(this, graph);
     }
+ 
+ 
     updateEdgesMap(edgesInCy, edgesInGraph) {
         this.edgesInCy = edgesInCy;
         this.edgesInGraph = edgesInGraph;
     }
+ 
+ 
     onDelete() {
         for (let i = 0; i < this.cy.edges('').length; i++) {
             if (this.cy.edges('')[i].selected()) {
@@ -184,6 +219,7 @@ class GraphComponent extends Observable {
         }
 
     }
+    /*
     onPaste() {
         if (this.selectedEles.length > 1) {
             let center = this.selectedEles[0].position();
@@ -196,14 +232,16 @@ class GraphComponent extends Observable {
             this.selectedEles = {};
 
         }
-    }
+    }*/
     onClick(event) {
         this.lastClick = event.renderedPosition;
         if (this.ctrlKey) {
             let id = this.graph.addNode();
+            console.log(this.cy.pan())
             this.graph.updateNode(id, (data) => {
-                data.x = event.renderedPosition['x'];
-                data.y = event.renderedPosition['y'];
+                data['x'] = event.renderedPosition['x']-this.cy.pan().x;
+                data['y'] = event.renderedPosition['y']-this.cy.pan().y;
+              
                 return data;
             })
 
@@ -219,10 +257,10 @@ class GraphComponent extends Observable {
 
     }
     savefactor(str, n, handside) {
-
-        let jpeg = this.cy.jpeg({ bg: 'rgb(255, 224, 183)' });
+        console.log("img + " +n+ " "+handside);
+        let png = this.cy.png({  bg: 'rgb(255, 224, 183)' });
         let img = document.getElementById(str + 'rule' + handside + n)
-        img.setAttribute('src', jpeg);
+        img.setAttribute('src', png);
         img.setAttribute('style', 'width:50%;padding:1%');
     }
     refresh() {

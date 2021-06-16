@@ -1,5 +1,5 @@
 class VueStateRule extends VueState {
-
+    static RuleSystem
     constructor(vue) {
         super(vue);
         this.onCreate = false;
@@ -8,17 +8,22 @@ class VueStateRule extends VueState {
     }
 
     createRule() {
+        
+     
         this.vue.rsc.removeEles();
         this.onCreate = true;
-        let n = this.vue.rsc.createRule();
+        this.vue.rsc.createRule(); 
+        let n = this.vue.rsc.getCurrentRule();
         this.addRuleButton(n);
-
+        this.vue.rsc.saveRule();
+        
     }
 
 
     switch (n) {
-        if (!this.onCreate) this.save();
-        this.onCreate = false;
+        this.vue.rsc.removeEles();
+        if (!this.onCreate) this.vue.rsc.saveRule(this.onCreate);
+        this.onCreate=false;
         this.vue.rsc.switch(n);
 
 
@@ -36,13 +41,10 @@ class VueStateRule extends VueState {
     hide() {
         document.getElementById("lhs").setAttribute("style", "display:none");
         document.getElementById("rhs").setAttribute("style", "display:none");
-        document.getElementById("cancel").setAttribute("style", "display:none");
-        document.getElementById("save").setAttribute("style", "display:none");
     }
     show() {
         document.getElementById("lhs").setAttribute("style", "display:inline-flex");
         document.getElementById("rhs").setAttribute("style", "display:inline-flex");
-        document.getElementById("save").setAttribute("style", "display:block");
     }
 
     addRuleButton(n) {

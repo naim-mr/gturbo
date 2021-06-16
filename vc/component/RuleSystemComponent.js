@@ -10,7 +10,7 @@ class RuleSystemComponent {
 
 
         on_createRule(rule) {
-            this.rsc.rc.updateComponents(rule);
+            this.rsc.rc.updateRule(rule);
 
         }
 
@@ -24,13 +24,15 @@ class RuleSystemComponent {
             }
         }
     }
+   
     constructor(rs) {
         this.rs = rs;
         let rule = this.rs.createRule();
-        this.rc = new RuleComponent(new GraphComponent(rule.rhs, "lhs"), new GraphComponent(rule.lhs, "rhs"), rule);
+        this.rc = new RuleComponent(new GraphComponent(rule.lhs, "lhs"), new GraphComponent(rule.rhs, "rhs"), rule);
         this.edgesInCy = [];
         this.edgesInGraph = [];
-        this.rsObs = new RuleSystemComponent.RuleSystemObs(this, rs);
+        new RuleSystemComponent.RuleSystemObs(this, rs);
+       
     }
     
     
@@ -39,7 +41,7 @@ class RuleSystemComponent {
         this.edgesInCy.push(this.rc.edgesInCy());
     }
     saveEdgesIds() {
-        let n = this.rc.cur - 1;
+        let n = this.rc.cur;
         this.edgesInCy[n] = this.rc.edgesInCy();
         this.edgesInGraph[n] = this.rc.edgesInGraph();
     }
@@ -48,17 +50,23 @@ class RuleSystemComponent {
     switch (n) {
         this.removeEles();
         let rule = this.getRule(n);
-        this.rc.update(n - 1, rule, this.edgesInCy, this.edgesInGraph)
+        this.rc.update(n , rule, this.edgesInCy, this.edgesInGraph)
     }
 
     createRule()  {
-        let rule = this.rs.createRule();
-        this.rc.save();
+    
+        let rule;
+        if(this.rc.cpt==0)rule= this.rc.rule;
+        else rule = this.rs.createRule();
+        this.rc.cur=this.rc.cpt;
+        this.rc.cpt++;
     }
     getRule(n) {
         return this.rs.rules[n];
     }
-
+    getCurrentRule(){
+        return this.rc.cur;
+    }
     cancelRule() {
         this.rs.deleteRule(this.rc.rule);
     }
@@ -66,10 +74,10 @@ class RuleSystemComponent {
         if (onCreate) {
             this.rc.save();
             this.pushEdgesIds();
-            this.removeEles();
         } else {
             this.saveEdgesIds();
-            this.rc.save;
+            this.rc.save();
+
 
         }
     }
