@@ -222,7 +222,10 @@ class GraphComponent extends Observable {
              
         })
     }
-
+    deleteEdges(){
+        this.edgesInCy={};
+        this.edgesInGraph={};
+    }
     updateGraph(graph) {
         if(this.graphObs!=undefined)this.graph.unregister(this.graphObs);
         this.graph = graph;

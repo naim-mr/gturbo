@@ -31,7 +31,9 @@ class RuleInclusionComponent {
         this.cpt = 0;
     }
 
+    deleteInclusion(){
 
+    };
     updateEdgesMap(sub, over, edgesInCy, edgesInGraph) {
         console.log(over);
         console.log(edgesInCy);

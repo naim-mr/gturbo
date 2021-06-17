@@ -73,12 +73,17 @@ class RuleInclusion extends Observable {
             this.rinc = rinc;
 
         }
+       
     }
 
     static Over = class extends RuleObserver {
             constructor(rinc, r) {
                 super(r);
                 this.rinc = rinc;
+            }
+            on_delete(){
+                this.rinc.r.unregister(this);
+               
             }
         }
         // eleOver dictionary { idSub : idOver}

@@ -4,9 +4,9 @@
 
 
 let rs= new RuleSystem();
-let vue = new Vue();
-let rsc= new RuleSystemComponent(rs);
-vue.rsc=rsc;
+let vue = new Vue(rs);
+
+
 const onCancel = ()=> vue.cancel();
 const onHide = () => vue.hide();
 const onShow = () => vue.show();
@@ -62,6 +62,13 @@ const onSwitchRule= (event)=>{
 const onSave= (event)=> {
         vue.hide();
         vue.save();
+}
+const onDelete= (event)=> {
+
+        if(confirm("Êtes vous sûr ? ") ){
+                 vue.hide();
+                 vue.delete();
+        }
 }
 
 const onSwitchVueGlobal = (event) => {

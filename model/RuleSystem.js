@@ -3,9 +3,9 @@ class RuleSystemObserver extends Observer {
         super(rs);
     }
     on_createRule(rule) {};
-    on_deleteRule(rule) {};
+    on_deleteRule(id) {};
     on_createInclusion(inc, sub, over) {};
-    on_deleteInclusion(inc) {};
+    on_deleteInclusion(id) {};
 }
 
 class RuleSystem extends Observable {
@@ -38,19 +38,21 @@ class RuleSystem extends Observable {
         }
         on_removeNode(id) {
             this.rs.rules[id].unregister(this);
-            delete this.rs.rules[id];
-            this.rs.graph.updateNode(id, (data) => {
+            this.rs.deleteRuleById(id);
+            /*this.rs.graph.updateNode(id, (data) => {
                 delete data["rule"];
                 return data;
-            });
+            });*/
         }
         on_removeEdge(id) {
+            
             this.rs.inclusions[id].unregister(this);
-            delete this.rs.inclusion[id];
-            this.rs.graph.updateEdge(id, (data) => {
+            this.rs.deleteInclusionById(id);
+         /*   this.rs.graph.updateEdge(id, (data) => {
                 delete data["inc"];
                 return data;
             })
+            */
         }
     }
 
@@ -59,7 +61,8 @@ class RuleSystem extends Observable {
             super(r);
             this.rs = rs;
         }
-    }
+       
+    }   
 
     static RuleInclusionObs = class extends RuleInclusionObserver {
         constructor(rs, i) {
@@ -88,7 +91,7 @@ class RuleSystem extends Observable {
 
     }
     deleteRule(r) {
-        r.unregister(this);
+        r.unregisterAll();   
         let idr;
         Object.keys(this.rules).reduce((result, id) => {
             if (this.rules[id] == r) {
@@ -97,7 +100,7 @@ class RuleSystem extends Observable {
             }
             return null
         }, null);
-        this.notify('on_deleteRule');
+      
     }
     createInclusion(sub, over) {
         let id = this.graph.addEdge(sub, over);
@@ -107,14 +110,26 @@ class RuleSystem extends Observable {
         return inc;
 
     }
+
+    // Je passe par la pour bien notifier et donc faire une suppression en cascad
+    // Avant : suppression règle => suppression d'inclsuion mais pas de notify sur l'inclusion :/
+    deleteRuleById(id){
+        
+        this.notify('on_deleteRule',id);
+        delete this.rules[id];
+    }
+    deleteInclusionById(id){
+        console.log(this.graph);
+        this.notify('on_deleteInclusion',id);
+        delete this.inclusions[id];
+    }
     deleteInclusion(i) {
-        this.notify('on_deleteInclusion',i);
-        i.unregister(this);
+        i.unregisterAll();
         let idI;
         Object.keys(this.inclusions).reduce((result, id) => {
-            if (this.inclusion[id] == i) {
-                idI=id;
-                this.graph.removeEdge(id)
+            //ATTENTION typeof(id)==string
+            if (this.inclusions[id] == i) {
+                this.graph.removeEdge(parseInt(id))
             }
             return null
         }, null);

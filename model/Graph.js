@@ -1,5 +1,6 @@
 const removeElement = (array, elem) => {
     var index = array.indexOf(elem);
+    console.log(index);
     if (index > -1) {
         array.splice(index, 1);
     }
@@ -81,7 +82,7 @@ class Graph extends Observable {
             dst: dst,
             data: {},
         };
-        console.log(this);
+        
         this.nodes[src].outgoing.push(id);
         this.nodes[dst].incoming.push(id);
         this.notify("on_addEdge", id, src, dst);
@@ -105,8 +106,11 @@ class Graph extends Observable {
     //   id in this.edges
     removeEdge(id) {
         this.notify("on_removeEdge", id);
+        
         removeElement(this.nodes[this.edges[id].src].outgoing, id);
         removeElement(this.nodes[this.edges[id].dst].incoming, id);
+        console.log("dans remove edge" +id);
+        console.log(this.nodes[this.edges[id].src]);
         delete this.edges[id];
     }
 

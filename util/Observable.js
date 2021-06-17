@@ -17,4 +17,7 @@ class Observable {
         }
 
     }
+    unregisterAll(){
+        this.observer=[];
+    }
 }

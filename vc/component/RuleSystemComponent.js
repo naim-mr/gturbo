@@ -1,7 +1,20 @@
 
 
 
-class RuleSystemComponent {
+class RuleSystemComponentObserver extends Observer {
+    constructor(rsc){
+        super(rsc);
+        
+    }
+    on_createRule(){};
+    on_createInclusion(){};
+    on_deleteInclusion(n){};
+    on_deleteRule(n){};
+}
+
+
+class RuleSystemComponent extends Observable {
+    
     static RuleSystemObs = class extends RuleSystemObserver {
         constructor(rsc, rs) {
             super(rs);
@@ -20,20 +33,23 @@ class RuleSystemComponent {
                 this.rsc.ric.updateEdgesMap(sub , over , this.rsc.edgesInCy, this.rsc.edgesInGraph);
             } else {
                 this.rsc.ric.update(inc);
-                this.updateEdgesMap(sub   , over , this.rsc.edgesInCy, this.rsc.edgesInGraph);
+                this.rsc.ric.updateEdgesMap(sub   , over , this.rsc.edgesInCy, this.rsc.edgesInGraph);
             }
         }
-        on_deleteRule(r){
-            this.rsc.rs.getIndex(r);
-            this.rsc.rc.onDelete(rule);
+        on_deleteRule(id){
+            this.rsc.notify("on_deleteRule",id)
+            this.rsc.rc.deleteRule();
         }
-        on_deleteInclusion(){
+        on_deleteInclusion(id){
+            this.rsc.notify("on_deleteInclusion",id);
+            this.rsc.ric.deleteInclusion();
 
         }
         
     }
    
     constructor(rs) {
+        super();
         this.rs = rs;
         let rule = this.rs.createRule();
         this.rc = new RuleComponent(new GraphComponent(rule.lhs, "lhs"), new GraphComponent(rule.rhs, "rhs"), rule);
@@ -69,6 +85,13 @@ class RuleSystemComponent {
         this.rc.cur=this.rc.cpt;
         this.rc.cpt++;
     }
+    deleteRule(){
+
+        let r= this.rc.rule;
+        this.rs.deleteRule(r);
+      
+        
+    }
     getRule(n) {
         return this.rs.rules[n];
     }
@@ -89,9 +112,7 @@ class RuleSystemComponent {
 
         }
     }
-    deleteRule(){
-        
-    }
+    
     
     removeEles() {
         this.rc.lgc.cy.remove(this.rc.lgc.cy.elements(''));
@@ -103,6 +124,10 @@ class RuleSystemComponent {
     createInclusion(sub, over) {
         this.rs.createInclusion(sub, over);
         return this.ric.cpt;
+    }
+    deleteInclusion(){
+        let i= this.ric.inc;
+        this.rs.deleteInclusion(i);
     }
 
     loadInclusion(n) {

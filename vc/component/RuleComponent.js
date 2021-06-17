@@ -4,6 +4,7 @@ class RuleComponent {
             super(r);
             this.rc = rc;
         }
+       
     }
     static GraphComponentObs= class extends GraphComponentObserver{
         constructor(rc , g){
@@ -26,7 +27,12 @@ class RuleComponent {
         new RuleComponent.GraphComponentObs(this,rgc);
         
     }
-    
+    deleteRule(){
+        this.lgc.deleteEdges();
+        this.rgc.deleteEdges();
+        
+       
+    }
     update(n, rule, edgesInGraph, edgesInCy) {
         this.cur = n;
         this.updateRule(rule)

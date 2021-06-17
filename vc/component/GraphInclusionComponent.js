@@ -70,7 +70,7 @@ class GraphInclusionComponent {
         this.graphI = graphI;
         this.domComp.updateGraph(graphI.dom) ;
         this.codComp.updateGraph(graphI.cod);
-        this.graphIobs = new GraphInclusionComponent.GraphIObs(this, lgraphI);
+        this.graphIobs = new GraphInclusionComponent.GraphIObs(this, graphI);
 
     }
     updateEdgesMap(edgesInCy, edgesInGraph, over) {

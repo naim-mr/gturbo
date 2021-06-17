@@ -4,6 +4,7 @@ class RuleObserver extends Observer {
         super(r);
     }
     
+    
 
 }
 
