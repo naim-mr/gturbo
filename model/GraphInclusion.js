@@ -59,13 +59,15 @@ class GraphInclusion extends Observable {
     }
 
     setNode(idx, idy) {
-        this.unsetNode(idx);
-        if (idy in this.nodeInvMap) {
-            this.unsetNode(this.nodeInvMap[idy]);
+       if(this.nodeMap[idx]!=idy){
+            this.unsetNode(idx);
+            if (idy in this.nodeInvMap) {
+                this.unsetNode(this.nodeInvMap[idy]);
+            }
+            this.nodeMap[idx] = idy;
+            this.nodeInvMap[idy] = idx;
+            this.notify("on_setNode", idx, idy);
         }
-        this.nodeMap[idx] = idy;
-        this.nodeInvMap[idy] = idx;
-        this.notify("on_setNode", idx, idy);
     }
 
     setEdge(idx, idy) {

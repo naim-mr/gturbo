@@ -23,6 +23,14 @@ class RuleSystemComponent {
                 this.updateEdgesMap(sub   , over , this.rsc.edgesInCy, this.rsc.edgesInGraph);
             }
         }
+        on_deleteRule(r){
+            this.rsc.rs.getIndex(r);
+            this.rsc.rc.onDelete(rule);
+        }
+        on_deleteInclusion(){
+
+        }
+        
     }
    
     constructor(rs) {
@@ -80,6 +88,9 @@ class RuleSystemComponent {
 
 
         }
+    }
+    deleteRule(){
+        
     }
     
     removeEles() {

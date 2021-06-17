@@ -89,13 +89,15 @@ class RuleSystem extends Observable {
     }
     deleteRule(r) {
         r.unregister(this);
+        let idr;
         Object.keys(this.rules).reduce((result, id) => {
             if (this.rules[id] == r) {
+                idr=id;
                 this.graph.removeNode(id)
             }
             return null
         }, null);
-        this.notify('on_deleteRule', r);
+        this.notify('on_deleteRule');
     }
     createInclusion(sub, over) {
         let id = this.graph.addEdge(sub, over);
@@ -106,10 +108,12 @@ class RuleSystem extends Observable {
 
     }
     deleteInclusion(i) {
-        this.notify('on_deleteInclusion', i);
+        this.notify('on_deleteInclusion',i);
         i.unregister(this);
+        let idI;
         Object.keys(this.inclusions).reduce((result, id) => {
             if (this.inclusion[id] == i) {
+                idI=id;
                 this.graph.removeEdge(id)
             }
             return null
