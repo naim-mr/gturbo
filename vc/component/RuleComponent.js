@@ -23,6 +23,7 @@ class RuleComponent {
         this.cur = 0;
         this.lgc = lgc;
         this.rgc = rgc;
+        
         new RuleComponent.GraphComponentObs(this,lgc);
         new RuleComponent.GraphComponentObs(this,rgc);
         
@@ -30,14 +31,16 @@ class RuleComponent {
     deleteRule(){
         this.lgc.deleteEdges();
         this.rgc.deleteEdges();
-        
+        this.rule.unregisterAll();
+        this.rule={};
+        this.cur=0;
        
     }
     update(n, rule, edgesInGraph, edgesInCy) {
         this.cur = n;
         this.updateRule(rule)
         this.lgc.updateEdgesMap(edgesInCy[n]['left'], edgesInGraph[n]['right']);
-        this.rgc.updateEdgesMap(edgesInCy[n]['right'], edgesInGraph[n]['left']);
+        this.rgc.updateEdgesMap(edgesInCy[n]['left'], edgesInGraph[n]['right']);
         this.refresh();
     }
 
@@ -46,7 +49,7 @@ class RuleComponent {
        
         this.lgc.updateGraph(rule.lhs);
         this.rgc.updateGraph(rule.rhs);
-        this.rule.unregister(this.ruleObserver);
+        if(this.rule.length>0)   this.rule.unregister(this.ruleObserver);
         this.rule = rule;
         this.ruleObserver = new RuleComponent.RuleObs(this, rule);
     }
@@ -60,6 +63,8 @@ class RuleComponent {
     }
 
     edgesInGraph() {
+        console.log("edge in graph");
+        console.log(this.lgc.edgesInGraph);
         return { left: this.lgc.edgesInGraph, right: this.rgc.edgesInGraph }
     }
     edgesInCy() {

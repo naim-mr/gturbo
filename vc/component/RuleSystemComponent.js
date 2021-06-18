@@ -38,6 +38,7 @@ class RuleSystemComponent extends Observable {
         }
         on_deleteRule(id){
             this.rsc.notify("on_deleteRule",id)
+            console.log("on delete rule "+ id);
             this.rsc.rc.deleteRule();
         }
         on_deleteInclusion(id){
@@ -53,28 +54,31 @@ class RuleSystemComponent extends Observable {
         this.rs = rs;
         let rule = this.rs.createRule();
         this.rc = new RuleComponent(new GraphComponent(rule.lhs, "lhs"), new GraphComponent(rule.rhs, "rhs"), rule);
-        this.edgesInCy = [];
-        this.edgesInGraph = [];
+        this.edgesInCy = {};
+        this.edgesInGraph = {};
         new RuleSystemComponent.RuleSystemObs(this, rs);
        
     }
     
     
     pushEdgesIds() {
-        this.edgesInGraph.push(this.rc.edgesInGraph());
-        this.edgesInCy.push(this.rc.edgesInCy());
+        this.edgesInGraph[this.rc.cur]=(this.rc.edgesInGraph());
+        this.edgesInCy[this.rc.cur]=(this.rc.edgesInCy());
     }
     saveEdgesIds() {
         let n = this.rc.cur;
+        console.log("saveEdgeId "+ n);
         this.edgesInCy[n] = this.rc.edgesInCy();
         this.edgesInGraph[n] = this.rc.edgesInGraph();
     }
     
     
+
     switch (n) {
+        
         this.removeEles();
         let rule = this.getRule(n);
-        this.rc.update(n , rule, this.edgesInCy, this.edgesInGraph)
+        this.rc.update(n , rule, this.edgesInGraph, this.edgesInCy)
     }
 
     createRule()  {
@@ -123,7 +127,10 @@ class RuleSystemComponent extends Observable {
 
     createInclusion(sub, over) {
         this.rs.createInclusion(sub, over);
-        return this.ric.cpt;
+        this.ric.cpt++;
+        this.ric.cur=this.ric.cpt;
+
+        return this.ric.cpt-1;
     }
     deleteInclusion(){
         let i= this.ric.inc;
@@ -144,7 +151,8 @@ class RuleSystemComponent extends Observable {
     }
 
     removeElesI() {
-        if (this.ric != undefined) {
+        if (this.ric 
+            != undefined) {
             this.ric.lgcI.removeEles();
             this.ric.rgcI.removeEles();
         }

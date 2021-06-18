@@ -2,25 +2,33 @@ class VueStateRule extends VueState {
     static RuleSystem
     constructor(vue) {
         super(vue);
-        this.onCreate=false;
-
+        this.onCreate=true;
+        this.onDelete=false;
+        
     }
 
     createRule() {
+        if(!this.onCreate)this.vue.rsc.saveRule(this.onCreate);
         this.vue.rsc.removeEles();
         this.onCreate = true;
         this.vue.rsc.createRule(); 
         let n = this.vue.rsc.getCurrentRule();
         this.addRuleButton(n);
+        this.save();
     }
 
     delete(){
         this.vue.rsc.deleteRule();
+        this.onDelete=true;;
     }
 
     switch (n) {
-      
+        if(this.onDelete){
+            this.vue.rsc.rc.cur=n;
+            this.onDelete=false;
+        }else{
         this.vue.rsc.saveRule(this.onCreate);
+        }
         this.vue.rsc.removeEles();
         this.onCreate=false;
         this.vue.rsc.switch(n);

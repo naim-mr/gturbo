@@ -57,7 +57,9 @@ class Rule extends Observable {
             this.rule = rule;
         }
     }
-
+    static emptyRule() {
+        return new Rule(null,null);
+    }
     constructor(lhs, rhs) {
         super();
         this.lhs = lhs;

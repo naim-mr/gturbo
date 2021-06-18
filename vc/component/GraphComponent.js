@@ -53,7 +53,7 @@ class GraphComponent extends Observable {
     constructor(g, idComp) {
         super();
         this.updateGraph(g);
-       
+        this.inc=false;
         this.edgesInCy = {};
         this.edgesInGraph = {}
        
@@ -175,7 +175,7 @@ class GraphComponent extends Observable {
             }else if(event.key=="Alt"){
              // this.eh.disableDrawMode();
             } else if (event.key == "Delete") {
-                this.onDelete()
+                if(!this.inc)   this.onDelete()
 
             }
             /*if (event.key === 'c' &&  event.ctrlKey) {
@@ -201,14 +201,16 @@ class GraphComponent extends Observable {
                 if(event.target != e && e.hasClass("highlight"))e.removeClass("highlight");
             }
             
-            this.onClick(event);
+            if(!this.inc)this.onClick(event);
 
         });
         
         this.cy.on("ehcomplete", (event, sourceNode, targetNode, addedEles) => {
-            this.edgesInCy[this.graph.edgeCpt] = addedEles.id();
-            this.edgesInGraph[addedEles.id()] = this.graph.edgeCpt;
-            this.graph.addEdge(sourceNode.id(), targetNode.id());
+            if(!this.inc){
+                this.edgesInCy[this.graph.edgeCpt] = addedEles.id();
+                this.edgesInGraph[addedEles.id()] = this.graph.edgeCpt;
+                this.graph.addEdge(sourceNode.id(), targetNode.id());
+            }
 
         })
         this.cy.on("dragfree",(event)=>{
@@ -223,8 +225,8 @@ class GraphComponent extends Observable {
         })
     }
     deleteEdges(){
-        this.edgesInCy={};
-        this.edgesInGraph={};
+       // this.edgesInCy={};
+     //   this.edgesInGraph={};
     }
     updateGraph(graph) {
         if(this.graphObs!=undefined)this.graph.unregister(this.graphObs);

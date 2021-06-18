@@ -44,8 +44,6 @@ class RuleInclusionComponent {
 
     }
     update(inc) {
-        this.cpt++;
-        this.cur = this.cpt;
         this.inc.unregister(this.incObs);
         this.inc = inc;
         this.lgcI.updateComponent(inc.lgraphI);

@@ -32,6 +32,7 @@ class VueStateInclusion extends VueState {
             this.hideInclusionButton();
             this.vue.rsc.removeElesI();
             this.showRulesButton();
+            
 
         }
     }

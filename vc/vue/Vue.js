@@ -54,14 +54,13 @@ class Vue {
         this.stateToStr = vueState;
         switch (vueState) {
             case (VueEnum.RULE):
-                {
+                {   
 
                     this.state = new VueStateRule(this);
                     break;
                 }
             case (VueEnum.INCLUSION):
-                {
-
+                {   
                     this.state = new VueStateInclusion(this);
                     break;
                 }

@@ -54,6 +54,10 @@ class GraphInclusionComponent {
         });
         this.codComp.cy.on("click", 'edge', (event) => {
             if (this.selectedEle != null && this.selectedEle.isEdge()) {
+                console.log("on click edge");
+                console.log(this.selectedEle.id());
+                console.log(this.domComp.edgesInGraph[this.selectedEle.id()]);
+                console.log(this.codComp.edgesInGraph);
                 this.graphI.setEdge(this.domComp.edgesInGraph[this.selectedEle.id()], this.codComp.edgesInGraph[event.target.id()]);
             }
         });
@@ -86,6 +90,8 @@ class GraphInclusionComponent {
     //Diminuer ? 
 
     coloredInclusion() {
+        this.codComp.inc=true;
+        this.domComp.inc=true;
         var rgb;
         for (const node in this.graphI.dom.nodes) {
             rgb = getRandomRgb();
@@ -158,6 +164,8 @@ class GraphInclusionComponent {
     }
 
     loadInclusion() {
+        this.codComp.inc=true;
+        this.domComp.inc=true;
         var rgb;
         for (const node in this.graphI.dom.nodes) {
             rgb = getRandomRgb();

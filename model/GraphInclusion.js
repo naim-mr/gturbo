@@ -40,8 +40,8 @@ class GraphInclusion extends Observable {
             }
         }
         on_removeEdge(id) {
-            if (id in this.g.edgeInvMap) {
-                this.ginc.unsetEdge(this.g.edgeInvMap[id]);
+            if (id in this.ginc.edgeInvMap) {
+                this.ginc.unsetEdge(this.ginc.edgeInvMap[id]);
             }
         }
     }
@@ -75,6 +75,8 @@ class GraphInclusion extends Observable {
         if (idy in this.edgeInvMap) {
             this.unsetEdge(this.edgeInvMap[idy]);
         }
+        console.log("on set edge +" +idx);
+        console.log(this.dom.edges);
         let nidx = this.dom.edges[idx].src;
         let nidy = this.cod.edges[idy].src;
         if (this.nodeMap[nidx] != nidy) {
