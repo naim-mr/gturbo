@@ -53,12 +53,10 @@ class GraphComponent extends Observable {
     constructor(g, idComp) {
         super();
         this.updateGraph(g);
-        this.inc=false;
+      
         this.edgesInCy = {};
         this.edgesInGraph = {}
-       
-        this.lastClick = {};
-       
+        this.lastClick = {};       
         this.cy = this.cy = cytoscape({
             zoomEnabled: false,
             container: document.getElementById(idComp),
@@ -147,6 +145,8 @@ class GraphComponent extends Observable {
                 edges: []
             }
         });
+        
+        this.mouseover=false;
         //this.cy.zoomingEnabled(false);
         this.eh = this.cy.edgehandles();
         this.eh.enableDrawMode();
@@ -157,6 +157,7 @@ class GraphComponent extends Observable {
             ele.addClass('highlight2');
         })    
         this.cy.on('mouseout','node',(event)=>{
+            
             let ele=event.target;
             ele.removeClass('highlight2');
         })  
@@ -168,40 +169,48 @@ class GraphComponent extends Observable {
             let ele=event.target;
             ele.removeClass('highlight2');
         })      
-        
         document.addEventListener('keydown', (event) => {
-            if (event.ctrlKey) {
-                this.ctrlKey = true;
-            }else if(event.key=="Alt"){
-             // this.eh.disableDrawMode();
-            } else if (event.key == "Delete") {
-                if(!this.inc)   this.onDelete()
+            if(this.mouseover){
+                if (event.ctrlKey) {
+                    this.ctrlKey = true;
+                }else if(event.key=="Alt"){
+                // this.eh.disableDrawMode();
+                } else if (event.key == "Delete") {
+                    this.onDelete()
 
-            }
+                }
             /*if (event.key === 'c' &&  event.ctrlKey) {
                                 this.selectedEles = this.cy.$(':selected');
                         } else if (event.key == 'v' && this.selectedEles != {} && this.lastClick!={}) {                  
                                 this.onPaste()
                         }*/
+            }
         });
+        document.getElementById(idComp).addEventListener('mouseover',(event)=>{
+            this.mouseover=true;
+        });
+        document.getElementById(idComp).addEventListener('mouseout',(event)=> {
+            this.mouseover  =false;
+            this.ctrlKey=false;
+        })
         
         document.addEventListener('keyup', (event) => {
-            if (event.ctrlKey) {
-                this.ctrlKey = false;
-            }else if(event.key=="Alt"){
-           //     this.eh.enableDrawMode();
+            if(this.mouseover){
+                if (event.ctrlKey) {
+                    this.ctrlKey = false;
+                }else if(event.key=="Alt"){
+            //     this.eh.enableDrawMode();
+                }
             }
 
         });
-        
         this.cy.on('click', (event) => {
             for(let i=0;i<this.cy.elements('').length;i++){
-                console.log("okok")
                 let e= this.cy.elements('')[i];
                 if(event.target != e && e.hasClass("highlight"))e.removeClass("highlight");
             }
             
-            if(!this.inc)this.onClick(event);
+            this.onClick(event);
 
         });
         
@@ -225,8 +234,8 @@ class GraphComponent extends Observable {
         })
     }
     deleteEdges(){
-       // this.edgesInCy={};
-     //   this.edgesInGraph={};
+        this.edgesInCy={};
+        this.edgesInGraph={};
     }
     updateGraph(graph) {
         if(this.graphObs!=undefined)this.graph.unregister(this.graphObs);
@@ -236,7 +245,7 @@ class GraphComponent extends Observable {
  
  
     updateEdgesMap(edgesInCy, edgesInGraph) {
-        this.edgesInCy = edgesInCy;
+        this.edgesInCy= edgesInCy;
         this.edgesInGraph = edgesInGraph;
     }
  
@@ -284,19 +293,11 @@ class GraphComponent extends Observable {
         }
     }
     save(n, handside) {
-        this.index = n;
-        this.id = handside;
-        this.savefactor('', n, handside);
-        this.savefactor('i', n, handside);
-        this.savefactor('g', n, handside);
+    
 
     }
     savefactor(str, n, handside) {
-        console.log("img + " +n+ " "+handside);
-        let png = this.cy.png({  bg: 'rgb(255, 224, 183)' });
-        let img = document.getElementById(str + 'rule' + handside + n)
-        img.setAttribute('src', png);
-        img.setAttribute('style', 'width:50%;padding:1%');
+     
     }
     refresh() {
         for (const node in this.graph.nodes) {
@@ -327,6 +328,8 @@ class GraphComponent extends Observable {
 
     }
 
-
+    removeEles(){
+        this.cy.remove(this.cy.elements(''));
+    }
 
 }

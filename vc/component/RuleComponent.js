@@ -29,18 +29,18 @@ class RuleComponent {
         
     }
     deleteRule(){
-        this.lgc.deleteEdges();
-        this.rgc.deleteEdges();
-        this.rule.unregisterAll();
-        this.rule={};
-        this.cur=0;
+        
+       this.rule.unregisterAll();
+       this.rule={};
+       this.cur=0;
        
     }
     update(n, rule, edgesInGraph, edgesInCy) {
         this.cur = n;
         this.updateRule(rule)
-        this.lgc.updateEdgesMap(edgesInCy[n]['left'], edgesInGraph[n]['right']);
-        this.rgc.updateEdgesMap(edgesInCy[n]['left'], edgesInGraph[n]['right']);
+        console.log("on update "+n);
+        this.lgc.updateEdgesMap(edgesInCy[n]['left'], edgesInGraph[n]['left']);
+        this.rgc.updateEdgesMap(edgesInCy[n]['right'], edgesInGraph[n]['right']);
         this.refresh();
     }
 
@@ -54,6 +54,8 @@ class RuleComponent {
         this.ruleObserver = new RuleComponent.RuleObs(this, rule);
     }
     save() {
+        
+        
         this.lgc.save(this.cur, "lhs");
         this.rgc.save(this.cur, "rhs");
     }
@@ -61,10 +63,11 @@ class RuleComponent {
         this.lgc.refresh();
         this.rgc.refresh();
     }
-
+    deleteEdges(){
+        this.lgc.deleteEdges();
+        this.rgc.deleteEdges();
+    }
     edgesInGraph() {
-        console.log("edge in graph");
-        console.log(this.lgc.edgesInGraph);
         return { left: this.lgc.edgesInGraph, right: this.rgc.edgesInGraph }
     }
     edgesInCy() {

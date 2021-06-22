@@ -1,3 +1,4 @@
+
 class GraphInclusionComponent {
     static GraphIObs = class extends GraphInclusionObserver {
         constructor(gic, graphI) {
@@ -8,7 +9,10 @@ class GraphInclusionComponent {
 
         on_setNode(idx, idy) {
             let nodeDom = this.gic.domComp.cy.getElementById(idx);
+            
             this.gic.codComp.cy.getElementById(idy).style('background-color',nodeDom.style('background-color'));
+            this.gic.codComp.cy.getElementById(idy).addClass('inclusion');
+
         }   
 
         on_setEdge(idx, idy) {
@@ -17,7 +21,7 @@ class GraphInclusionComponent {
             let edgey = this.gic.codComp.edgesInCy[idy];
             this.gic.codComp.cy.getElementById(edgey).style('line-color',edgeDom.style('line-color'));
             this.gic.codComp.cy.getElementById(edgey).style('target-arrow-color',edgeDom.style('target-arrow-color'));
-
+            this.gic.codComp.cy.getElementById(edgey).addClass('inclusion');
         }
 
         on_unsetNode(idx, idy) {
@@ -37,30 +41,46 @@ class GraphInclusionComponent {
         }
 
     }
-
+ 
     constructor(graphI, idComp) {
         this.graphI = graphI;
         this.graphIobs = new GraphInclusionComponent.GraphIObs(this, graphI);
 
         this.domComp = new GraphComponent(graphI.dom, idComp[0]);
         this.codComp = new GraphComponent(graphI.cod, idComp[1])
-
+        
         this.selectedEle = null;
 
         this.codComp.cy.on("click", 'node', (event) => {
-            if (this.selectedEle != null && this.selectedEle.isNode()) {
+            console.log( event.target);
+         
+            if(event.target.hasClass('inclusion')){
+                this.graphI.unsetNode(this.graphI.nodeInvMap[event.target.id()]);
+                event.target.removeClass('inclusion');
+                event.target.unselect();
+            }else  if (this.selectedEle != null && this.selectedEle.isNode()) {
                 this.graphI.setNode(this.selectedEle.id(), event.target.id());
+                this.lastInclusion=event.target;
+
             }
         });
         this.codComp.cy.on("click", 'edge', (event) => {
-            if (this.selectedEle != null && this.selectedEle.isEdge()) {
-                console.log("on click edge");
-                console.log(this.selectedEle.id());
-                console.log(this.domComp.edgesInGraph[this.selectedEle.id()]);
-                console.log(this.codComp.edgesInGraph);
+            if(event.target.hasClass('inclusion')){
+                this.graphI.unsetEdge(this.graphI.edgeInvMap[this.codComp.edgesInGraph[event.target.id()]]);
+                event.target.removeClass('inclusion');
+                event.target.unselect();
+                
+            }
+            else if (this.selectedEle != null && this.selectedEle.isEdge()) {
+                
+                
+                
                 this.graphI.setEdge(this.domComp.edgesInGraph[this.selectedEle.id()], this.codComp.edgesInGraph[event.target.id()]);
+                
             }
         });
+
+
     }
 
 
@@ -193,6 +213,7 @@ class GraphInclusionComponent {
                     position: { x: this.graphI.cod.nodes[this.graphI.nodeMap[node]].data['x'], y: this.graphI.cod.nodes[this.graphI.nodeMap[node]].data['y'] }
                 });
                 ele.style({ 'background-color': rgb })
+                ele.addClass('inclusion');
 
 
             }
@@ -220,6 +241,7 @@ class GraphInclusionComponent {
                 'line-color': rgb,
                 'target-arrow-color': rgb
             });
+            
 
             if (this.graphI.edgeMap[edge] != undefined) {
                 ele = this.codComp.cy.add({
@@ -236,6 +258,8 @@ class GraphInclusionComponent {
                     'line-color': rgb,
                     'target-arrow-color': rgb
                 });
+                ele.addClass('inclusion');
+                
 
 
             }
@@ -243,24 +267,26 @@ class GraphInclusionComponent {
         for (const node in this.graphI.cod.nodes) {
 
             if (!this.codComp.cy.getElementById(node).length) {
-                let id = this.codComp.cy.add({
+                let ele = this.codComp.cy.add({
                     group: 'nodes',
                     data: {
 
                         id: node
                     },
+                    
                     position: { x: this.graphI.cod.nodes[node].data['x'], y: this.graphI.cod.nodes[node].data['y'] }
                 }).on("click", (event) => {
                     this.codSelectedEle = event.target;
                     this.codSelectedEle.addClass('highlight');
     
                 });
+
             }
 
         }
         for (const edge in this.graphI.cod.edges) {
             if (!this.codComp.cy.getElementById(this.codComp.edgesInCy[edge]).length) {
-                let id = this.codComp.cy.add({
+                let ele = this.codComp.cy.add({
                     group: 'edges',
                     data: {
                         id: this.codComp.edgesInCy[edge],
@@ -268,12 +294,12 @@ class GraphInclusionComponent {
                         target: this.graphI.cod.edges[edge]['dst'],
                     },
 
-
                 }).on("click", (event) => {
                     this.codSelectedEle = event.target;
                     this.codSelectedEle.addClass('highlight');
     
-                });;
+                });
+                
             }
         }
 
@@ -286,4 +312,4 @@ function getRandomRgb() {
     var g = num >> 8 & 255;
     var b = num & 255;
     return 'rgb(' + r + ', ' + g + ', ' + b + ')';
-}
+}   

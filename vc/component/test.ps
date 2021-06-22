@@ -1,0 +1,73 @@
+
+creerBase:
+---------------------
+Entrée : Ensemble d'automorphisme Aut=  { f1,f2....,fn}
+Variable : B : liste représentant la base construite , 
+           S : liste des composition déjà calculé 
+---------------------
+Algo:
+    B = B U {id};
+    supprimer id de Aut;
+    tant que (Aut!={})
+        a=Aut[0];
+        supprimer a dans Aut;
+        ajouter a dans B     
+        ajouterCombinaison(a,S,B,Aut)            
+    Fin tant que 
+Fin    
+
+----------
+
+
+
+ajouterCombinaison
+---------------------
+Entrée: Ensemble automorphisme A 
+        Liste de composition calculée S 
+        a dernier automorphisme ajouté à la base ;
+Variable : Temp liste des automorphisme a ajouté dans S 
+
+
+    ajouter a dans Temp
+    tant que (Temp != {})
+        
+        s=Temp[0];       
+        supprimer s dans Temp;
+        ajouter s dans S; 
+        
+        pour( i allant de 0  à S.taille)
+            t= so S[i];
+            si t !=id
+                si t dans A 
+                    supprimer t dans A; 
+                ajouter t dans temp;
+            Fin si 
+            si S[i] != s
+                t= S[i]os ; 
+                si t dans A 
+                    supprimer t dans A; 
+                ajouter t dans temp;
+            Fin si
+        Fin pour 
+    Fin tant que
+Fin
+
+
+
+[id,f1,f2,f3,f4]       on suppose f3= f1of2  et f4= f1of2of1
+
+[f1,f2,f3,f4] [id] []
+[f2,f3,f4]   [id,f1]  []  ------>    [f2,f3,f4] f1 []
+                                     [f2,f3,f4] f1 [] [f1] 
+                                     [f2,f3,f4] f1 [f1] []
+                                     [f2,f3,f4] f1 [f1] [f1²]
+                                     [f2,f3,f3] _   [f1,f1²] [f1³ ,f1⁴]
+                                     [f2,f3,f4] _    [f1,f1², f1³ ] [f1⁴,f1⁵,f1⁶]
+                                     [f2,f3,f5] _    ...
+[f2,f3,f5]  [id,f1]  [f1,f1²,f1³]
+
+[f3,f5] [id,f1,f2] [....]  ------>>> [f3,f5] f2 [f1,f1²,f1³]  []
+                                     [f3,f5] _   [f1,f1²,f1³]  [f2] 
+                                     [f3,f5] _   [f1,f1²,f1³,f2]  [] 
+                                     [f3,f5] _   [f1,f1²,f1³,f2]  [f1of2 ,f2of1,f1²of2 ,f2of1²,f2²] 
+                                     [f5] _   [f1,f1²,f1³,f2,f1of2]  [f2of1,f1²of2 ,f2of1²,f2²] 

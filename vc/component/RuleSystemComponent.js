@@ -54,20 +54,19 @@ class RuleSystemComponent extends Observable {
         this.rs = rs;
         let rule = this.rs.createRule();
         this.rc = new RuleComponent(new GraphComponent(rule.lhs, "lhs"), new GraphComponent(rule.rhs, "rhs"), rule);
-        this.edgesInCy = {};
-        this.edgesInGraph = {};
+        this.edgesInCy = [];
+        this.edgesInGraph = [];
         new RuleSystemComponent.RuleSystemObs(this, rs);
        
     }
     
     
     pushEdgesIds() {
-        this.edgesInGraph[this.rc.cur]=(this.rc.edgesInGraph());
-        this.edgesInCy[this.rc.cur]=(this.rc.edgesInCy());
+        this.edgesInGraph.push(this.rc.edgesInGraph());
+        this.edgesInCy.push(this.rc.edgesInCy());
     }
     saveEdgesIds() {
         let n = this.rc.cur;
-        console.log("saveEdgeId "+ n);
         this.edgesInCy[n] = this.rc.edgesInCy();
         this.edgesInGraph[n] = this.rc.edgesInGraph();
     }
@@ -110,6 +109,7 @@ class RuleSystemComponent extends Observable {
             this.rc.save();
             this.pushEdgesIds();
         } else {
+            
             this.saveEdgesIds();
             this.rc.save();
 
@@ -119,6 +119,7 @@ class RuleSystemComponent extends Observable {
     
     
     removeEles() {
+        this.rc.deleteEdges();
         this.rc.lgc.cy.remove(this.rc.lgc.cy.elements(''));
         this.rc.rgc.cy.remove(this.rc.rgc.cy.elements(''));
     }

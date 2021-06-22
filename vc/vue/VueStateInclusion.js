@@ -12,7 +12,6 @@ class VueStateInclusion extends VueState {
         document.getElementById("rhs1").setAttribute("style", "display:none");
         document.getElementById("lhs2").setAttribute("style", "display:none");
         document.getElementById("rhs2").setAttribute("style", "display:none");;
-        document.getElementById("save").setAttribute("style", "display:none");
         document.getElementById("delete").setAttribute("style", "display:none");
 
     }
@@ -21,7 +20,6 @@ class VueStateInclusion extends VueState {
         document.getElementById("rhs1").setAttribute("style", "display:flex");
         document.getElementById("lhs2").setAttribute("style", "display:flex");
         document.getElementById("rhs2").setAttribute("style", "display:flex");
-        document.getElementById("save").setAttribute("style", "display:block");
         document.getElementById("delete").setAttribute("style", "display:block");
     }
     createInclusion() {
@@ -49,13 +47,17 @@ class VueStateInclusion extends VueState {
             this.addInclusionButton(cpt);
             this.vue.rsc.coloredInclusion();
             this.index = 0;
-
+            this.hideRulesButton();
+            this.showInclusionButton();
         } else {
             this.index++;
             this.sub = n;
         }
     }
     switch (n) {
+        this.hideRulesButton();
+        this.showInclusionButton();
+        this.onCreate = false;
         this.vue.rsc.removeElesI();
         this.vue.rsc.loadInclusion(n);
     }
@@ -67,12 +69,7 @@ class VueStateInclusion extends VueState {
         let htmlcollection = document.getElementsByClassName("inavrule");
         for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:block");
     }
-    save() {
-        this.hideRulesButton();
-        this.showInclusionButton();
-        this.onCreate = false;
-
-    }
+ 
     hideRulesButton() {
         let htmlcollection = document.getElementsByClassName("inavrule");
         for (let i = 0; i < htmlcollection.length; i++) htmlcollection.item(i).setAttribute("style", "display:none");

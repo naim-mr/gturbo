@@ -4,7 +4,7 @@ class RuleObserver extends Observer {
         super(r);
     }
     
-    
+    on_update(hs){};
 
 }
 
@@ -16,38 +16,31 @@ class Rule extends Observable {
 
                 this.rule = rule;
             }
-      /* on_addNode(id) {
-           this.rule.rhs.addNode();
-           
+        on_addNode(id) {
+      //     this.rule.rhs.addNode();
+            this.rule.notify("on_update","lhs");
         }
         on_addEdge(ide,src,dest){
-           this.rule.rhs.addEdge(src,dest);
+           //this.rule.rhs.addEdge(src,dest);
+           this.rule.notify("on_update","lhs");
         }
-        /*
-        let idr=this.rule.rhs.addEdge(this.rule.nodeRgc[src],this.rule.nodeRgc[dest]);
-            this.rule.edgeRgc[ide]=idr;
+        
         
         on_removeEdge(id){
-            this.rule.rhs.removeEdge(id);
+            this.rule.notify("on_update","lhs");
+            
         }
+
         on_removeNode(id){
-            this.rule.rhs.removeNode(id);
+            this.rule.notify("on_update","lhs");
+
         }
         on_updateNode(id,dataN){
-            this.rule.nodeRgc[id]=
-            this.rule.rhs.updateNode(this.rule.rhsObserver.lastId,(data)=> {
-                    data=dataN ;
-                
-                    return data;
-            })
+            this.rule.notify("on_update","lhs");
         }
         on_updateEdge(id,dataE){
-            this.rule.rhs.updateEdge(this.rule.rhsObserver.lastEdge,(data)=> {
-                    data=dataE;
-                    return data;
-            })
+            this.rule.notify("on_update","lhs");
         }
-        }*/
     
     }
 
@@ -56,6 +49,26 @@ class Rule extends Observable {
             super(g);
             this.rule = rule;
         }
+        on_addNode(id) {
+            //     this.rule.rhs.addNode();
+                  this.rule.notify("on_update","rhs");
+        }
+        on_addEdge(ide,src,dest){
+           this.rule.notify("on_update","rhs");
+        }         
+        on_removeEdge(id){
+            this.rule.notify("on_update","rhs");
+        }
+        on_removeNode(id){
+            this.rule.notify("on_update","rhs");
+        }
+        on_updateNode(id,dataN){
+            this.rule.notify("on_update","rhs");
+        }
+        on_updateEdge(id,dataE){
+            this.rule.notify("on_update","rhs");
+        }
+          
     }
     static emptyRule() {
         return new Rule(null,null);
@@ -64,6 +77,7 @@ class Rule extends Observable {
         super();
         this.lhs = lhs;
         this.rhs = rhs;
+        this.autoInclusion={}
         this.lhsObserver = new Rule.Lhs(this, lhs);
         this.rhsObserver = new Rule.Rhs(this, rhs);
         this.nodeRgc = {};
@@ -75,6 +89,14 @@ class Rule extends Observable {
             lhs: JSON.parse(this.lhs.toJSON()),
             rhs: JSON.parse(this.rhs.toJSON()),
         })
+    }
+
+    addAutoInclusion(nodeMap,edgeMap){
+        if(this.checkAutoInclusion(nodeMap,edgeMap))
+
+    }
+    checkAutoInclusion(){
+        
     }
 
 }

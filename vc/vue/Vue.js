@@ -43,7 +43,6 @@ class Vue {
         this.rsc = new RuleSystemComponent(rs);
        
         document.getElementById("cyto_button").innerHTML += '<button id="delete" onclick="onDelete()" style="display:none">Delete</button>'
-        document.getElementById("cyto_button").innerHTML += '<button id="save" onclick="onSave()" style="display:none">Save</button>'
      
         new Vue.RuleSystemComponentObs(this,this.rsc);
     }
@@ -70,8 +69,8 @@ class Vue {
         }
     }
     div_str(n, id) {
-        if (n == 0) return '<div id="' + id + '" class="cy" style="display:none"></div>';
-        else return '<div id="' + id + n + '" class="cyhalf"  style="display:none" ></div>';
+        if (n == 0) return '<div id="' + id + '" class="cy" style="display:none" tabindex="-1"></div>';
+        else return '<div id="' + id + n + '" class="cyhalf"  style="display:none"  tabindex="-1"></div>';
     }
 
     parseId(str, n) {

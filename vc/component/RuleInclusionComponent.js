@@ -35,8 +35,6 @@ class RuleInclusionComponent {
 
     };
     updateEdgesMap(sub, over, edgesInCy, edgesInGraph) {
-        console.log(over);
-        console.log(edgesInCy);
         this.lgcI.updateEdgesMap(edgesInCy[over]['left'], edgesInGraph[over]['left'], true);
         this.lgcI.updateEdgesMap(edgesInCy[sub]['left'], edgesInGraph[sub]['left'], false);
         this.rgcI.updateEdgesMap(edgesInCy[over]['left'], edgesInGraph[over]['left'], true);

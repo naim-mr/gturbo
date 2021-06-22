@@ -80,13 +80,13 @@ class GraphInclusion extends Observable {
         let nidx = this.dom.edges[idx].src;
         let nidy = this.cod.edges[idy].src;
         if (this.nodeMap[nidx] != nidy) {
-            this.setNode(this.dom.edges[idx].src, this.cod.edges[idy].src);
+            this.setNode(nidx,nidy);
 
         }
         nidx = this.dom.edges[idx].dst;
         nidy = this.cod.edges[idy].dst;
         if (this.nodeMap[nidx] != nidy) {
-            this.setNode(this.dom.edges[idx].dst, this.cod.edges[idy].dst);
+            this.setNode(nidx,nidy);
 
         }
         this.edgeMap[idx] = idy;
