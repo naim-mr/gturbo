@@ -94,13 +94,10 @@ export default {
     data(){
         return {
             img:arrow,
-            showModal:false,
         } 
     },
     methods: {
-        showModal(){
-            showModal=true;
-        },
+        
         addRule(){
             this.$emit('addRule');
             
@@ -113,6 +110,7 @@ export default {
         }
     },
     mounted(){
+        
         this.$emit("initRsc")
     }
     

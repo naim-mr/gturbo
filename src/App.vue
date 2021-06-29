@@ -1,8 +1,9 @@
 <template>
 
-  
-  <global v-show="global"/>
-  <rules v-show="global">
+
+  <div class="comp" v-show="glob"> <global  @initRsc="initRsc" /></div>
+  <div class="comp" v-show="rule" ><rules  @rulesMounted="rulesMounted" @back="back" /></div>
+
   
 </template>
 <style>
@@ -10,9 +11,13 @@ html,body{
      height:100%;
      width: 100%;
 }
-
+.comp {
+    height: 100%;
+    width: 100%;
+}
  #app{
      display:flex;
+
      flex-direction: row;
      height:100%;
      width: 100%;
@@ -23,6 +28,7 @@ var {RuleSystemComponent,RuleSystemComponentObserver} =require('./js/vc/componen
 var Observer = require('./js/util/Observer.js')
 var Observable = require('./js/util/Observable.js')
 var {RuleSystem,RuleSystemObserver} =require('./js/model/RuleSystem');
+
 import global from "./views/GlobalView.vue"
 import rules from "./views/Rules.vue"
 export default {
@@ -35,15 +41,13 @@ export default {
   data() {
       return {
           RuleSysObserver: class extends RuleSystemObserver{
-                constructor(rsc,app,router){
+                constructor(rsc,app){
                     super(rsc);
                     this.app=app;
-                    this.router=router;
                 }
                 on_editRule(){
-                    this.router.push("/rules");
-                    app.global=false;
-                    app.rules=true;
+                this.app.glob=false;
+                this.app.rule=true;
 
                 }
                 on_addRule(){
@@ -64,27 +68,28 @@ export default {
           onCreate:true,
           cptRule:0,
           onDelete:false,
-          global:true,
-          rules:false,
+          glob:true,
+          rule:false,
       }
   },
   methods:{
       initRsc(){
-         console.log('init');
+        console.log("ok"+ this.glob);
         if(this.rsc==null){
             this.rsc= new RuleSystemComponent(new RuleSystem()),
-              this.rscObs= new this.RuleSysObserver(this.rsc,this,this.$router);
+            this.rscObs= new this.RuleSysObserver(this.rsc,this,this.$router);
          }
+        
+      },
+      rulesMounted(){
           
+        
       },
-      initRc(){
-          this.rsc.createRc();
-      },
-      switchRight(){
-          this.switchRule(this.$store.getters.getNext)
+      back(){
+          this.rule=false;
+          this.glob=true;
       },
       saveCur(){
-          alert("ici");
           this.rsc.saveRule(this.onCreate);
       },
       addRule(){
@@ -101,7 +106,6 @@ export default {
           this.switchRule(this.$store.getters.getPrevious)
       },
       switchRule(n){
-          console.log(n);
           this.$store.state.index=n;
             if (this.onDelete) {
                 this.rsc.rc.cur = n
@@ -115,8 +119,6 @@ export default {
             
       },
       createInclusion(sub,over){
-        console.log("app "+sub +" "+over);
-
          this.rsc.createInclusion(sub,over);
       },
       topRule(){

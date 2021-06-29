@@ -26,17 +26,14 @@ class RuleSystemComponent extends Observable {
     static RuleSystemObs = class extends RuleSystemObserver {
         constructor(rsc, rs) {
             super(rs);
+            
             this.rsc = rsc;
         }
 
 
         on_createRule(rule) {
-            if(this.rsc.rc==undefined){
-                new RuleComponent(new GraphComponent(this.rule.lhs, "lhs"), new GraphComponent(this.rule.rhs, "rhs"), this.rule);
-            }
-            this.rsc.rc.updateRule(rule);
-            
-
+            if(this.rsc.rc==undefined)this.rsc.rc=new RuleComponent(new GraphComponent(rule.lhs, "lhs"), new GraphComponent(rule.rhs, "rhs"), rule);
+            this.rsc.rc.updateRule(rule);        
         }
 
         on_createInclusion(inc, sub, over) {
@@ -50,7 +47,6 @@ class RuleSystemComponent extends Observable {
         }
         on_deleteRule(id){
             this.rsc.notify("on_deleteRule",id)
-            console.log("on delete rule "+ id);
             this.rsc.rc.deleteRule();
         }
         on_deleteInclusion(id){
@@ -75,20 +71,13 @@ class RuleSystemComponent extends Observable {
         super();
         this.rs = rs;
         this.globalView= new GlobalView(rs.graph,"rcomp");
-        new RuleSystemComponent.GlobalViewObs(this.globalView,this)
-       
+        new RuleSystemComponent.GlobalViewObs(this.globalView,this);
+    
         this.edgesInCy = [];
         this.edgesInGraph = [];
+        
         new RuleSystemComponent.RuleSystemObs(this, rs);
        
-    }
-    createRc(){
-       
-
-            
-           
-        
-        
     }
     pushEdgesIds() {
         this.edgesInGraph.push(this.rc.edgesInGraph());

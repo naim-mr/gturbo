@@ -1,5 +1,6 @@
 <template>
-    <rule  />
+        <rule  />
+        
 </template>
 <script>
 import rule from "@/components/rules.vue";

@@ -4,6 +4,7 @@
     <div id="rhs" class="cy"></div>
 
     </div>
+    <button v-on:click="back" >back </button>
                
    
 </template>
@@ -82,16 +83,16 @@ export default {
     data(){
         return {
             img:arrow,
-            showModal:false,
         } 
     },
     methods: {
-        showModal(){
-            showModal=true;
-        },
+        
         addRule(){
             this.$emit('addRule');
             
+        },
+        back(){
+           this.$emit("back");
         },
         switchLeft(){
             this.$emit('switchLeft');
@@ -101,7 +102,7 @@ export default {
         }
     },
     mounted(){
-        this.$emit("initRc")
+        this.$emit("rulesMounted")
     }
     
 }

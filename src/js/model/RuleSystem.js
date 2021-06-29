@@ -1,3 +1,4 @@
+//Problème où faire le notify
 
 var Observer = require('../util/Observer.js')
 var Observable = require('../util/Observable.js')
@@ -32,6 +33,7 @@ class RuleSystem extends Observable {
           data.rule = r
           return data
         })
+        this.rs.notify('on_createRule', r) // solution au problème
         this.rs.rules[id] = r
       }
 
@@ -44,6 +46,7 @@ class RuleSystem extends Observable {
           data.inc = inc
           return data
         })
+        this.rs.notify('on_createInclusion', id,sub,over) // solution au problème
         this.rs.inclusions[id] = inc
       }
 
@@ -92,7 +95,6 @@ class RuleSystem extends Observable {
     createRule () {
       const id = this.graph.addNode()
       const rule = this.graph.nodes[id].data.rule
-      this.notify('on_createRule', rule)
       new RuleSystem.RuleObs(this, rule)
       return rule
     }
