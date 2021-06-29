@@ -1,12 +1,12 @@
 <template>
-    <rule  />
+    <global  />
 </template>
 <script>
-import rule from "@/components/rules.vue";
+import global from "@/components/global.vue";
 
 export default {
     components: {
-        rule,
+        global,
     },
     data(){
         return {

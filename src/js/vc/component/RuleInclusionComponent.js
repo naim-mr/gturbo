@@ -13,6 +13,7 @@ class RuleInclusionComponent {
       on_setNodeL (idx, idy) {}
 
       on_setEdgeL (idx, idy) {}
+      
 
       on_unsetNodeL (idx, idy) {}
 

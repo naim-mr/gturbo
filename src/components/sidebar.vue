@@ -1,8 +1,8 @@
 <template>
     <div id="sidebar-wrapper">
         <ul class="sidebar-nav">
-            <li ><button @click="$router.push('/rules')">Rules</button></li>
-            <li><button>Inclusions</button> </li>
+            <li ><button @click="switchRule">Rules</button></li>
+            <li><button @click="switchInclusion">Inclusions</button> </li>
         </ul>
     </div>
 
@@ -42,3 +42,24 @@
   transition: all 0.4s ease 0s;
 }
 </style>
+<script>
+
+export default {
+  data(){
+    return{
+    onglet:0
+    }
+  },
+  methods:{
+    switchInclusion(){
+        if(this.onglet==1)(this.$emit("leaveRule"));
+        this.$router.push("/inclusions");
+        this.onglet=2;
+    },
+    switchRule(){
+      this.onglet=1;
+      this.$router.push("/rules")
+    } 
+  }
+}
+</script>

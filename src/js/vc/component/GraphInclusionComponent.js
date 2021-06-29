@@ -50,24 +50,28 @@ class GraphInclusionComponent {
       this.selectedEle = null
 
       this.codComp.cy.on('click', 'node', (event) => {
-        console.log(event.target)
-
+        let id = parseInt(event.target.id())
         if (event.target.hasClass('inclusion')) {
-          this.graphI.unsetNode(this.graphI.nodeInvMap[event.target.id()])
+          
+          this.graphI.unsetNode(this.graphI.nodeInvMap[id])
           event.target.removeClass('inclusion')
           event.target.unselect()
         } else if (this.selectedEle != null && this.selectedEle.isNode()) {
-          this.graphI.setNode(this.selectedEle.id(), event.target.id())
+          this.graphI.setNode((this.selectedEle.id()), id)
           this.lastInclusion = event.target
         }
       })
       this.codComp.cy.on('click', 'edge', (event) => {
+        let id = event.target.id();
         if (event.target.hasClass('inclusion')) {
-          this.graphI.unsetEdge(this.graphI.edgeInvMap[this.codComp.edgesInGraph[event.target.id()]])
+          this.graphI.unsetEdge(this.graphI.edgeInvMap[this.codComp.edgesInGraph[id]])
           event.target.removeClass('inclusion')
           event.target.unselect()
         } else if (this.selectedEle != null && this.selectedEle.isEdge()) {
-          this.graphI.setEdge(this.domComp.edgesInGraph[this.selectedEle.id()], this.codComp.edgesInGraph[event.target.id()])
+          console.log("before bug");
+          console.log(id);
+          console.log(typeof(id));
+          this.graphI.setEdge(this.domComp.edgesInGraph[(this.selectedEle.id())], this.codComp.edgesInGraph[id])
         }
       })
     }

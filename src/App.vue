@@ -1,8 +1,9 @@
 <template>
 
-        <sidebar/>
-        <router-view @initRsc="initRsc" @addRule="addRule" @switchRight="switchRight" @switchLeft="switchLeft" @switchRule="switchRule"/>
-    
+  
+  <global v-show="global"/>
+  <rules v-show="global">
+  
 </template>
 <style>
 html,body{
@@ -18,33 +19,73 @@ html,body{
  }
 </style>
 <script>
-import sidebar from './components/sidebar.vue'
 var {RuleSystemComponent,RuleSystemComponentObserver} =require('./js/vc/component/RuleSystemComponent');
 var Observer = require('./js/util/Observer.js')
 var Observable = require('./js/util/Observable.js')
 var {RuleSystem,RuleSystemObserver} =require('./js/model/RuleSystem');
-
+import global from "./views/GlobalView.vue"
+import rules from "./views/Rules.vue"
 export default {
-  components: { sidebar },
+  components: {
+      global,
+      rules,
+  },
   name: 'App',
   
   data() {
       return {
+          RuleSysObserver: class extends RuleSystemObserver{
+                constructor(rsc,app,router){
+                    super(rsc);
+                    this.app=app;
+                    this.router=router;
+                }
+                on_editRule(){
+                    this.router.push("/rules");
+                    app.global=false;
+                    app.rules=true;
+
+                }
+                on_addRule(){
+                }
+                on_addInclusion(){
+
+                }
+                on_deleteRule(){
+
+                }
+                on_deleteInclusion(){
+
+                }
+          },
+
           rsc: null,
           rscObs: null,
           onCreate:true,
           cptRule:0,
           onDelete:false,
+          global:true,
+          rules:false,
       }
   },
   methods:{
       initRsc(){
-          this.rsc= new RuleSystemComponent(new RuleSystem()),
-          this.rscObs=new RuleSystemComponentObserver(this.rsc);
+         console.log('init');
+        if(this.rsc==null){
+            this.rsc= new RuleSystemComponent(new RuleSystem()),
+              this.rscObs= new this.RuleSysObserver(this.rsc,this,this.$router);
+         }
           
+      },
+      initRc(){
+          this.rsc.createRc();
       },
       switchRight(){
           this.switchRule(this.$store.getters.getNext)
+      },
+      saveCur(){
+          alert("ici");
+          this.rsc.saveRule(this.onCreate);
       },
       addRule(){
           this.rsc.saveRule(this.onCreate);
@@ -72,6 +113,17 @@ export default {
             this.onCreate = false
             this.rsc.switch(n)
             
+      },
+      createInclusion(sub,over){
+        console.log("app "+sub +" "+over);
+
+         this.rsc.createInclusion(sub,over);
+      },
+      topRule(){
+
+      },
+      botRule(){
+
       }
       
   }

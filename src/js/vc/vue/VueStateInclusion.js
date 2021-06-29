@@ -34,7 +34,7 @@ class VueStateInclusion extends VueState {
     this.vue.rsc.deleteInclusion()
   }
 
-  printRule (n) {
+ printRule (n) {
     this.hideInclusionButton()
     this.showRulesButton()
     if (n > this.vue.rsc.rc.cpt) throw 'Error: printRule n is greater than the number of rule'

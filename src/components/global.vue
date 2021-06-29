@@ -1,11 +1,23 @@
 <template>
-    <div id="rowContent">
-    <div id="lhs" class="cy"></div>
-    <div id="rhs" class="cy"></div>
-
+    <div id="rcomp" class="cy">
     </div>
+    <!--        </div>
+            <button v-on:click="addRule" >Add Rule</button>
+            <div class="footer">
+                <img v-on:click="switchLeft" id="larrow" :src="img">
+                <select name="ruleList" id="rule-select">
+                    <option value="">Choisir une règle </option>
+                    <option  v-for="ele in this.$store.state.rulesId" :key="ele" v-bind:value="ele" v-on:click="this.$emit('switchRule',ele)">
+                                 {{ ele }}
+                    </option>
+                </select>
+                <img v-on:click="switchRight" id="rarrow" :src="img">
+            </div> 
+        </div>
+       
                
-   
+    </div>
+    !-->
 </template>
 <style>
     #rowContent{
@@ -101,7 +113,7 @@ export default {
         }
     },
     mounted(){
-        this.$emit("initRc")
+        this.$emit("initRsc")
     }
     
 }

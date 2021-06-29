@@ -1,24 +1,18 @@
-
-var Observer = require('../../util/Observer.js')
-var Observable = require('../../util/Observable.js')
+var Observer=  require('../../util/Observer.js')
+var Observable=  require('../../util/Observable.js')
 var { Graph, GraphObserver } = require('../../model/Graph');
+var { GraphComponent, GraphComponentObserver } = require('./GraphComponent')
 var cytoscape =require('cytoscape');
 var edgehandles=require('cytoscape-edgehandles');
-var cxtmenu =require('cytoscape-cxtmenu');
-
-cytoscape.use( cxtmenu );
-cytoscape.use( edgehandles );
-
-class GraphComponentObserver extends Observer {
-  constructor (g) {
-    super(g)
-  }
-
-  on_update () {};
-  on_addNode () {};
+class GlobalViewObserver extends Observer{
+    constructor(gv){
+        super(gv);
+    }
+    on_editRule(){};
+    on_update () {};
 }
 
-class GraphComponent extends Observable {
+class GlobalView extends Observable {
     static GraphObs = class extends GraphObserver {
       constructor (gc, g) {
         super(g)
@@ -31,15 +25,12 @@ class GraphComponent extends Observable {
           position: {},
           data: { id: idn }
         })
-        console.log("ok");
-        this.gc.notify('on_addNode')
       }
 
       on_updateNode (idn, data) {
 
         const node = this.gc.cy.getElementById(idn)
         node.position(data)
-        this.gc.notify('on_update')
       }
 
       on_addEdge (ide, src, dest) {
@@ -51,31 +42,23 @@ class GraphComponent extends Observable {
           this.gc.edgesInCy[ide] = idC.id()
           this.gc.edgesInGraph[idC.id()] = ide
         }
-        this.gc.notify('on_update')
       }
 
       on_removeEdge (id) {
         this.gc.cy.remove(this.gc.cy.getElementById(this.gc.edgesInCy[id]))
-        this.gc.notify('on_update')
       }
 
       on_removeNode (id) {
         this.gc.cy.remove(this.gc.cy.getElementById(id))
-        this.gc.notify('on_update')
       }
     }
 
-    // typeof(g): Graph
-    // s'auto gère sur les changements
     constructor (g, idComp) {
       super()
       this.updateGraph(g)
-
-      this.edgesInCy = {}
-      this.edgesInGraph = {}
       this.lastClick = {};
-      console.log("ici +"+idComp);
-      console.log(document.getElementById(idComp));
+      this.edgesInGraph={};
+      this.edgesInCy={};
       this.cy = this.cy = cytoscape({
         zoomEnabled: false,
         container: document.getElementById(idComp),
@@ -161,7 +144,7 @@ class GraphComponent extends Observable {
           edges: []
         }
       })
-
+      this.counter=0;
       this.mouseover = false
       this.cy.zoomingEnabled(false);
       this.eh = this.cy.edgehandles()
@@ -193,11 +176,7 @@ class GraphComponent extends Observable {
           } else if (event.key == 'Delete') {
             this.onDelete()
           }
-          /* if (event.key === 'c' &&  event.ctrlKey) {
-                                this.selectedEles = this.cy.$(':selected');
-                        } else if (event.key == 'v' && this.selectedEles != {} && this.lastClick!={}) {
-                                this.onPaste()
-                        } */
+          
         }
       })
       document.getElementById(idComp).addEventListener('mouseover', (event) => {
@@ -207,13 +186,12 @@ class GraphComponent extends Observable {
         this.mouseover = false
         this.ctrlKey = false
       })
-
+      
       document.addEventListener('keyup', (event) => {
         if (this.mouseover) {
           if (event.ctrlKey) {
             this.ctrlKey = false
           } else if (event.key == 'Alt') {
-            //     this.eh.enableDrawMode();
           }
         }
       })
@@ -222,16 +200,7 @@ class GraphComponent extends Observable {
           const e = this.cy.elements('')[i]
           if (event.target != e && e.hasClass('highlight'))e.removeClass('highlight')
         }
-
         this.onClick(event)
-      })
-
-      this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEles) => {
-        if (!this.inc) {
-          this.edgesInCy[this.graph.edgeCpt] = addedEles.id()
-          this.edgesInGraph[addedEles.id()] = this.graph.edgeCpt
-          this.graph.addEdge(sourceNode.id(), targetNode.id())
-        }
       })
       this.cy.on('dragfree', (event) => {
         const id = event.target.id()
@@ -252,7 +221,7 @@ class GraphComponent extends Observable {
     updateGraph (graph) {
       if (this.graphObs != undefined) this.graph.unregister(this.graphObs)
       this.graph = graph
-      this.graphObs = new GraphComponent.GraphObs(this, graph)
+      this.graphObs = new GlobalView.GraphObs(this, graph)
     }
 
     updateEdgesMap (edgesInCy, edgesInGraph) {
@@ -272,23 +241,16 @@ class GraphComponent extends Observable {
         }
       }
     }
-
-    /*
-    onPaste() {
-        if (this.selectedEles.length > 1) {
-            let center = this.selectedEles[0].position();
-            let translation = { x: this.lastClick['x'] - center['x'], y: this.lastClick['y'] - center['y'] }
-            for (let i = 0; i < this.selectedEles.length; i++) {
-                let element = this.selectedEles[i];
-                if (element.isNode()) this.graph.pasteNode(element.id(), element.position()['x'], element.position()['y'], translation);
-            }
-            this.graph.resetVisited();
-            this.selectedEles = {};
-
-        }
-    } */
     onClick (event) {
-      this.lastClick = event.renderedPosition
+      this.lastClick = event.renderedPosition    
+      if(this.counter>0 && event.target==this.lastTarget){
+          this.counter=0;
+          this.notify("on_editRule");
+          this.lastTarget=null;
+        
+      }
+      this.counter++;
+      this.lastTarget=event.target;
       if (this.ctrlKey) {
         const id = this.graph.addNode()
         this.graph.updateNode(id, (data) => {
@@ -302,18 +264,9 @@ class GraphComponent extends Observable {
       }
     }
 
-    save (n, handside) {
-
-    }
-
-    savefactor (str, n, handside) {
-
-    }
-
     refresh () {
       for (const node in this.graph.nodes) {
         const id = this.cy.add({
-
           group: 'nodes',
           data: {
             id: node
@@ -342,4 +295,4 @@ class GraphComponent extends Observable {
     }
 }
 
-module.exports = { GraphComponent, GraphComponentObserver }
+module.exports = { GlobalView, GlobalViewObserver }

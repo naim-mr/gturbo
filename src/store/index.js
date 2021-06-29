@@ -10,10 +10,10 @@ const removeElement = (array, elem) => {
 export default createStore({
   state() {
     return {
-      cptRule:0,
-      rulesId:[],
-      curRule:0,
-      index:0
+       rulesId: [],
+       cptRule:0,
+       curRule:0,
+       index:0
       }
   },
   mutations: {

@@ -8,6 +8,7 @@ class Observable {
   }
 
   notify (op, ...args) {
+    console.log(op)
     for (const obs of this.observers) {
       obs[op].apply(obs, args)
     }

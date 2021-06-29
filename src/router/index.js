@@ -13,6 +13,12 @@ const routes = [
 
   },
   {
+    path: '/inclusions',
+    name: 'inclusions',
+    component: ()=>import('../views/Inclusions.vue')
+
+  },
+  {
     path: '/about',
     name: 'About',
     // route level code-splitting

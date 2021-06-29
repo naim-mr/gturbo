@@ -1,6 +1,7 @@
 
 var {RuleSystem,RuleSystemObserver}=  require('../../model/RuleSystem.js')
-var {GraphComponent,GraphComponentObserver}=  require('./GraphComponent.js')
+var {GlobalView,GlobalViewObserver}=  require('./GlobalView.js')
+var { GraphComponent, GraphComponentObserver } = require('./GraphComponent')
 var {RuleComponent}=  require('./RuleComponent.js')
 var RuleInclusionComponent=  require('./RuleInclusionComponent.js')
 var Observer=  require('../../util/Observer.js')
@@ -16,6 +17,7 @@ class RuleSystemComponentObserver extends Observer {
     on_createInclusion(){};
     on_deleteInclusion(n){};
     on_deleteRule(n){};
+    on_editRule(){};
 }
 
 
@@ -29,7 +31,11 @@ class RuleSystemComponent extends Observable {
 
 
         on_createRule(rule) {
+            if(this.rsc.rc==undefined){
+                new RuleComponent(new GraphComponent(this.rule.lhs, "lhs"), new GraphComponent(this.rule.rhs, "rhs"), this.rule);
+            }
             this.rsc.rc.updateRule(rule);
+            
 
         }
 
@@ -54,25 +60,41 @@ class RuleSystemComponent extends Observable {
         }
         
     }
-   
+    static GlobalViewObs= class extends GlobalViewObserver{
+        constructor(gv,rsc){
+            super(gv);
+            this.rsc=rsc;
+
+        }
+        on_editRule(){
+            this.rsc.notify("on_editRule");
+        }
+    }
+ 
     constructor(rs) {
         super();
         this.rs = rs;
-        let rule = this.rs.createRule();
-        this.rc = new RuleComponent(new GraphComponent(rule.lhs, "lhs"), new GraphComponent(rule.rhs, "rhs"), rule);
+        this.globalView= new GlobalView(rs.graph,"rcomp");
+        new RuleSystemComponent.GlobalViewObs(this.globalView,this)
+       
         this.edgesInCy = [];
         this.edgesInGraph = [];
         new RuleSystemComponent.RuleSystemObs(this, rs);
        
     }
-    
-    
+    createRc(){
+       
+
+            
+           
+        
+        
+    }
     pushEdgesIds() {
         this.edgesInGraph.push(this.rc.edgesInGraph());
         this.edgesInCy.push(this.rc.edgesInCy());
     }
     saveEdgesIds() {
-        console.log("saveEdge00");
         
         let n = this.rc.cur;
         console.log(n)
@@ -88,7 +110,7 @@ class RuleSystemComponent extends Observable {
     }
 
     createRule()  {
-    
+        
         this.rs.createRule();
         this.rc.cur=this.rc.cpt;
         this.rc.cpt++;
@@ -110,8 +132,6 @@ class RuleSystemComponent extends Observable {
         this.rs.deleteRule(this.rc.rule);
     }
     saveRule(onCreate) {
-        console.log("onsave rule0");
-        console.log(onCreate);
         if (onCreate) {
             this.rc.save();
             this.pushEdgesIds();
@@ -134,11 +154,12 @@ class RuleSystemComponent extends Observable {
 
 
     createInclusion(sub, over) {
+        this.removeElesI()
         this.rs.createInclusion(sub, over);
         this.ric.cpt++;
         this.ric.cur=this.ric.cpt;
+        this.coloredInclusion()
 
-        return this.ric.cpt-1;
     }
     deleteInclusion(){
         let i= this.ric.inc;
