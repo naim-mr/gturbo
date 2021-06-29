@@ -31,7 +31,6 @@ class GraphComponent extends Observable {
           position: {},
           data: { id: idn }
         })
-        console.log("ok");
         this.gc.notify('on_addNode')
       }
 
@@ -92,8 +91,6 @@ class GraphComponent extends Observable {
         {
           selector: 'edge',
           style: {
-            'line-color':'black',
-            'target-arrow-color':'black',
             'curve-style': 'bezier',
             'target-arrow-shape': 'triangle'
           }
@@ -311,6 +308,7 @@ class GraphComponent extends Observable {
     }
 
     refresh () {
+      this.removeEles();
       for (const node in this.graph.nodes) {
         const id = this.cy.add({
 

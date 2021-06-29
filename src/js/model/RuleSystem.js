@@ -33,6 +33,7 @@ class RuleSystem extends Observable {
           data.rule = r
           return data
         })
+      
         this.rs.notify('on_createRule', r) // solution au problème
         this.rs.rules[id] = r
       }
@@ -46,7 +47,8 @@ class RuleSystem extends Observable {
           data.inc = inc
           return data
         })
-        this.rs.notify('on_createInclusion', id,sub,over) // solution au problème
+      
+        this.rs.notify('on_createInclusion', inc,sub,over) // solution au problème
         this.rs.inclusions[id] = inc
       }
 
@@ -118,7 +120,6 @@ class RuleSystem extends Observable {
     createInclusion (sub, over) {
       const id = this.graph.addEdge(sub, over)
       const inc = this.graph.edges[id].data.inc
-      this.notify('on_createInclusion', inc, sub, over)
       new RuleSystem.RuleInclusionObs(this, inc)
       return inc
     }

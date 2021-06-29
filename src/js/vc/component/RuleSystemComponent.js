@@ -17,7 +17,8 @@ class RuleSystemComponentObserver extends Observer {
     on_createInclusion(){};
     on_deleteInclusion(n){};
     on_deleteRule(n){};
-    on_editRule(){};
+    on_editRule(id){};
+    on_editInclusion(id){};
 }
 
 
@@ -32,18 +33,34 @@ class RuleSystemComponent extends Observable {
 
 
         on_createRule(rule) {
+
             if(this.rsc.rc==undefined)this.rsc.rc=new RuleComponent(new GraphComponent(rule.lhs, "lhs"), new GraphComponent(rule.rhs, "rhs"), rule);
-            this.rsc.rc.updateRule(rule);        
+            else if(this.rsc.onCreate)this.rsc.pushEdgesIds();
+            else this.rsc.saveEdgesIds();
+            this.rsc.rc.updateRule(rule);
+            this.rsc.onCreate=true;
+            this.rsc.rc.cur=this.rsc.rc.cpt;
+            this.rsc.rc.cpt++;        
         }
 
         on_createInclusion(inc, sub, over) {
+            if(this.rsc.onCreate)this.rsc.pushEdgesIds();
+            else this.rsc.saveEdgesIds();
             if (this.rsc.ric == undefined) {
+                console.log("over ");
+                console.log(over);
+                console.log(this.rsc.edgesInGraph);
                 this.rsc.ric = new RuleInclusionComponent(inc);
-                this.rsc.ric.updateEdgesMap(sub , over , this.rsc.edgesInCy, this.rsc.edgesInGraph);
+                this.rsc.ric.updateEdgesMap(sub , over, this.rsc.edgesInCy, this.rsc.edgesInGraph);
             } else {
                 this.rsc.ric.update(inc);
                 this.rsc.ric.updateEdgesMap(sub   , over , this.rsc.edgesInCy, this.rsc.edgesInGraph);
+            
             }
+            this.rsc.onCreate=true;
+            this.rsc.ric.cpt++;
+            this.rsc.ric.cur=this.rsc.ric.cpt;
+         //   this.rsc.coloredInclusion()
         }
         on_deleteRule(id){
             this.rsc.notify("on_deleteRule",id)
@@ -62,13 +79,24 @@ class RuleSystemComponent extends Observable {
             this.rsc=rsc;
 
         }
-        on_editRule(){
-            this.rsc.notify("on_editRule");
+        on_editRule(id){
+            this.rsc.switch(parseInt(id));
+            this.rsc.notify("on_editRule",id);
+            
+        }
+        on_editInclusion(id){
+            
+            this.rsc.onCreate=false;
+            //this.rsc.loadInclusion(parseInt(id));
+            this.rsc.notify("on_editInclusion",id);
+            
         }
     }
  
     constructor(rs) {
         super();
+        this.onCreate=true;
+        this.onDelete=false;
         this.rs = rs;
         this.globalView= new GlobalView(rs.graph,"rcomp");
         new RuleSystemComponent.GlobalViewObs(this.globalView,this);
@@ -80,6 +108,8 @@ class RuleSystemComponent extends Observable {
        
     }
     pushEdgesIds() {
+
+        console.log("push");
         this.edgesInGraph.push(this.rc.edgesInGraph());
         this.edgesInCy.push(this.rc.edgesInCy());
     }
@@ -95,14 +125,13 @@ class RuleSystemComponent extends Observable {
 
     switch (n) {
         let rule = this.getRule(n);
-        this.rc.update(n , rule, this.edgesInGraph, this.edgesInCy)
+        this.rc.update(n , rule,     this.edgesInGraph, this.edgesInCy)
     }
 
     createRule()  {
         
         this.rs.createRule();
-        this.rc.cur=this.rc.cpt;
-        this.rc.cpt++;
+     
     }
     deleteRule(){
 
@@ -143,12 +172,7 @@ class RuleSystemComponent extends Observable {
 
 
     createInclusion(sub, over) {
-        this.removeElesI()
         this.rs.createInclusion(sub, over);
-        this.ric.cpt++;
-        this.ric.cur=this.ric.cpt;
-        this.coloredInclusion()
-
     }
     deleteInclusion(){
         let i= this.ric.inc;

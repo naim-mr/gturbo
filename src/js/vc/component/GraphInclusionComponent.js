@@ -43,7 +43,6 @@ class GraphInclusionComponent {
     constructor (graphI, idComp) {
       this.graphI = graphI
       this.graphIobs = new GraphInclusionComponent.GraphIObs(this, graphI)
-
       this.domComp = new GraphComponent(graphI.dom, idComp[0])
       this.codComp = new GraphComponent(graphI.cod, idComp[1])
 

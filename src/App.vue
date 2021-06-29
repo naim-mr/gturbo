@@ -1,10 +1,7 @@
 <template>
-
-
   <div class="comp" v-show="glob"> <global  @initRsc="initRsc" /></div>
   <div class="comp" v-show="rule" ><rules  @rulesMounted="rulesMounted" @back="back" /></div>
-
-  
+  <div class="comp" v-show="inc" ><inclusion  @backInc="backInc"/></div>
 </template>
 <style>
 html,body{
@@ -12,6 +9,7 @@ html,body{
      width: 100%;
 }
 .comp {
+    margin:auto;
     height: 100%;
     width: 100%;
 }
@@ -31,10 +29,12 @@ var {RuleSystem,RuleSystemObserver} =require('./js/model/RuleSystem');
 
 import global from "./views/GlobalView.vue"
 import rules from "./views/Rules.vue"
+import inclusion from "./views/Inclusions.vue"
 export default {
   components: {
       global,
       rules,
+      inclusion
   },
   name: 'App',
   
@@ -45,10 +45,15 @@ export default {
                     super(rsc);
                     this.app=app;
                 }
-                on_editRule(){
+                on_editRule(id){
                 this.app.glob=false;
                 this.app.rule=true;
-
+                this.app.inc=false;
+                }
+                on_editInclusion(id){
+                    this.app.glob=false;
+                    this.app.rule=false;
+                    this.app.inc=true;
                 }
                 on_addRule(){
                 }
@@ -70,22 +75,23 @@ export default {
           onDelete:false,
           glob:true,
           rule:false,
+          inc:false,
       }
   },
   methods:{
       initRsc(){
-        console.log("ok"+ this.glob);
         if(this.rsc==null){
             this.rsc= new RuleSystemComponent(new RuleSystem()),
             this.rscObs= new this.RuleSysObserver(this.rsc,this,this.$router);
          }
         
       },
-      rulesMounted(){
-          
-        
-      },
       back(){
+          this.rule=false;
+          this.glob=true;
+      },
+      backInc(){
+          this.inc=false;
           this.rule=false;
           this.glob=true;
       },

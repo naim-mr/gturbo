@@ -29,6 +29,7 @@ class RuleInclusionComponent {
     }
 
     constructor (inc) {
+      console.log(inc);
       this.lgcI = new GraphInclusionComponent(inc.lgraphI, ['lhs2', 'lhs1'])
       this.rgcI = new GraphInclusionComponent(inc.rgraphI, ['rhs2', 'rhs1'])
       this.inc = inc

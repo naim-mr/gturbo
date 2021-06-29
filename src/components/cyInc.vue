@@ -14,12 +14,13 @@
                 </div>
 
             </div>
-            <div  class="rowContent">
+<!--            <div  class="rowContent">
             <img v-on:click="switchLeftInc" id="larrow" v-bind:src="img"> 
-            
             <img v-on:click="switcRightInc" id="rarrow" v-bind:src="img">
-            <button v-on:click="unfixed" id="addInclusion" >Create Inclusion</button>
+    
             </div>
+ -->   
+        <button @click="$emit('backInc')"> Back</button>
      </div>
     
 </template>

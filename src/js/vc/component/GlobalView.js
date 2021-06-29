@@ -8,7 +8,8 @@ class GlobalViewObserver extends Observer{
     constructor(gv){
         super(gv);
     }
-    on_editRule(){};
+    on_editRule(id){};
+    on_editInclusion(id){};
     on_update () {};
 }
 
@@ -35,7 +36,6 @@ class GlobalView extends Observable {
 
       on_addEdge (ide, src, dest) {
         let isInCyto = true
-
         if (this.gc.edgesInCy[ide] == undefined) isInCyto = false
         if (!isInCyto) {
           const idC = this.gc.cy.add({ group: 'edges', data: { source: src, target: dest } })
@@ -75,8 +75,6 @@ class GlobalView extends Observable {
         {
           selector: 'edge',
           style: {
-            'line-color':'black',
-            'target-arrow-color':'black',
             'curve-style': 'bezier',
             'target-arrow-shape': 'triangle'
           }
@@ -167,10 +165,37 @@ class GlobalView extends Observable {
         const ele = event.target
         ele.removeClass('highlight2')
       })
+      this.cy.on("click","node",(event)=>{
+        if(this.lastTarget)console.log(this.lastTarget.id());
+        if(this.counter==1 && event.target.id()==this.lastTarget.id()){
+          this.counter=0;
+          this.notify("on_editRule",event.target.id());
+          this.mouseover=false;
+          this.lastTarget=null;
+        
+        }else if(this.counter==1 ){
+          this.counter=0;
+        }else this.counter++;
+        this.lastTarget=event.target;
+      });
+
+      this.cy.on("click","edge",(event)=>{
+        if(this.counter==1 && event.target.id()==this.lastTarget.id()){
+          this.counter=0;
+          this.notify("on_editInclusion",event.target.id());
+          this.mouseover=false;
+          this.lastTarget=null;
+        
+        }else if(this.counter==1 ){
+          this.counter=0;
+        }else this.counter++;
+        this.lastTarget=event.target;
+      });
+
       document.addEventListener('keydown', (event) => {
         if (this.mouseover) {
           if (event.ctrlKey) {
-            this.ctrlKey = true
+            this.ctrlKey = true;
           } else if (event.key == 'Alt') {
             // this.eh.disableDrawMode();
           } else if (event.key == 'Delete') {
@@ -190,7 +215,7 @@ class GlobalView extends Observable {
       document.addEventListener('keyup', (event) => {
         if (this.mouseover) {
           if (event.ctrlKey) {
-            this.ctrlKey = false
+            this.ctrlKey = false;
           } else if (event.key == 'Alt') {
           }
         }
@@ -210,6 +235,14 @@ class GlobalView extends Observable {
 
           return data
         })
+      });
+
+      this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEles) => {
+        if (!this.inc) {
+          this.edgesInCy[this.graph.edgeCpt] = addedEles.id()
+          this.edgesInGraph[addedEles.id()] = this.graph.edgeCpt
+          this.graph.addEdge(sourceNode.id(), targetNode.id())
+        }
       })
     }
 
@@ -243,14 +276,7 @@ class GlobalView extends Observable {
     }
     onClick (event) {
       this.lastClick = event.renderedPosition    
-      if(this.counter>0 && event.target==this.lastTarget){
-          this.counter=0;
-          this.notify("on_editRule");
-          this.lastTarget=null;
-        
-      }
-      this.counter++;
-      this.lastTarget=event.target;
+
       if (this.ctrlKey) {
         const id = this.graph.addNode()
         this.graph.updateNode(id, (data) => {

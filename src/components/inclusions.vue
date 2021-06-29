@@ -1,8 +1,7 @@
 <template>
     
-    <div id="boy">
-            <cyInc v-show="fix"  @unfixed="unfixed"/>
-            <div v-show="!fix" class="footer">
+            <cyInc />
+            <!--<div v-show="!fix" class="footer">
               
                 <select  name="topruleList" class="rule-select">
                     <option value="">Choisir une la règle du haut </option>
@@ -18,9 +17,8 @@
                 </select>
                 <button  @click="fixed" id="valider">Valider</button>
               
-            </div> 
+            </div> !-->
                
-    </div>
     
     
 </template>

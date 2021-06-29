@@ -43,7 +43,6 @@ class RuleComponent {
     update(n, rule, edgesInGraph, edgesInCy) {
         this.cur = n;
         this.updateRule(rule)
-        console.log("on update "+n);
         this.lgc.updateEdgesMap(edgesInCy[n]['left'], edgesInGraph[n]['left']);
         this.rgc.updateEdgesMap(edgesInCy[n]['right'], edgesInGraph[n]['right']);
         this.refresh();
@@ -57,7 +56,7 @@ class RuleComponent {
         if(this.rule.length>0)   this.rule.unregister(this.ruleObserver);
         this.rule = rule;
         this.ruleObserver = new RuleComponent.RuleObs(this, rule);
-    }*
+    }
     save() {
         
         
@@ -65,6 +64,7 @@ class RuleComponent {
         this.rgc.save(this.cur, "rhs");
     }
     refresh() {
+        
         this.lgc.refresh();
         this.rgc.refresh();
     }
