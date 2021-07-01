@@ -6,7 +6,7 @@
          </div>
          <div  class="rowButton">
             <button v-on:click="back" >back </button>
-            <button id="autoInc" >auto inclusion </button>
+            <button @click="autoInclusion" id="autoInc" >auto inclusion </button>
          </div>
     </div>    
                
@@ -61,7 +61,9 @@ export default {
         } 
     },
     methods: {
-        
+        autoInclusion(){
+            this.$emit('autoInclusion');
+        },
         addRule(){
             this.$emit('addRule');
             

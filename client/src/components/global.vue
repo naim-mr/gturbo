@@ -62,7 +62,7 @@ export default {
         }
     },
     mounted(){
-        
+        console.log("mountedd")
         this.$emit("initRsc")
     }
     

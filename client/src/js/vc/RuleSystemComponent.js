@@ -121,8 +121,11 @@ class RuleSystemComponent extends Observable {
     getRule(n) {
         return this.rs.rules[n];
     }
+    getCurrentR(){
+        return this.getRule(this.rc.cur);
+    }
     getCurrentRule(){
-        return this.rc.cur;
+        return (this.rc.cur);
     }
     removeEles() {
         this.rc.deleteEdges();
@@ -156,9 +159,12 @@ class RuleSystemComponent extends Observable {
             this.ric.rgcI.removeEles();
         }
     }
-
+    generateAutoInclusion(){
+        this.rs.generateAutoInclusion(this.getCurrentRule());
+    }
     save(){
         this.notify('on_save',this.rs.toJSON());
+
     }
 
 

@@ -69,7 +69,7 @@ class GraphComponent extends Observable {
       this.lastClick = {};
       this.mouseover = false;
       this.ctrlKey = false;
-      
+      console.log(document.getElementById(idComp))
       this.cy = this.cy = cytoscape({
         zoomEnabled: false,
         container: document.getElementById(idComp),

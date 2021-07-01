@@ -5,6 +5,8 @@ var Observable = require('../util/Observable.js')
 var { Graph, GraphObserver } = require('./Graph.js')
 var { Rule, RuleObserver } = require('./Rule.js')
 var { RuleInclusion, RuleInclusionObserver } = require('./RuleInclusion.js')
+var axios=require('axios')
+
 class RuleSystemObserver extends Observer {
   constructor (rs) {
     super(rs)
@@ -75,6 +77,9 @@ class RuleSystem extends Observable {
       constructor (rs, r) {
         super(r)
         this.rs = rs
+      }
+      on_baseGenerated(base){
+        
       }
     }
 
@@ -151,7 +156,75 @@ class RuleSystem extends Observable {
         return null
       }, null)
     }
+    generateAutoInclusion(n){
+      console.log("ici");
+      let lhs=this.rules[n].lhs;
+      axios.post('http://127.0.0.1:5000/autoInclusion',JSON.parse(lhs.toJSON( (data)=> { return data}, (data)=> { return data } )))
+        .then((res) => {
+          let autoInclusion= this.parseResponse(res.data);
+          this.rules[n].generateBase(autoInclusion);
+        })
+        .catch((error) => {
+            console.error(error);
+        });
 
+    }
+
+    parseResponse(json){ 
+      let c;
+      let  nodeMap={}
+      let edgeMap={}
+      let autoInclusions=[]
+      let i=0
+      let n1;
+      let  n2 ; 
+      let  src; 
+      let dst; 
+      let inJ=false;
+      while(i<json.length && i<20){
+        c=json.charAt(i);
+        if(c=='{') {    
+            inJ=true;
+            while(c != '}' && i<json.length){
+              i++;
+              c=json.charAt(i);
+
+              if(this.isInteger(c)){
+                n1= parseInt(c)  ;
+                i+=3;
+                c=json.charAt(i);
+                n2= parseInt(c);
+                nodeMap[n1]=n2;
+                console.log("n1: "+n1+" n2:"+n2);
+                console.log(nodeMap[n1]);
+              }
+              if(c=='('){
+                i++ ; 
+                c=json.charAt(i);
+                src=parseInt(c);
+                i+=3;
+                c=json.charAt(i);
+                dst=parseInt(c);
+                i+=3;
+                edgeMap[src]=dst             
+              }
+              
+            }
+        }
+        if(inJ){
+          autoInclusions.push({nodeMap,edgeMap})
+          nodeMap={};
+          edgeMap={};
+          inJ=false;
+        }
+        i++;
+        c=json.charAt(i)     
+      }
+    return autoInclusions;
+    }
+    isInteger(c){
+      return c<= '9' && c>='0'
+    }
     toJSON(){
       return JSON.parse(this.graph.toJSON( ((data)=> {return data.rule.toJSON()}) , ((data)=> {return data.inc.toJSON()}) )); 
     }
