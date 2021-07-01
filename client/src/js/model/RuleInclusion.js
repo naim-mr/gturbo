@@ -66,7 +66,6 @@ class RuleInclusion extends Observable {
         }
 
         on_unsetNode(idx,idy) {
-            console.log("ici "+idx+" "+idy);
             //revenir ici attention 
            // this.rinc.notify("on_undesetNodeR", idx,idy);
         }
@@ -104,7 +103,11 @@ class RuleInclusion extends Observable {
         new RuleInclusion.RGraphIObs(this, this.rgraphI);
     }
 
-
+    toJSON(){
+        return {
+    
+        }
+    }
 }
 
 module.exports={ RuleInclusion,RuleInclusionObserver}

@@ -95,8 +95,8 @@ class Rule extends Observable {
 
     toJSON () {
       return JSON.stringify({
-        lhs: JSON.parse(this.lhs.toJSON()),
-        rhs: JSON.parse(this.rhs.toJSON())
+        lhs: JSON.parse(this.lhs.toJSON( (data)=> { return  data}, (data)=> { return  data}     )),
+        rhs: JSON.parse(this.rhs.toJSON(  (data)=> { return  data}, (data)=> { return  data}    ))
       })
     }
 

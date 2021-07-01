@@ -1,9 +1,8 @@
-var Observer=  require('../../util/Observer.js')
-var Observable=  require('../../util/Observable.js')
-var { Graph, GraphObserver } = require('../../model/Graph');
+var Observer=  require('../util/Observer.js')
+var Observable=  require('../util/Observable.js')
+var { Graph, GraphObserver } = require('../model/Graph');
 var { GraphComponent, GraphComponentObserver } = require('./GraphComponent')
 var cytoscape =require('cytoscape');
-
 var options=require("./defaultcxt.js");
 
 class GlobalViewObserver extends Observer{
@@ -21,7 +20,7 @@ class GlobalView extends Observable {
         super(g)
         this.gv= gv
       }
-
+   
       on_addNode (idn) {
         let ele=this.gv.cy.add({
           group: 'nodes',
@@ -32,14 +31,11 @@ class GlobalView extends Observable {
       }
 
       on_updateNode (idn, data) {
-
         const node = this.gv.cy.getElementById(idn)
         node.position(data)
       }
 
       on_addEdge (ide, src, dest) {
-        console.log("addedggee "+src+' - '+dest);
-        console.log(this.gv.cy);
         let isInCyto = true
         if (this.gv.edgesInCy[ide] == undefined) isInCyto = false
         if (!isInCyto) {
@@ -58,13 +54,19 @@ class GlobalView extends Observable {
       }
     }
 
+
+    // precond g is a Graph and idComp a string ( id of a html div)
     constructor (g, idComp) {
       super()
+      
+      this.counter=0;  //  counter ==1 => goto rules or inc edition
+      this.mouseover = false // to control document.listener 
+      this.lastClick = {};    
+      this.edgesInGraph={}; // map to convert id from cytoscape to our model
+      this.edgesInCy={};  // map to convert id from our model to id in cytoscape
+      this.ctrlKey=false;
       this.updateGraph(g)
-      this.lastClick = {};
-      this.edgesInGraph={};
-      this.edgesInCy={};
-      this.cy = this.cy = cytoscape({
+      this.cy = cytoscape({
         zoomEnabled: false,
         container: document.getElementById(idComp),
         layout: {
@@ -76,7 +78,7 @@ class GlobalView extends Observable {
           selector: 'node',
           style: {
             shape:'rectangle',
-
+    
           }
         },
         {
@@ -142,22 +144,77 @@ class GlobalView extends Observable {
             opacity: 0
           }
         }
-
+    
         ],
         elements: {
           nodes: [],
           edges: []
         }
-      })
-
-      this.counter=0;
-      this.mouseover = false
+      })     
       this.cy.zoomingEnabled(false);
+      
       this.eh=this.cy.edgehandles(options);
       this.eh.enable();
       this.eh.enableDrawMode();
     
-      this.ctrlKey = false
+      
+      this.addListener(idComp);
+      
+    }
+  
+    deleteEdges () {
+      this.edgesInCy = {}
+      this.edgesInGraph = {}
+    }
+
+    destroyObserver(){
+      if (this.graphObs != undefined) this.graph.unregister(this.graphObs)
+    }
+    // precond graph in Graph
+    updateGraph (graph) {
+      this.destroyObserver();
+      this.graph = graph
+      this.graphObs = new GlobalView.GraphObs(this, graph)
+    }
+
+
+    /* precond:
+        edgeinCy map id from our model to cytoscape 
+        edgeInGraph map id from cytoscape to our model
+    */
+    updateEdgesMap (edgesInCy, edgesInGraph) {
+      this.edgesInCy = edgesInCy
+      this.edgesInGraph = edgesInGraph
+    }
+    reloadCy () {
+      for (const node in this.graph.nodes) {
+        const id = this.cy.add({
+          group: 'nodes',
+          data: {
+            id: node
+
+          },
+          position: { x: this.graph.nodes[node].data.x, y: this.graph.nodes[node].data.y }
+        })
+      }
+      for (const edge in this.graph.edges) {
+        const id = this.cy.add({
+          group: 'edges',
+          data: {
+            id: this.edgesInCy[edge],
+            source: this.graph.edges[edge].src,
+            target: this.graph.edges[edge].dst
+          }
+        })
+      }
+    }
+
+    removeEles () {
+      this.cy.remove(this.cy.elements(''))
+    }
+
+
+    addListener(idComp){
       this.cy.on('mouseover', 'node', (event) => {
         const ele = event.target
         ele.addClass('highlight2')
@@ -255,24 +312,6 @@ class GlobalView extends Observable {
         }
       })
     }
-
-    deleteEdges () {
-      this.edgesInCy = {}
-      this.edgesInGraph = {}
-    }
-
-    updateGraph (graph) {
-      if (this.graphObs != undefined) this.graph.unregister(this.graphObs)
-      this.graph = graph
-      this.graphObs = new GlobalView.GraphObs(this, graph)
-      console.log(this.graphObs)
-    }
-
-    updateEdgesMap (edgesInCy, edgesInGraph) {
-      this.edgesInCy = edgesInCy
-      this.edgesInGraph = edgesInGraph
-    }
-
     onDelete () {
       for (let i = 0; i < this.cy.edges('').length; i++) {
         if (this.cy.edges('')[i].selected()) {
@@ -285,51 +324,23 @@ class GlobalView extends Observable {
         }
       }
     }
-    onClick (event) {
-      this.lastClick = event.renderedPosition    
-      console.log("onclik")
-      if (this.ctrlKey) {
-        const id = this.graph.addNode()
-        this.graph.updateNode(id, (data) => {
-          data.x = (event.position.x)
-          data.y = (event.position.y)
 
-          return data
-        })
+  onClick (event) {
+    this.lastClick = event.renderedPosition    
+    if (this.ctrlKey) {
+      const id = this.graph.addNode()
+      this.graph.updateNode(id, (data) => {
+        data.x = (event.position.x)
+        data.y = (event.position.y)
 
-        this.ctrlKey = false
-      }
+        return data
+      })
+
+      this.ctrlKey = false
     }
+  }
 
-    refresh () {
-      for (const node in this.graph.nodes) {
-        const id = this.cy.add({
-          group: 'nodes',
-          data: {
-            id: node
 
-          },
-          position: { x: this.graph.nodes[node].data.x, y: this.graph.nodes[node].data.y }
-        })
-      }
-
-      for (const edge in this.graph.edges) {
-        const id = this.cy.add({
-
-          group: 'edges',
-          data: {
-            id: this.edgesInCy[edge],
-            source: this.graph.edges[edge].src,
-            target: this.graph.edges[edge].dst
-          }
-
-        })
-      }
-    }
-
-    removeEles () {
-      this.cy.remove(this.cy.elements(''))
-    }
 }
 
 module.exports = { GlobalView, GlobalViewObserver }

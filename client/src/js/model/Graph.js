@@ -132,6 +132,8 @@ class Graph extends Observable {
     this.notify('on_updateEdge', id, this.edges[id].data)
   }
 
+
+
   toJSON (toJSONNodeData, toJSONEdgeData) {
     return JSON.stringify({
       nodeCpt: this.nodeCpt,
@@ -182,58 +184,3 @@ class Graph extends Observable {
 }
 
 module.exports = { Graph, GraphObserver }
-
-/*     //precond
-    //*
-    resetVisited(){
-        for(let i=0;i<this.nodes.length;i++){
-            this.nodes[i].visited=false;
-
-        }
-        for(let i=0;i<this.edges.length;i++){
-            this.edges[i].visited=false;
-        }
-    }
-    //precond
-    //
-    pasteNode(id,px,py,translation){
-        let cid;
-        if(!this.nodes[id].visited){
-            cid = this.addNode(px+translation['x'],py+translation['y']);
-            this.nodes[id].visited=true;
-            this.nodes[cid].visited=true;
-        }
-        for (const eid of [].concat(this.nodes[id].outgoing)) {
-            this.copyEdge(eid,translation,'out',cid);
-        }
-        for(const eid of [].concat(this.nodes[id].incoming)){
-           this.copyEdge(eid,translation,'in',cid);
-        }
-
-    }
-    // precond
-    //
-    pasteEdge(eid,translation,sod,cid){
-
-        if(!this.edges[eid].visited){
-            let src= this.edges[eid].src;
-            let dest= this.edges[eid].dst;
-            if(sod==="out" && cid!= undefined) src= cid;
-            else if(sod==="in" && cid!= undefined)dest= cid;
-            let newSrc= src;
-            let newDest=dest;
-            if(!this.nodes[src].visited){
-                newSrc = this.addNode(this.nodes[src].x+translation['x'],this.nodes[src].y+translation['y']);
-                this.nodes[src].visited=true;
-                this.nodes[newSrc].visited=true;
-            }
-            if(!this.nodes[dest].visited){
-                newDest = this.addNode(this.nodes[dest].x+translation['x'],this.nodes[dest].y+translation['y']);
-                this.nodes[dest].visited=true;
-                this.nodes[newDest].visited=true;
-            }
-            this.addEdge(newSrc,newDest);
-            this.edges[eid].visited=true;
-        }
-    }
- */

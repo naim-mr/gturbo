@@ -1,75 +1,52 @@
 <template>
-    <div id="rowContent">
-    <div id="lhs" class="cy"></div>
-    <div id="rhs" class="cy"></div>
-
-    </div>
-    <button v-on:click="back" >back </button>
+    <div class="colContent">
+        <div class="rowContent">
+           <div id="lhs" class="cy"></div>
+           <div id="rhs" class="cy"></div>
+         </div>
+         <div  class="rowButton">
+            <button v-on:click="back" >back </button>
+            <button id="autoInc" >auto inclusion </button>
+         </div>
+    </div>    
                
    
 </template>
 <style>
-    #rowContent{
+    .rowContent{
         width:100%;
         height:100%;
         display:flex;
         flex-direction: row;
     }
-    .footer{
-        display:flex;
-        flex-direction: row;
-    }
-    .footer #rule-select{
-        margin:auto;
-        width:10%;
-        height: 20%;
     
-    }
-    #content {
+    .colContent{
+        
         display:flex;
-        flex-direction: column;
+        flex-direction:column;
         width:100%;
         height:100%;
-    }
-    #boy{
-        height: 100%;
-        width:100%;
-        background:#699fc8
-    }
-    #rarrow {
-        width: 10%;
-        margin-left:80%;
-    }
-    #larrow {
-        width: 10%;
-        transform: rotate(180deg)
-    }
-    #boy img {
-        cursor:pointer;
     }
     .cy{
         margin:auto;
         border-radius: 6px 6px 6px 6px;
         height: 80%;
-        width: 80%;
+        width: 45%;
         background:#e5e7e6;
+        border:1px solid black;
         box-shadow: 3px 3px 3px 3px #798a83;
                 
     }
-    #content button {
-        
+    .colContent .rowButton button {     
         background:#e5e7e6;
-        border-color:2px solid transparent;
         box-sizing: border-box;
-        margin-bottom: 5%;
-        margin-left:auto;
-        margin-right:auto;
-        width:25%;
         border-radius: 6px 6px 6px 6px;
+        width:20%;
         box-shadow: 1px 1px 1px 1px #798a83;
-
+        
     }
-    #content button:hover{
+    
+    .colContent button:hover{
         border-color:rgb(51, 51, 51);
     }
 </style>

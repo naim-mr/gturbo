@@ -1,6 +1,6 @@
 var { GraphInclusionComponent } = require('./GraphInclusionComponent')
-var { Rule, RuleObserver } = require('../../model/Rule.js')
-var { RuleInclusion, RuleInclusionObserver } = require('../../model/RuleInclusion.js')
+var { Rule, RuleObserver } = require('../model/Rule.js')
+var { RuleInclusion, RuleInclusionObserver } = require('../model/RuleInclusion.js')
 
 class RuleInclusionComponent {
     static IncObs = class extends RuleInclusionObserver {
@@ -13,8 +13,7 @@ class RuleInclusionComponent {
       on_setNodeL (idx, idy) {}
 
       on_setEdgeL (idx, idy) {}
-      
-
+    
       on_unsetNodeL (idx, idy) {}
 
       on_unsetEdgeL (idx, idy) {}
@@ -33,40 +32,47 @@ class RuleInclusionComponent {
       this.lgcI = new GraphInclusionComponent(inc.lgraphI, ['lhs2', 'lhs1'])
       this.rgcI = new GraphInclusionComponent(inc.rgraphI, ['rhs2', 'rhs1'])
       this.inc = inc
-      this.create=false;
       this.incObs = new RuleInclusionComponent.IncObs(this, inc)
       this.cur = 0
       this.cpt = 0
+      this.create=true;;
     }
 
-    deleteInclusion () {
+    destroyObserver(){
+      if(this.inc!= undefined)  this.inc.unregister(this.incObs);
+    }
 
-    };
-
-    updateEdgesMap (sub, over, edgesInCy, edgesInGraph) {
-      this.lgcI.updateEdgesMap(edgesInCy[over].left, edgesInGraph[over].left, true)
-      this.lgcI.updateEdgesMap(edgesInCy[sub].left, edgesInGraph[sub].left, false)
-      this.rgcI.updateEdgesMap(edgesInCy[over].left, edgesInGraph[over].left, true)
-      this.rgcI.updateEdgesMap(edgesInCy[sub].left, edgesInGraph[sub].left, false)
+    updateEdgesMap (sub, over, edgesInCyList, edgesInGraphList) {
+      this.lgcI.updateEdgesMap(edgesInCyList[over].left, edgesInGraphList[over].left, true)
+      this.lgcI.updateEdgesMap(edgesInCyList[sub].left, edgesInGraphList[sub].left, false)
+      this.rgcI.updateEdgesMap(edgesInCyList[over].left, edgesInGraphList[over].left, true)
+      this.rgcI.updateEdgesMap(edgesInCyList[sub].left, edgesInGraphList[sub].left, false)
       this.create=false;
     }
 
     update (inc) {
-      if(this.inc != undefined)this.inc.unregister(this.incObs)
+      this.destroyObserver();
       this.inc = inc
       this.lgcI.updateComponent(inc.lgraphI)
       this.rgcI.updateComponent(inc.rgraphI)
-      this.create=false;
+      this.create=true  
       this.incObs = new RuleInclusionComponent.IncObs(this, inc)
+
+
     }
 
-    coloredInclusion () {
+
+    printNewInclusion () {
       this.create=true;
-      this.lgcI.coloredInclusion()
-      this.rgcI.coloredInclusion()
+      this.lgcI.removeEles();
+      this.rgcI.removeEles();
+      this.lgcI.printNewInclusion()
+      this.rgcI.printNewInclusion()
     }
 
     loadInclusion () {
+      this.lgcI.removeEles();
+      this.rgcI.removeEles();
       this.lgcI.loadInclusion()
       this.rgcI.loadInclusion()
     }

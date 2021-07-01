@@ -1,7 +1,10 @@
 <template>
-  <div class="comp" v-show="glob"> <global  @initRsc="initRsc" /></div>
-  <div class="comp" v-show="rule" ><rules  @rulesMounted="rulesMounted" @back="back" /></div>
-  <div class="comp" v-show="inc" ><inclusion  @backInc="backInc"/></div>
+  <div id="app">
+    <div class="comp" v-show="glob"> <global @save="save" @initRsc="initRsc" /></div>
+    <div class="comp" v-show="rule" ><rules  @rulesMounted="rulesMounted" @back="back" /></div>
+    <div class="comp" v-show="inc" ><inclusion  @backInc="backInc"/></div>
+    
+   </div>
 </template>
 <style>
 html,body{
@@ -13,16 +16,19 @@ html,body{
     height: 100%;
     width: 100%;
 }
+#saveB {
+    border: 
+}
  #app{
      display:flex;
-
-     flex-direction: row;
+     background-color: #e8cebf;
+     flex-direction: column;
      height:100%;
      width: 100%;
  }
 </style>
 <script>
-var {RuleSystemComponent,RuleSystemComponentObserver} =require('./js/vc/component/RuleSystemComponent');
+var {RuleSystemComponent,RuleSystemComponentObserver} =require('./js/vc/RuleSystemComponent');
 var Observer = require('./js/util/Observer.js')
 var Observable = require('./js/util/Observable.js')
 var {RuleSystem,RuleSystemObserver} =require('./js/model/RuleSystem');
@@ -47,6 +53,7 @@ export default {
                     this.app=app;
                 }
                 on_editRule(id){
+                
                 this.app.glob=false;
                 this.app.rule=true;
                 this.app.inc=false;
@@ -68,9 +75,13 @@ export default {
                 on_deleteInclusion(){
 
                 }
-                on_save(){
-
-                }
+                on_save(rs){
+                    
+                    axios.post('http://127.0.0.1:5000/json', rs)
+                           .then((res) => {
+                               console.log(res.data);
+                            });
+                }             
           },
 
           rsc: null,
@@ -93,10 +104,25 @@ export default {
          }
         
     },
-    back(){
+    save(){
+       this.rsc.save();
+    },
+    
+    back(){ 
           this.rule=false;
           this.glob=true;
+          this.inc=false;
+          let rules= this.rsc.rs.rules;
+          
+          axios.post('http://127.0.0.1:5000/patternmatching',rules)
+            .then((res) => {
+                console.log(res);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     },
+    
     backInc(){
           this.inc=false;
           this.rule=false;
@@ -112,10 +138,7 @@ export default {
              console.error(error);
          });
     },
-   },
-   created(){
-       this.getMessage();
-   }
+  }
 }
 
 </script>

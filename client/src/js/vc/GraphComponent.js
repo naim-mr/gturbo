@@ -1,13 +1,10 @@
 
-var Observer = require('../../util/Observer.js')
-var Observable = require('../../util/Observable.js')
-var { Graph, GraphObserver } = require('../../model/Graph');
+var Observer = require('../util/Observer.js')
+var Observable = require('../util/Observable.js')
+var { Graph, GraphObserver } = require('../model/Graph');
 var cytoscape =require('cytoscape');
 var edgehandles=require('cytoscape-edgehandles');
-var cxtmenu =require('cytoscape-cxtmenu');
 var options= require("./defaultcxt.js");
-
-cytoscape.use( cxtmenu );
 cytoscape.use( edgehandles );
 
 class GraphComponentObserver extends Observer {
@@ -37,7 +34,6 @@ class GraphComponent extends Observable {
       }
 
       on_updateNode (idn, data) {
-
         const node = this.gc.cy.getElementById(idn)
         node.position(data)
       }
@@ -63,14 +59,17 @@ class GraphComponent extends Observable {
     }
   }
 
-    // typeof(g): Graph
-    // s'auto gère sur les changements
+    //g in Graph
     constructor (g, idComp) {
       super()
       this.updateGraph(g)
+
       this.edgesInCy = {}
       this.edgesInGraph = {}
       this.lastClick = {};
+      this.mouseover = false;
+      this.ctrlKey = false;
+      
       this.cy = this.cy = cytoscape({
         zoomEnabled: false,
         container: document.getElementById(idComp),
@@ -154,13 +153,61 @@ class GraphComponent extends Observable {
           nodes: [],
           edges: []
         }
-      })
+      });
 
-      this.mouseover = false
       this.cy.zoomingEnabled(false);
       this.eh = this.cy.edgehandles(options);
-      this.eh.enableDrawMode()
-      this.ctrlKey = false
+      this.eh.enableDrawMode();
+      this.addListener(idComp);
+      
+    }
+
+    deleteEdges () {
+      this.edgesInCy = {}
+      this.edgesInGraph = {}
+    }
+    destroyObserver(){}
+    updateGraph (graph) {
+      
+     
+      this.graph = graph;
+      this.graphObs = new GraphComponent.GraphObs(this, graph);
+    }
+
+    updateEdgesMap (edgesInCy, edgesInGraph) {
+      this.edgesInCy = edgesInCy
+      this.edgesInGraph = edgesInGraph
+    }
+
+    onDelete () {
+      for (let i = 0; i < this.cy.edges('').length; i++) {
+        if (this.cy.edges('')[i].selected()) {
+          this.graph.removeEdge(this.edgesInGraph[this.cy.edges('')[i].id()])
+        }
+      }
+      for (let i = 0; i < this.cy.nodes('').length; i++) {
+        if (this.cy.nodes('')[i].selected()) {
+          this.graph.removeNode(this.cy.nodes('')[i].id())
+        }
+      }
+    }
+
+
+    onDelete () {
+      for (let i = 0; i < this.cy.edges('').length; i++) {
+        if (this.cy.edges('')[i].selected()) {
+          this.graph.removeEdge(this.edgesInGraph[this.cy.edges('')[i].id()])
+        }
+      }
+      for (let i = 0; i < this.cy.nodes('').length; i++) {
+        if (this.cy.nodes('')[i].selected()) {
+          this.graph.removeNode(this.cy.nodes('')[i].id())
+        }
+      }
+    }
+
+
+    addListener(idComp){
       this.cy.on('mouseover', 'node', (event) => {
         const ele = event.target
         ele.addClass('highlight2')
@@ -240,51 +287,6 @@ class GraphComponent extends Observable {
         })
       })
     }
-
-    deleteEdges () {
-      this.edgesInCy = {}
-      this.edgesInGraph = {}
-    }
-
-    updateGraph (graph) {
-      
-      if (this.graphObs != undefined) this.graph.unregister(this.graphObs)
-      this.graph = graph;
-      this.graphObs = new GraphComponent.GraphObs(this, graph);
-    }
-
-    updateEdgesMap (edgesInCy, edgesInGraph) {
-      this.edgesInCy = edgesInCy
-      this.edgesInGraph = edgesInGraph
-    }
-
-    onDelete () {
-      for (let i = 0; i < this.cy.edges('').length; i++) {
-        if (this.cy.edges('')[i].selected()) {
-          this.graph.removeEdge(this.edgesInGraph[this.cy.edges('')[i].id()])
-        }
-      }
-      for (let i = 0; i < this.cy.nodes('').length; i++) {
-        if (this.cy.nodes('')[i].selected()) {
-          this.graph.removeNode(this.cy.nodes('')[i].id())
-        }
-      }
-    }
-
-    /*
-    onPaste() {
-        if (this.selectedEles.length > 1) {
-            let center = this.selectedEles[0].position();
-            let translation = { x: this.lastClick['x'] - center['x'], y: this.lastClick['y'] - center['y'] }
-            for (let i = 0; i < this.selectedEles.length; i++) {
-                let element = this.selectedEles[i];
-                if (element.isNode()) this.graph.pasteNode(element.id(), element.position()['x'], element.position()['y'], translation);
-            }
-            this.graph.resetVisited();
-            this.selectedEles = {};
-
-        }
-    } */
     onClick (event) {
       this.lastClick = event.renderedPosition
       if (this.ctrlKey) {
@@ -299,16 +301,7 @@ class GraphComponent extends Observable {
         this.ctrlKey = false
       }
     }
-
-    save (n, handside) {
-
-    }
-
-    savefactor (str, n, handside) {
-
-    }
-
-    refresh () {
+    reloadCy () {
       this.removeEles();
       for (const node in this.graph.nodes) {
         const id = this.cy.add({
@@ -339,12 +332,7 @@ class GraphComponent extends Observable {
     removeEles () {
       this.cy.remove(this.cy.elements(''))
     }
-    colorizeNode(id,rgb){
-      this.cy.getElementById(id).style({'background-color':rgb});
-    }
-    colorizeEdge(id,rgb){
-      this.cy.getElementById(id).style({'line-color':rgb,'target-arrow-color':rgb});
-    }
+ 
 }
 
 module.exports = { GraphComponent, GraphComponentObserver }

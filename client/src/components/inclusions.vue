@@ -1,24 +1,7 @@
 <template>
     
             <cyInc />
-            <!--<div v-show="!fix" class="footer">
-              
-                <select  name="topruleList" class="rule-select">
-                    <option value="">Choisir une la règle du haut </option>
-                    <option  v-for="ele in this.$store.state.rulesId" :key="ele" v-bind:value="ele" v-on:click="setOver(ele)">
-                                 {{ ele }}
-                    </option>
-                </select>
-                <select  name="botruleList" class="rule-select">
-                    <option value="">Choisir une la règle du bas </option>
-                    <option  v-for="ele in this.$store.state.rulesId" :key="ele" v-bind:value="ele" v-on:click="setSub(ele)">
-                                 {{ ele }}
-                    </option>
-                </select>
-                <button  @click="fixed" id="valider">Valider</button>
-              
-            </div> !-->
-               
+           
     
     
 </template>

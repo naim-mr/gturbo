@@ -5,7 +5,6 @@ var Observable = require('../util/Observable.js')
 var { Graph, GraphObserver } = require('./Graph.js')
 var { Rule, RuleObserver } = require('./Rule.js')
 var { RuleInclusion, RuleInclusionObserver } = require('./RuleInclusion.js')
-
 class RuleSystemObserver extends Observer {
   constructor (rs) {
     super(rs)
@@ -100,11 +99,6 @@ class RuleSystem extends Observable {
       new RuleSystem.RuleObs(this, rule)
       return rule
     }
-
-    deleteF (x, fn) {
-
-    }
-
     deleteRule (r) {
       r.unregisterAll()
       let idr
@@ -124,14 +118,14 @@ class RuleSystem extends Observable {
       return inc
     }
     autoAddInclusion(rule){
-        var id; 
+        /*var id; 
         for(const idr in this.rules){
           if(this.rules[idr]==rule)id=idr;
         }
         for(const idr in this.rules){
           this.createInclusion(idr,id)
           if(idr !=id)this.createInclusion(id,idr)
-        }
+        }*/
     }
 
     // Je passe par la pour bien notifier et donc faire une suppression en cascad
@@ -142,7 +136,6 @@ class RuleSystem extends Observable {
     }
 
     deleteInclusionById (id) {
-      console.log(this.graph)
       this.notify('on_deleteInclusion', id)
       delete this.inclusions[id]
     }
@@ -157,6 +150,10 @@ class RuleSystem extends Observable {
         }
         return null
       }, null)
+    }
+
+    toJSON(){
+      return JSON.parse(this.graph.toJSON( ((data)=> {return data.rule.toJSON()}) , ((data)=> {return data.inc.toJSON()}) )); 
     }
 }
 

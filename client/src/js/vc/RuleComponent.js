@@ -1,5 +1,5 @@
 
-var {Rule,RuleObserver}  = require('../../model/Rule.js')
+var {Rule,RuleObserver}  = require('../model/Rule.js')
 var {GraphComponentObserver} = require('./GraphComponent');
 
 
@@ -20,7 +20,10 @@ class RuleComponent {
             this.rc.save();
         }
     }
-
+    /* precond:
+    lgc and rgc in GraphComponent
+    rule in Rule
+    */
     constructor(lgc, rgc, rule) {
         this.ruleObserver = new RuleComponent.RuleObs(this, rule);
         this.rule = rule;
@@ -39,12 +42,12 @@ class RuleComponent {
        this.cur=0;
        
     }
-    update(n, rule, edgesInGraph, edgesInCy) {
+    update(n, rule, edgesInGraphList, edgesInCyList) {
         this.cur = n;
         this.updateRule(rule)
-        this.lgc.updateEdgesMap(edgesInCy[n]['left'], edgesInGraph[n]['left']);
-        this.rgc.updateEdgesMap(edgesInCy[n]['right'], edgesInGraph[n]['right']);
-        this.refresh();
+        this.lgc.updateEdgesMap(edgesInCyList[n]['left'], edgesInGraphList[n]['left']);
+        this.rgc.updateEdgesMap(edgesInCyList[n]['right'], edgesInGraphList[n]['right']);
+        this.reloadCy();
     }
 
 
@@ -57,15 +60,13 @@ class RuleComponent {
         this.ruleObserver = new RuleComponent.RuleObs(this, rule);
     }
     save() {
-        
-        
         this.lgc.save(this.cur, "lhs");
         this.rgc.save(this.cur, "rhs");
     }
-    refresh() {
+    reloadCy() {
 
-        this.lgc.refresh();
-        this.rgc.refresh();
+        this.lgc.reloadCy();
+        this.rgc.reloadCy();
     }
     deleteEdges(){
         this.lgc.deleteEdges();

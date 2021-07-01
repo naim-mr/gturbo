@@ -1,5 +1,5 @@
 <template>
-     <div id="content">
+     <div class="colContent">
             <div  class="rowContent">
                 <div id="lhs1" class="cyhalf">
 
@@ -38,31 +38,34 @@
         height: 30%;
         transform: rotate(180deg)
 }
-#content {
+.colContent {
 
         display:flex;
         flex-direction: column;
         width:100%;
         height:100%;
 }
-   .cyhalf{
+.cyhalf{
+        
         margin-left:auto;
         margin-right: auto;
-        border:2px solid black;
+        border:1    px solid black;
         border-radius: 6px 6px 6px 6px;
-        width: 40%;
+        width: 45%;
+        
         background:#e5e7e6;
         box-shadow: 3px 3px 3px 3px #798a83;
-                
-    }
-    #content .rowContent #addInclusion {
+}
+.colContent button {     
         background:#e5e7e6;
-        border-color:2px solid transparent;
         box-sizing: border-box;
         border-radius: 6px 6px 6px 6px;
+        width:20%;
         box-shadow: 1px 1px 1px 1px #798a83;
-        height: 15%;
-    }
+        
+}
+    
+
 </style>
 <script>
 import arrow from "../assets/imgs/arrow.png"
