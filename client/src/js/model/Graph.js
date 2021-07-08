@@ -64,7 +64,7 @@ class Graph extends Observable {
       outgoing: [],
       data: {}
     }
-    
+
     this.notify('on_addNode', id)
     return id
   }
@@ -72,6 +72,7 @@ class Graph extends Observable {
   // pre-cond:
   //   src, dst in this.nodes
   addEdge (src, dst) {
+    console.log('add edge')
     const id = this.edgeCpt
     this.edgeCpt++
     this.edges[id] = {
@@ -105,8 +106,6 @@ class Graph extends Observable {
 
     removeElement(this.nodes[this.edges[id].src].outgoing, id)
     removeElement(this.nodes[this.edges[id].dst].incoming, id)
-    console.log('dans remove edge' + id)
-    console.log(this.nodes[this.edges[id].src])
     delete this.edges[id]
   }
 
@@ -131,8 +130,6 @@ class Graph extends Observable {
     this.edges[id].data = update(this.edges[id].data)
     this.notify('on_updateEdge', id, this.edges[id].data)
   }
-
-
 
   toJSON (toJSONNodeData, toJSONEdgeData) {
     return JSON.stringify({

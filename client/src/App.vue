@@ -1,9 +1,9 @@
 <template>
-  <div id="app">
+   <div id="app">
     <div class="comp" v-show="glob"> <global @save="save" @initRsc="initRsc" /></div>
     <div class="comp" v-show="rule" ><rules @autoInclusion="autoInclusion"  @rulesMounted="rulesMounted" @back="back" /></div>
-    <div class="comp" v-show="inc" ><inclusion  @backInc="backInc"/></div>
-    
+    <div class="comp" v-show="inc " ><inclusion  @backInc="backInc"/></div>
+    <div class="comp" v-show="autoInc " ><rulesAuto @initAutoRule="initAutoRule" @confirm="confirmAuto" @nextRAuto="nextRAuto" @nextLAuto="nextLAuto" @prevLAuto="prevLAuto" @prevRAuto="prevRAuto" @back="back"/></div>    
    </div>
 </template>
 <style>
@@ -24,7 +24,7 @@ html,body{
      background-color: #e8cebf;
      flex-direction: column;
      height:100%;
-     width: 100%;
+     width: 100%
  }
 </style>
 <script>
@@ -34,13 +34,17 @@ var Observable = require('./js/util/Observable.js')
 var {RuleSystem,RuleSystemObserver} =require('./js/model/RuleSystem');
 
 import global from "./views/GlobalView.vue"
+import rulesAuto from "./views/RulesAuto.vue"
 import rules from "./views/Rules.vue"
 import inclusion from "./views/Inclusions.vue"
+import nav from "./components/navbar.vue"
 import axios from 'axios'
 export default {
   components: {
+      nav,
       global,
       rules,
+      rulesAuto,
       inclusion
   },
   name: 'App',
@@ -62,6 +66,7 @@ export default {
                     this.app.glob=false;
                     this.app.rule=false;
                     this.app.inc=true;
+                    this.app.autoInc=false;
                 }
                 on_addRule(){
                     
@@ -94,6 +99,7 @@ export default {
           glob:true,
           rule:false,
           inc:false,
+          autoInc:false
       }
   },
   methods:{
@@ -104,34 +110,69 @@ export default {
          }
         
     },
+    
     save(){
        this.rsc.save();
     },
     autoInclusion(){
-        this.rsc.generateAutoInclusion();
+        this.rsc.generateAutoInclusion().then( ()=> {
+        this.inc=false;
+        this.rule=false
+        this.glob=false;
+        this.autoInc=true;
+        this.$store.state.baseLen=this.rsc.getBaseLeft();
+        this.$store.state.cur=0;
+        
+        });
+
+        
+        
+        
     },
     back(){ 
           this.rule=false;
           this.glob=true;
           this.inc=false;
+          this.autoInc=false;
+          this.rsc.updateInclusion();
           
           
     },
     backInc(){
-          this.inc=false;
+    
           this.rule=false;
           this.glob=true;
+          this.inc=false;
+          this.autoInc=false;
+          this.rsc.stylized(this.rsc.ric.cur);
+                    
+          
+    },  
+    
+    prevLAuto(){
+        this.rsc.prevLAuto();
+        this.$store.state.cur=this.rsc.aic.curL;
     },
-    getMessage() {
-      
-      axios.get(this.path)
-        .then((res) => {
-            console.log(res);
-        })
-        .catch((error) => {
-             console.error(error);
-         });
+    prevRAuto(){
+        this.rsc.prevRAuto();
     },
+    nextLAuto(){
+        this.rsc.nextLAuto();
+        this.$store.state.cur=this.rsc.aic.curL;
+    },
+    nextRAuto(){
+        this.rsc.nextRAuto();
+    },
+    confirmAuto(){
+       if(this.rsc.confirmAuto()) {
+          this.rule=false;
+          this.glob=true;
+          this.inc=false;
+          this.autoInc=false;
+          this.rsc.updateInclusion();
+       }
+    },
+    
   }
 }
 

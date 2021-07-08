@@ -1,16 +1,16 @@
 <template>
      <div class="colContent">
             <div  class="rowContent">
-                <div id="lhs1" class="cyhalf">
+                <div id="a_lhs1" class="cyhalf">
 
                 </div>
-                <div id="rhs1" class="cyhalf">
+                <div id="a_rhs1" class="cyhalf">
                 </div>
             </div>
             <div  class="rowContent">
-                <div id="lhs2" class="cyhalf">
+                <div id="a_lhs2" class="cyhalf">
                 </div>
-                <div id="rhs2" class="cyhalf">
+                <div id="a_rhs2" class="cyhalf">
                 </div>
 
             </div>
@@ -46,15 +46,14 @@
         height:100%;
 }
 .cyhalf{
-
-        margin-left:auto;
-        margin-right: auto;
-        border:1    px solid black;
+        margin-left: 1%;
+        margin-right: 1%;
+        border:1px solid black;
         border-radius: 6px 6px 6px 6px;
         width: 45%;
-
+        height:98%;
         background:#e5e7e6;
-        box-shadow: 3px 3px 3px 3px #798a83;
+        box-shadow: 1px 1px 1px 1px #798a83;
 }
 .colContent button {
         background:#e5e7e6;

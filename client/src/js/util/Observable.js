@@ -1,4 +1,4 @@
-const { ObservableSeq } = require("./ObservableSeq");
+const { ObservableSeq } = require('./ObservableSeq')
 
 class Observable {
   static seq = new ObservableSeq();
@@ -12,14 +12,12 @@ class Observable {
 
   notify (op, ...args) {
     this.observers.forEach(
-      (obs)=>
-      {
-        Observable.seq.pushCallBack({obs:obs,op:op,args:args})
-      });
-    this.observers.forEach((obs)=> Observable.seq.notify());
+      (obs) => {
+        Observable.seq.pushCallBack({ obs: obs, op: op, args: args })
+      })
+    this.observers.forEach((obs) => Observable.seq.notify())
+  }
 
-}
-  
   unregister (obs) {
     var index = this.observers.indexOf(obs)
     if (index > -1) {

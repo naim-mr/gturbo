@@ -1,5 +1,6 @@
 from flask import Flask, jsonify,request
 from flask.helpers import make_response
+import json 
 from flask_cors import CORS 
 import libgt.data.Graph as GraphModule
 from libgt.data.Sheaf import Parametrisation
@@ -16,6 +17,61 @@ app.config.from_object(__name__)
 
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
+
+class JSON_encoder:
+    
+    def __init__(self,js):
+        self.json= js
+        self.g=GraphO()
+        self.nodeMap={}
+        self.edgeMap={}
+        self.nodeInvMap={}
+        self.edgeInvMap={}
+        for n in self.json['nodes']:
+            n=int(n)
+            v=self.g.add_node()
+            self.nodeMap[n]=v
+            self.nodeInvMap[v]=n
+        for e in self.json['edges']:
+            
+            i=int(self.json['edges'][e]['src'])
+            j=int(self.json['edges'][e]['dst'])
+            a=self.g.add_edge(i,j)
+            self.edgeMap[int(e)]=a
+            self.edgeInvMap[a]=e
+
+class JSON_decoder:
+    def __init__(self,j1,j2 ):
+        self.incGenerator= Graph.pattern_match(j1.g,j2.g)
+        self.inclusions=[]
+        for inc in self.incGenerator:
+            self.inclusions.append('{')
+            cursor= len(self.inclusions)-1
+            inNode=True
+            self.inclusions[cursor]+='"nodeMap":{'
+            for key in inc.l.items():                
+                if(isinstance(key[0],tuple)):
+                    print(key,file=sys.stderr)
+                    if(inNode):
+                        if(self.inclusions[cursor][len(self.inclusions[cursor])-1]==','):
+                            self.inclusions[cursor]= self.inclusions[cursor][0:-1]        
+                        self.inclusions[cursor]+='},'
+                        self.inclusions[cursor] += '"edgeMap":{'
+                        inNode=False
+                    self.inclusions[cursor]+='"'+ str(j1.edgeInvMap[key[0]])+'":'+str(j2.edgeInvMap[key[1]])+','
+                else : 
+                    self.inclusions[cursor]+='"'+str(key[0])+ '":'+str(key[1])+','
+                    inNode=True
+            if(self.inclusions[cursor][len(self.inclusions[cursor])-1]==','):
+                            self.inclusions[cursor]= self.inclusions[cursor][0:-1]          
+            self.inclusions[cursor] += '}}'
+
+    def decoder(self):
+        print(self.inclusions,file=sys.stderr)
+        return json.dumps(self.inclusions)
+
+
+
 
 
 def hs_to_graphO(hs):
@@ -43,18 +99,15 @@ def jsoni():
     print(content,file=sys.stderr)
     return "ok"
 
-@app.route('/autoInclusion', methods=['POST'])
+@app.route('/Inclusion', methods=['POST'])
 def autoInc():
-    lhs=request.json
-    l= hs_to_graphO(lhs)
-    auto=[]
-    for i in Graph.pattern_match(l,l):
-         auto.append(i.l)
-    print('auto',file=sys.stderr)
-    print(l,file=sys.stderr)
-    print(auto,file=sys.stderr)
-    response=jsonify(str(auto))
-    return response
+    js=json.loads(request.data)
+    j1= JSON_encoder(js[0])
+    j2= JSON_encoder(js[1])
+    jdecoder= JSON_decoder(j1,j2)
+    print(jdecoder.decoder(),file=sys.stderr)
+    return jdecoder.decoder()
+    
 
 @app.route('/globalT', methods=['POST'])
 def pattern():

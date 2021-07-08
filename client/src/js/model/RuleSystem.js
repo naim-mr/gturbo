@@ -1,11 +1,19 @@
-//Problème où faire le notify
+// Problème où faire le notify
+const removeElement = (array, elem) => {
+  var index = array.indexOf(elem)
+  console.log(index)
+  if (index > -1) {
+    array.splice(index, 1)
+  }
+}
 
 var Observer = require('../util/Observer.js')
 var Observable = require('../util/Observable.js')
 var { Graph, GraphObserver } = require('./Graph.js')
 var { Rule, RuleObserver } = require('./Rule.js')
 var { RuleInclusion, RuleInclusionObserver } = require('./RuleInclusion.js')
-var axios=require('axios')
+var axios = require('axios')
+const { GraphInclusion } = require('./GraphInclusion.js')
 
 class RuleSystemObserver extends Observer {
   constructor (rs) {
@@ -34,7 +42,7 @@ class RuleSystem extends Observable {
           data.rule = r
           return data
         })
-        this.rs.rules[id] = r;
+        this.rs.rules[id] = r
         this.rs.notify('on_createRule', r) // solution au problème
         this.rs.autoAddInclusion(r)
       }
@@ -48,8 +56,8 @@ class RuleSystem extends Observable {
           data.inc = inc
           return data
         })
-      
-        this.rs.notify('on_createInclusion', inc,sub,over) // solution au problème
+
+        this.rs.notify('on_createInclusion', inc, sub, over) // solution au problème
         this.rs.inclusions[id] = inc
       }
 
@@ -78,9 +86,6 @@ class RuleSystem extends Observable {
         super(r)
         this.rs = rs
       }
-      on_baseGenerated(base){
-        
-      }
     }
 
     static RuleInclusionObs = class extends RuleInclusionObserver {
@@ -94,7 +99,7 @@ class RuleSystem extends Observable {
       super()
       this.graph = new Graph()
       this.rules = {}
-      this.inclusions ={}
+      this.inclusions = {}
       new RuleSystem.GraphObs(this, this.graph)
     }
 
@@ -104,6 +109,7 @@ class RuleSystem extends Observable {
       new RuleSystem.RuleObs(this, rule)
       return rule
     }
+
     deleteRule (r) {
       r.unregisterAll()
       let idr
@@ -122,15 +128,32 @@ class RuleSystem extends Observable {
       new RuleSystem.RuleInclusionObs(this, inc)
       return inc
     }
-    autoAddInclusion(rule){
-        /*var id; 
-        for(const idr in this.rules){
-          if(this.rules[idr]==rule)id=idr;
+
+    autoAddInclusion (rule) {
+      var id
+      for (const idr in this.rules) {
+        if (this.rules[idr] == rule)id = idr
+      }
+
+      for (const idr in this.rules) {
+        if (id != idr) this.generateInclusion(id, idr)
+        if (id != idr) this.generateInclusion(idr, id)
+      }
+    }
+
+    updateInclusion (id) {
+      const toRemove = []
+      for (const inc in this.inclusions) {
+        if ((this.inclusions[inc].sub == this.rules[id] || this.inclusions[inc].over == this.rules[id]) && this.inclusions[inc].over != this.inclusions[inc].sub) {
+          this.deleteInclusion(this.inclusions[inc])
         }
-        for(const idr in this.rules){
-          this.createInclusion(idr,id)
-          if(idr !=id)this.createInclusion(id,idr)
-        }*/
+      }
+      for (const idr in this.rules) {
+        if (idr != id) {
+          this.generateInclusion(id, idr)
+          this.generateInclusion(idr, id)
+        }
+      }
     }
 
     // Je passe par la pour bien notifier et donc faire une suppression en cascad
@@ -156,78 +179,63 @@ class RuleSystem extends Observable {
         return null
       }, null)
     }
-    generateAutoInclusion(n){
-      console.log("ici");
-      let lhs=this.rules[n].lhs;
-      axios.post('http://127.0.0.1:5000/autoInclusion',JSON.parse(lhs.toJSON( (data)=> { return data}, (data)=> { return data } )))
+
+    async generateInclusion (n, m) {
+      const lhs1 = this.rules[n].lhs
+      const lhs2 = this.rules[m].lhs
+      var base
+      if (n == m) {
+        for (const inc in this.inclusions) {
+          if (this.inclusions[inc].sub == this.rules[n] && this.inclusions[inc].over == this.rules[n]) {
+            this.deleteInclusion(this.inclusions[inc])
+          }
+        }
+      }
+      await axios.post('http://127.0.0.1:5000/Inclusion', [JSON.parse(lhs1.toJSON((data) => { return data }, (data) => { return data })), JSON.parse(lhs2.toJSON((data) => { return data }, (data) => { return data }))])
         .then((res) => {
-          let autoInclusion= this.parseResponse(res.data);
-          this.rules[n].generateBase(autoInclusion);
+          const autoInclusions = []
+          for (const inc of res.data) {
+            autoInclusions.push(JSON.parse(inc))
+          }
+          if (n == m) {
+            this.rules[n].generateBase(autoInclusions)
+          } else {
+            for (let i = 0; i < autoInclusions.length; i++) {
+              const inc = this.createInclusion(n, m)
+              const auto = autoInclusions[i]
+              for (const node in auto.nodeMap) {
+                inc.lgraphI.setNode(parseInt(node), parseInt(auto.nodeMap[node]))
+              }
+              for (const src in auto.edgeMap) {
+                typeof (src)
+                inc.lgraphI.setEdge(parseInt(src), parseInt(auto.edgeMap[src]))
+              }
+            }
+          }
         })
         .catch((error) => {
-            console.error(error);
-        });
-
-    }
-
-    parseResponse(json){ 
-      let c;
-      let  nodeMap={}
-      let edgeMap={}
-      let autoInclusions=[]
-      let i=0
-      let n1;
-      let  n2 ; 
-      let  src; 
-      let dst; 
-      let inJ=false;
-      while(i<json.length && i<20){
-        c=json.charAt(i);
-        if(c=='{') {    
-            inJ=true;
-            while(c != '}' && i<json.length){
-              i++;
-              c=json.charAt(i);
-
-              if(this.isInteger(c)){
-                n1= parseInt(c)  ;
-                i+=3;
-                c=json.charAt(i);
-                n2= parseInt(c);
-                nodeMap[n1]=n2;
-                console.log("n1: "+n1+" n2:"+n2);
-                console.log(nodeMap[n1]);
-              }
-              if(c=='('){
-                i++ ; 
-                c=json.charAt(i);
-                src=parseInt(c);
-                i+=3;
-                c=json.charAt(i);
-                dst=parseInt(c);
-                i+=3;
-                edgeMap[src]=dst             
-              }
-              
+          console.error(error)
+        })
+      if (n == m) {
+        const rhs = this.rules[n].rhs
+        await axios.post('http://127.0.0.1:5000/Inclusion', [JSON.parse(rhs.toJSON((data) => { return data }, (data) => { return data })), JSON.parse(rhs.toJSON((data) => { return data }, (data) => { return data }))])
+          .then((res) => {
+            const rautoInclusions = []
+            for (const inc of res.data) {
+              rautoInclusions.push(JSON.parse(inc))
             }
-        }
-        if(inJ){
-          autoInclusions.push({nodeMap,edgeMap})
-          nodeMap={};
-          edgeMap={};
-          inJ=false;
-        }
-        i++;
-        c=json.charAt(i)     
+
+            this.rules[n].rautoInclusions = rautoInclusions
+          })
+          .catch((error) => {
+            console.error(error)
+          })
       }
-    return autoInclusions;
     }
-    isInteger(c){
-      return c<= '9' && c>='0'
-    }
-    toJSON(){
-      return JSON.parse(this.graph.toJSON( ((data)=> {return data.rule.toJSON()}) , ((data)=> {return data.inc.toJSON()}) )); 
+
+    toJSON () {
+      return JSON.parse(this.graph.toJSON((data) => { return data.rule.toJSON() }, (data) => { return data.inc.toJSON() }))
     }
 }
 
-module.exports = {RuleSystem, RuleSystemObserver}
+module.exports = { RuleSystem, RuleSystemObserver }

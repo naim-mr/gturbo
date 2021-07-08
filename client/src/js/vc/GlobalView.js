@@ -1,33 +1,33 @@
-var Observer=  require('../util/Observer.js')
-var Observable=  require('../util/Observable.js')
-var { Graph, GraphObserver } = require('../model/Graph');
+var Observer = require('../util/Observer.js')
+var Observable = require('../util/Observable.js')
+var { Graph, GraphObserver } = require('../model/Graph')
 var { GraphComponent, GraphComponentObserver } = require('./GraphComponent')
-var cytoscape =require('cytoscape');
-var options=require("./defaultcxt.js");
+var cytoscape = require('cytoscape')
+var options = require('./defaultcxt.js')
 
-class GlobalViewObserver extends Observer{
-    constructor(gv){
-        super(gv);
-    }
-    on_editRule(id){};
-    on_editInclusion(id){};
-    on_update () {};
+class GlobalViewObserver extends Observer {
+  constructor (gv) {
+    super(gv)
+  }
+
+  on_editRule (id) {};
+  on_editInclusion (id) {};
+  on_update () {};
 }
 
 class GlobalView extends Observable {
     static GraphObs = class extends GraphObserver {
       constructor (gv, g) {
         super(g)
-        this.gv= gv
+        this.gv = gv
       }
-   
+
       on_addNode (idn) {
-        let ele=this.gv.cy.add({
+        const ele = this.gv.cy.add({
           group: 'nodes',
           position: {},
           data: { id: idn }
-        });
-        
+        })
       }
 
       on_updateNode (idn, data) {
@@ -39,13 +39,17 @@ class GlobalView extends Observable {
         let isInCyto = true
         if (this.gv.edgesInCy[ide] == undefined) isInCyto = false
         if (!isInCyto) {
+          console.log('on gv add')
           const idC = this.gv.cy.add({ group: 'edges', data: { source: src, target: dest } })
+          console.log(idC)
           this.gv.edgesInCy[ide] = idC.id()
           this.gv.edgesInGraph[idC.id()] = ide
+          console.log(this.gv.cy.elements())
         }
       }
 
       on_removeEdge (id) {
+        console.log('on remove edge')
         this.gv.cy.remove(this.gv.cy.getElementById(this.gv.edgesInCy[id]))
       }
 
@@ -54,17 +58,16 @@ class GlobalView extends Observable {
       }
     }
 
-
     // precond g is a Graph and idComp a string ( id of a html div)
     constructor (g, idComp) {
       super()
-      
-      this.counter=0;  //  counter ==1 => goto rules or inc edition
-      this.mouseover = false // to control document.listener 
-      this.lastClick = {};    
-      this.edgesInGraph={}; // map to convert id from cytoscape to our model
-      this.edgesInCy={};  // map to convert id from our model to id in cytoscape
-      this.ctrlKey=false;
+
+      this.counter = 0 //  counter ==1 => goto rules or inc edition
+      this.mouseover = false // to control document.listener
+      this.lastClick = {}
+      this.edgesInGraph = {} // map to convert id from cytoscape to our model
+      this.edgesInCy = {} // map to convert id from our model to id in cytoscape
+      this.ctrlKey = false
       this.updateGraph(g)
       this.cy = cytoscape({
         zoomEnabled: false,
@@ -77,15 +80,31 @@ class GlobalView extends Observable {
         style: [{
           selector: 'node',
           style: {
-            shape:'rectangle',
-    
+            shape: 'rectangle'
+
+          }
+        },
+        {
+          selector: '.edited',
+          style: {
+            'border-width': 2,
+            'border-color': 'black'
+
           }
         },
         {
           selector: 'edge',
           style: {
             'curve-style': 'bezier',
-            'target-arrow-shape': 'triangle',
+            'target-arrow-shape': 'triangle'
+          }
+        },
+        {
+          selector: '.eh_edited',
+          style: {
+            'line-color': 'black',
+            'target-arrow-color': 'black'
+
           }
         },
         {
@@ -144,48 +163,47 @@ class GlobalView extends Observable {
             opacity: 0
           }
         }
-    
+
         ],
         elements: {
           nodes: [],
           edges: []
         }
-      })     
-      this.cy.zoomingEnabled(false);
-      
-      this.eh=this.cy.edgehandles(options);
-      this.eh.enable();
-      this.eh.enableDrawMode();
-    
-      
-      this.addListener(idComp);
-      
+      })
+      this.cy.zoomingEnabled(false)
+
+      this.eh = this.cy.edgehandles(options)
+      this.eh.enable()
+      this.eh.enableDrawMode()
+
+      this.addListener(idComp)
     }
-  
+
     deleteEdges () {
       this.edgesInCy = {}
       this.edgesInGraph = {}
     }
 
-    destroyObserver(){
+    destroyObserver () {
       if (this.graphObs != undefined) this.graph.unregister(this.graphObs)
     }
+
     // precond graph in Graph
     updateGraph (graph) {
-      this.destroyObserver();
+      this.destroyObserver()
       this.graph = graph
       this.graphObs = new GlobalView.GraphObs(this, graph)
     }
 
-
     /* precond:
-        edgeinCy map id from our model to cytoscape 
+        edgeinCy map id from our model to cytoscape
         edgeInGraph map id from cytoscape to our model
     */
     updateEdgesMap (edgesInCy, edgesInGraph) {
       this.edgesInCy = edgesInCy
       this.edgesInGraph = edgesInGraph
     }
+
     reloadCy () {
       for (const node in this.graph.nodes) {
         const id = this.cy.add({
@@ -213,8 +231,7 @@ class GlobalView extends Observable {
       this.cy.remove(this.cy.elements(''))
     }
 
-
-    addListener(idComp){
+    addListener (idComp) {
       this.cy.on('mouseover', 'node', (event) => {
         const ele = event.target
         ele.addClass('highlight2')
@@ -231,43 +248,39 @@ class GlobalView extends Observable {
         const ele = event.target
         ele.removeClass('highlight2')
       })
-      this.cy.on("click","node",(event)=>{
-        if(this.lastTarget)console.log(this.lastTarget.id());
-        if(this.counter==1 && event.target.id()==this.lastTarget.id()){
-          this.counter=0;
-          this.notify("on_editRule",event.target.id());
-          this.mouseover=false;
-          this.lastTarget=null;
-        
-        }else if(this.counter==1 ){
-          this.counter=0;
-        }else this.counter++;
-        this.lastTarget=event.target;
-      });
+      this.cy.on('click', 'node', (event) => {
+        if (this.counter == 1 && event.target.id() == this.lastTarget.id()) {
+          this.counter = 0
+          this.notify('on_editRule', event.target.id())
+          this.mouseover = false
+          this.lastTarget = null
+        } else if (this.counter == 1) {
+          this.counter = 0
+        } else this.counter++
+        this.lastTarget = event.target
+      })
 
-      this.cy.on("click","edge",(event)=>{
-        if(this.counter==1 && event.target.id()==this.lastTarget.id()){
-          this.counter=0;
-          this.notify("on_editInclusion",this.edgesInGraph[event.target.id()]);
-          this.mouseover=false;
-          this.lastTarget=null;
-        
-        }else if(this.counter==1 ){
-          this.counter=0;
-        }else this.counter++;
-        this.lastTarget=event.target;
-      });
+      this.cy.on('click', 'edge', (event) => {
+        if (this.counter == 1 && event.target.id() == this.lastTarget.id()) {
+          this.counter = 0
+          this.notify('on_editInclusion', this.edgesInGraph[event.target.id()])
+          this.mouseover = false
+          this.lastTarget = null
+        } else if (this.counter == 1) {
+          this.counter = 0
+        } else this.counter++
+        this.lastTarget = event.target
+      })
 
       document.addEventListener('keydown', (event) => {
         if (this.mouseover) {
           if (event.ctrlKey) {
-            this.ctrlKey = true;
+            this.ctrlKey = true
           } else if (event.key == 'Alt') {
             // this.eh.disableDrawMode();
           } else if (event.key == 'Delete') {
             this.onDelete()
           }
-          
         }
       })
       document.getElementById(idComp).addEventListener('mouseover', (event) => {
@@ -277,11 +290,11 @@ class GlobalView extends Observable {
         this.mouseover = false
         this.ctrlKey = false
       })
-      
+
       document.addEventListener('keyup', (event) => {
         if (this.mouseover) {
           if (event.ctrlKey) {
-            this.ctrlKey = false;
+            this.ctrlKey = false
           } else if (event.key == 'Alt') {
           }
         }
@@ -301,8 +314,8 @@ class GlobalView extends Observable {
 
           return data
         })
-      });
-            //this.rsc.loadInclusion(parseInt(id));
+      })
+      // this.rsc.loadInclusion(parseInt(id));
 
       this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEles) => {
         if (!this.inc) {
@@ -312,6 +325,7 @@ class GlobalView extends Observable {
         }
       })
     }
+
     onDelete () {
       for (let i = 0; i < this.cy.edges('').length; i++) {
         if (this.cy.edges('')[i].selected()) {
@@ -325,22 +339,33 @@ class GlobalView extends Observable {
       }
     }
 
-  onClick (event) {
-    this.lastClick = event.renderedPosition    
-    if (this.ctrlKey) {
-      const id = this.graph.addNode()
-      this.graph.updateNode(id, (data) => {
-        data.x = (event.position.x)
-        data.y = (event.position.y)
+    onClick (event) {
+      this.lastClick = event.renderedPosition
+      if (this.ctrlKey) {
+        const id = this.graph.addNode()
+        this.graph.updateNode(id, (data) => {
+          data.x = (event.position.x)
+          data.y = (event.position.y)
 
-        return data
-      })
+          return data
+        })
 
-      this.ctrlKey = false
+        this.ctrlKey = false
+      }
     }
-  }
 
+    stylizedRule (id) {
+      const r = this.cy.getElementById(id)
+      r.addClass('edited')
+      for (const ed of this.cy.elements()) {
+        if (ed.isEdge() && ed.source().id() == id && ed.target().id() == id) ed.addClass('eh_edited')
+      }
+    }
 
+    stylizedInc (id) {
+      const i = this.cy.getElementById(this.edgesInCy[id])
+      i.addClass('eh_edited')
+    }
 }
 
 module.exports = { GlobalView, GlobalViewObserver }

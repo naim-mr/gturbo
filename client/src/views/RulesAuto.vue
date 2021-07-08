@@ -1,12 +1,12 @@
 <template>
-    <inclusion />
+    <rulesAuto/>
 
 </template>
 <script>
-import inclusion from '@/components/inclusions.vue'
+import rulesAuto from '@/components/rulesAuto.vue'
 export default {
   components: {
-    inclusion
+    rulesAuto
   },
   methods: {
 

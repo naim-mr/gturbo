@@ -13,7 +13,7 @@ class RuleInclusionComponent {
       on_setNodeL (idx, idy) {}
 
       on_setEdgeL (idx, idy) {}
-    
+
       on_unsetNodeL (idx, idy) {}
 
       on_unsetEdgeL (idx, idy) {}
@@ -28,18 +28,17 @@ class RuleInclusionComponent {
     }
 
     constructor (inc) {
-      
       this.lgcI = new GraphInclusionComponent(inc.lgraphI, ['lhs2', 'lhs1'])
       this.rgcI = new GraphInclusionComponent(inc.rgraphI, ['rhs2', 'rhs1'])
       this.inc = inc
       this.incObs = new RuleInclusionComponent.IncObs(this, inc)
       this.cur = 0
       this.cpt = 0
-      this.create=true;;
+      this.create = true
     }
 
-    destroyObserver(){
-      if(this.inc!= undefined)  this.inc.unregister(this.incObs);
+    destroyObserver () {
+      if (this.inc != undefined) this.inc.unregister(this.incObs)
     }
 
     updateEdgesMap (sub, over, edgesInCyList, edgesInGraphList) {
@@ -47,35 +46,35 @@ class RuleInclusionComponent {
       this.lgcI.updateEdgesMap(edgesInCyList[sub].left, edgesInGraphList[sub].left, false)
       this.rgcI.updateEdgesMap(edgesInCyList[over].left, edgesInGraphList[over].left, true)
       this.rgcI.updateEdgesMap(edgesInCyList[sub].left, edgesInGraphList[sub].left, false)
-      this.create=false;
+      this.create = false
     }
 
     update (inc) {
-      this.destroyObserver();
+      this.destroyObserver()
       this.inc = inc
       this.lgcI.updateComponent(inc.lgraphI)
       this.rgcI.updateComponent(inc.rgraphI)
-      this.create=true  
+      this.create = true
       this.incObs = new RuleInclusionComponent.IncObs(this, inc)
-
-
     }
 
-
     printNewInclusion () {
-      this.create=true;
-      this.lgcI.removeEles();
-      this.rgcI.removeEles();
+      this.create = true
+      this.removeEles()
       this.lgcI.printNewInclusion()
       this.rgcI.printNewInclusion()
     }
 
+    removeEles () {
+      this.lgcI.removeEles()
+      this.rgcI.removeEles()
+    }
+
     loadInclusion () {
-      this.lgcI.removeEles();
-      this.rgcI.removeEles();
+      this.removeEles()
       this.lgcI.loadInclusion()
       this.rgcI.loadInclusion()
     }
 }
 
-module.exports = RuleInclusionComponent 
+module.exports = RuleInclusionComponent
