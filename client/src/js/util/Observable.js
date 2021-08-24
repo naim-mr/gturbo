@@ -11,6 +11,8 @@ class Observable {
   }
 
   notify (op, ...args) {
+    
+    
     this.observers.forEach(
       (obs) => {
         Observable.seq.pushCallBack({ obs: obs, op: op, args: args })

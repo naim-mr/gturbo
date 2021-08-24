@@ -14,6 +14,7 @@ var { Rule, RuleObserver } = require('./Rule.js')
 var { RuleInclusion, RuleInclusionObserver } = require('./RuleInclusion.js')
 var axios = require('axios')
 const { GraphInclusion } = require('./GraphInclusion.js')
+const { Base } = require('./Base.js')
 
 class RuleSystemObserver extends Observer {
   constructor (rs) {
@@ -31,8 +32,20 @@ class RuleSystem extends Observable {
       constructor (rs, g) {
         super(g)
         this.rs = rs
+        
       }
-
+      on_loadEdge(id,data){
+        
+        this.rs.inclusions[id].lgraphI=data.lgraphI;
+        this.rs.inclusions[id].rgraphI=data.rgraphI;
+        
+      }
+      on_loadNode(id,data){
+        
+        this.rs.rules[id].lhs=data.lhs;
+        this.rs.rules[id].rhs=data.rhs;
+        
+      }
       on_addNode (id) {
         const lhs = new Graph()
         const rhs = new Graph()
@@ -50,6 +63,9 @@ class RuleSystem extends Observable {
       on_addEdge (id, sub, over) {
         const subTemp = this.rs.rules[sub]
         const overTemp = this.rs.rules[over]
+        console.log("on add_edge ")
+        console.log(subTemp)
+        console.log(overTemp)
         const inc = new RuleInclusion(subTemp, overTemp)
         new RuleSystem.RuleInclusionObs(this, inc)
         this.rs.graph.updateEdge(id, (data) => {
@@ -79,6 +95,7 @@ class RuleSystem extends Observable {
             })
             */
       }
+
     }
 
     static RuleObs = class extends RuleObserver {
@@ -100,7 +117,10 @@ class RuleSystem extends Observable {
       this.graph = new Graph()
       this.rules = {}
       this.inclusions = {}
-      new RuleSystem.GraphObs(this, this.graph)
+      this.base=[]
+      this.morphisms=[]
+      this.memory=[]
+      this.graphObs=new RuleSystem.GraphObs(this, this.graph)
     }
 
     createRule () {
@@ -129,33 +149,37 @@ class RuleSystem extends Observable {
       return inc
     }
 
-    autoAddInclusion (rule) {
+    async autoAddInclusion (rule) {
       var id
+      this.memory=[]
+      this.morphisms=[];
       for (const idr in this.rules) {
         if (this.rules[idr] == rule)id = idr
       }
-
       for (const idr in this.rules) {
-        if (id != idr) this.generateInclusion(id, idr)
-        if (id != idr) this.generateInclusion(idr, id)
+        await this.generateInclusion(id, idr)
+        if(idr!=id)await this.generateInclusion(idr, id)
+   
       }
-    }
 
-    updateInclusion (id) {
-      const toRemove = []
+    }
+    updateAutoInclusion(id){
+        
+    }
+    async  updateInclusion (id) {
       for (const inc in this.inclusions) {
         if ((this.inclusions[inc].sub == this.rules[id] || this.inclusions[inc].over == this.rules[id]) && this.inclusions[inc].over != this.inclusions[inc].sub) {
           this.deleteInclusion(this.inclusions[inc])
         }
       }
+      this.morphisms=[];
       for (const idr in this.rules) {
-        if (idr != id) {
-          this.generateInclusion(id, idr)
-          this.generateInclusion(idr, id)
-        }
+        await this.generateInclusion(id, idr)
+        if(idr!=id) await this.generateInclusion(idr, id)
       }
-    }
-
+     }
+    
+    
     // Je passe par la pour bien notifier et donc faire une suppression en cascad
     // Avant : suppression règle => suppression d'inclsuion mais pas de notify sur l'inclusion :/
     deleteRuleById (id) {
@@ -169,6 +193,7 @@ class RuleSystem extends Observable {
     }
 
     deleteInclusion (i) {
+      console.log(i)
       i.unregisterAll()
       let idI
       Object.keys(this.inclusions).reduce((result, id) => {
@@ -193,49 +218,74 @@ class RuleSystem extends Observable {
       }
       await axios.post('http://127.0.0.1:5000/Inclusion', [JSON.parse(lhs1.toJSON((data) => { return data }, (data) => { return data })), JSON.parse(lhs2.toJSON((data) => { return data }, (data) => { return data }))])
         .then((res) => {
-          const autoInclusions = []
+          const morphisms = []
           for (const inc of res.data) {
-            autoInclusions.push(JSON.parse(inc))
+            morphisms.push(JSON.parse(inc))
           }
           if (n == m) {
-            this.rules[n].generateBase(autoInclusions)
+            this.rules[n].generateBase(morphisms)
+            this.rules[n].generateGIncs();
+            for (let i = 0; i < this.rules[n].lgraphI.length; i++) {
+              let inc = this.createInclusion(n, m)
+              inc.lgraphI=this.rules[n].lgraphI[i];
+            }            
           } else {
-            for (let i = 0; i < autoInclusions.length; i++) {
+            
+            for (let i = 0; i < morphisms.length; i++) {
+              const auto = morphisms[i];
+              this.morphisms.push(auto);
               const inc = this.createInclusion(n, m)
-              const auto = autoInclusions[i]
               for (const node in auto.nodeMap) {
-                inc.lgraphI.setNode(parseInt(node), parseInt(auto.nodeMap[node]))
-              }
-              for (const src in auto.edgeMap) {
-                typeof (src)
-                inc.lgraphI.setEdge(parseInt(src), parseInt(auto.edgeMap[src]))
-              }
+                  inc.lgraphI.setNode(parseInt(node), parseInt(auto.nodeMap[node]))
+                }
+                for (const src in auto.edgeMap) {
+                  inc.lgraphI.setEdge(parseInt(src), parseInt(auto.edgeMap[src]))
+                }
+            }
+              
+              
             }
           }
-        })
+        )
         .catch((error) => {
           console.error(error)
         })
-      if (n == m) {
-        const rhs = this.rules[n].rhs
-        await axios.post('http://127.0.0.1:5000/Inclusion', [JSON.parse(rhs.toJSON((data) => { return data }, (data) => { return data })), JSON.parse(rhs.toJSON((data) => { return data }, (data) => { return data }))])
-          .then((res) => {
-            const rautoInclusions = []
-            for (const inc of res.data) {
-              rautoInclusions.push(JSON.parse(inc))
-            }
+        if (n == m) {
+          const rhs = this.rules[n].rhs
+          await axios.post('http://127.0.0.1:5000/Inclusion', [JSON.parse(rhs.toJSON((data) => { return data }, (data) => { return data })), JSON.parse(rhs.toJSON((data) => { return data }, (data) => { return data }))])
+            .then((res) => {
+              const rautoInclusions = []
+              for (const inc of res.data) {
+                rautoInclusions.push(JSON.parse(inc))
+              }
 
-            this.rules[n].rautoInclusions = rautoInclusions
-          })
-          .catch((error) => {
-            console.error(error)
-          })
+              this.rules[n].rautoInclusions = rautoInclusions
+            })
+            .catch((error) => {
+              console.error(error)
+            })
+        }
       }
-    }
 
     toJSON () {
-      return JSON.parse(this.graph.toJSON((data) => { return data.rule.toJSON() }, (data) => { return data.inc.toJSON() }))
+      return this.graph.toJSON((data) => { return data.rule.toJSON(data.x,data.y)} , (data) => { return data.inc.toJSON(data.x,data.y) })
     }
-}
 
+    ofJSON(json){
+      this.graph.unregister(this.graphObs);
+      this.graph= Graph.ofJSON(json, (data) => { return Rule.ofJSON(data)}, (data,dom,cod) => { return RuleInclusion.ofJSON(data,dom,cod)})
+      this.graphObs=new RuleSystem.GraphObs(this,this.graph)
+      
+    }
+    refreshGraph(){
+      this.graph.refresh();
+      
+    }
+
+
+
+
+
+    
+}
 module.exports = { RuleSystem, RuleSystemObserver }

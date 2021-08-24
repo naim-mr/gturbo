@@ -2,7 +2,7 @@ var Observer = require('../util/Observer.js')
 var Observable = require('../util/Observable.js')
 var { Graph, GraphObserver } = require('./Graph.js')
 const { GraphInclusion } = require('./GraphInclusion.js')
-
+var {Base} = require('./Base.js')
 class RuleObserver extends Observer {
   constructor (r) {
     super(r)
@@ -101,105 +101,54 @@ class Rule extends Observable {
       this.lgraphI = []
       for (let i = 0; i < this.base.length; i++) {
         const b = this.base[i]
-        const ginc = GraphInclusion.ofJSON(this.lhs, this.lhs, JSON.stringify(b))
+        const ginc = GraphInclusion.ofJSON( JSON.stringify(b),this.lhs, this.lhs)
         this.lgraphI.push(ginc)
       }
       for (let i = 0; i < this.rautoInclusions.length; i++) {
         const a = this.rautoInclusions[i]
-        const ginc = GraphInclusion.ofJSON(this.rhs, this.rhs, JSON.stringify(a))
+        const ginc = GraphInclusion.ofJSON( JSON.stringify(a),this.rhs, this.rhs)
         this.rgraphI.push(ginc)
       }
       if (this.rautoInclusions.length == 0) this.rgraphI.push(new GraphInclusion(this.rhs, this.rhs))
       if (this.base.length == 0) this.lgraphI.push(new GraphInclusion(this.lhs, this.lhs))
     }
 
-    toJSON () {
-      return JSON.stringify({
+    toJSON (x,y) {
+     return JSON.stringify({
         lhs: JSON.parse(this.lhs.toJSON((data) => { return data }, (data) => { return data })),
-        rhs: JSON.parse(this.rhs.toJSON((data) => { return data }, (data) => { return data }))
+        rhs: JSON.parse(this.rhs.toJSON((data) => { return data }, (data) => { return data })),
+        x:x,
+        y:y
       })
     }
-
-    compose (s, a) {
-      const nodeMap = {}
-      const edgeMap = {}
-      for (const n in a.nodeMap) {
-        nodeMap[n] = s.nodeMap[a.nodeMap[n]]
-      }
-      for (const src in a.edgeMap) {
-        edgeMap[src] = s.edgeMap[a.edgeMap[src]]
-      }
-      return [nodeMap, edgeMap]
+    generateBase(morphisms){
+        let b = new Base(morphisms);
+        this.base=b.base;
+        console.log("base")
+        console.log(this.base)
+        this.saturation=b.saturation;
     }
+    
+    static ofJSON(json){
+      
+      
+      let jlhs=  JSON.stringify(JSON.parse(json)["lhs"]);
+      let jrhs=  JSON.stringify(JSON.parse(json)["rhs"]);
+      let lhs= Graph.ofJSON(jlhs,(data) => { return data }, (data) => { return data });
+      let rhs =Graph.ofJSON(jrhs,(data) => { return JSON.parse(data) }, (data) => { return JSON.parse(data) });
+      lhs.refresh();
+      rhs.refresh();
+      
+      return {
+        lhs:lhs,
+        rhs:rhs,
+        x: JSON.parse(json)["x"],
+        y: JSON.parse(json)["y"]
 
-    generateBase (autoInclusions) {
-      this.base = []
-      const identity = this.popIdentity(autoInclusions)
-      if (identity != null) this.base.push(identity)
-      this.saturation.push(identity)
-      let a
-      let s
-      let t
-      const fifo = []
-      while (autoInclusions.length > 0) {
-        a = autoInclusions.shift()
-        this.base.push(a)
-        fifo.push(a)
-        while (fifo.length > 0) {
-          s = fifo.shift()
-          t = this.compose(s, a)
-          this.deleteAutoInc(t, autoInclusions)
-          if (!this.inSatutration(t)) { fifo.push(t) }
-          if (!this.checkEquality(a, s)) {
-            t = this.compose(a, s)
-            this.deleteAutoInc(t, autoInclusions)
-            if (!this.inSatutration(t)) { fifo.push(t) }
-          }
-        }
-      }
-
-      return this.base
-    }
-
-    inSatutration (a) {
-      for (let i = 0; i < this.saturation.length; i++) {
-        if (this.checkEquality(a, this.saturation[i])) return true
-      }
-      return false
-    }
-
-    deleteAutoInc (t, autoInclusions) {
-      let a
-      for (let i = 0; i < autoInclusions.length; i++) {
-        a = autoInclusions[i]
-        if (this.checkEquality(t, a)) {
-          autoInclusions.splice(i, 1)
-        }
       }
     }
+  
 
-    popIdentity (autoInclusions) {
-      let identity = null
-      for (let i = 0; i < autoInclusions.length; i++) {
-        if (this.checkIdentity(autoInclusions[i].nodeMap, autoInclusions[i].edgeMap)) {
-          identity = autoInclusions[i]
-          autoInclusions.splice(i, 1)
-        }
-      }
-      return identity
-    }
-
-    checkIdentity (nodeMap, edgeMap) {
-      for (const src in edgeMap) if (edgeMap[src] != src) return false
-      for (const n in nodeMap) if (nodeMap[n] != n) return false
-      return true
-    }
-
-    checkEquality (t, a) {
-      for (const src in t.edgeMap) if (t.edgeMap[src] != a.edgeMap[src]) return false
-      for (const n in t.nodeMap) if (t.nodeMap[n] != a.nodeMap[n]) return false
-      return true
-    }
 }
 
 module.exports = { Rule, RuleObserver }

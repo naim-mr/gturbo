@@ -64,13 +64,21 @@ class GraphInclusion extends Observable {
       this.edgeInvMap = {}
     }
 
-    update () {
-
+    updateInvMap () {
+      if(this.nodeMap){
+        for( node in this.nodeMap){
+          this.nodeInvMap[this.nodeMap[node]]=node;
+        }
+      }
+      if(this.edgeMap){
+        for( edge in this.edgeMap){
+          this.edgeInvMap[this.edgeMap[edge]]=edge;
+        }
+      }
     }
-
+    
     setNode (idx, idy) {
       if (this.nodeMap[idx] != idy) {
-        console.log('set node')
         this.unsetNode(idx)
         if (idy in this.nodeInvMap) {
           this.unsetNode(this.nodeInvMap[idy])
@@ -132,7 +140,8 @@ class GraphInclusion extends Observable {
       })
     }
 
-    static ofJSON (dom, cod, str) {
+    static ofJSON (str,dom, cod) {
+      
       const o = JSON.parse(str)
 
       const i = new GraphInclusion(dom, cod)
@@ -148,7 +157,6 @@ class GraphInclusion extends Observable {
       else {
         i.edgeMap = Object.keys(o.edgeMap).reduce((result, key) => {
           result[parseInt(key)] = o.edgeMap[key]
-          console.log('odkz')
           return result
         }, {})
       }
@@ -160,8 +168,10 @@ class GraphInclusion extends Observable {
         result[i.edgeMap[key]] = parseInt(key)
         return result
       }, {})
-      console.log(i)
+     
       return i
+    
+    
     }
 }
 

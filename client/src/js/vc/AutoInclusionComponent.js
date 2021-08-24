@@ -27,13 +27,12 @@ class AutoInclusionComponent {
       on_unsetEdgeR (idx, idy) {}
     }
 
-    constructor (rule) {
+    constructor (rule,inc) {
       rule.generateGIncs()
-      this.lgcI = new GraphInclusionComponent(rule.lgraphI[0], ['a_lhs2', 'a_lhs1'])
-      console.log(this.lgcI)
-      this.rgcI = new GraphInclusionComponent(rule.rgraphI[0], ['a_rhs2', 'a_rhs1'])
-      //      this.inclus
+      this.lgcI = new GraphInclusionComponent(rule.lgraphI[0], ['a_lhs2', 'a_lhs1'],false)
+      this.rgcI = new GraphInclusionComponent(rule.rgraphI[0], ['a_rhs2', 'a_rhs1'],false)
       this.rule = rule
+      this.inc=inc;
       // this.incObs = new RuleInclusionComponent.IncObs(this, inc)
       this.curR = 0
       this.curL = 0
@@ -65,12 +64,9 @@ class AutoInclusionComponent {
       this.incObs = new RuleInclusionComponent.IncObs(this, inc)
 
     } */
-    update (r) {
-      // this.destroyObserver();
-      console.log(r)
+    update (r,inc) {
       this.rule = r
-      this.rule.generateGIncs()
-      this.lgcI.updateComponent(r.lgraphI[0])
+      this.lgcI.updateComponent(inc.lgraphI)
       this.rgcI.updateComponent(r.rgraphI[0])
       this.loadInclusion()
     }
@@ -101,12 +97,18 @@ class AutoInclusionComponent {
 
     prevR () {
       if (this.curR > 0) {
-        this.curr--
+        this.curR--
         this.rgcI.updateComponent(this.rule.rgraphI[this.curR])
         this.loadRight()
+        
       }
     }
+    goToRight(id){
+      this.curR=id;
+      this.rgcI.updateComponent(this.rule.rgraphI[this.curR])
+      this.loadRight()
 
+    }
     loadInclusion () {
       this.lgcI.removeEles()
       this.rgcI.removeEles()
@@ -128,7 +130,12 @@ class AutoInclusionComponent {
     confirmAuto () {
       this.checkListLeft[this.curL] = true
       this.checkListRight[this.curR] = true
-      return [this.rule.lgraphI[this.curL], this.rule.rgraphI[this.curR]]
+      
+      const lgraphI = this.rule.lgraphI[this.curL];
+      const rgraphI = this.rule.rgraphI[this.curR]
+      this.inc.lgraphI = lgraphI
+      this.inc.rgraphI = rgraphI
+       
     }
 }
 

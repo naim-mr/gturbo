@@ -23,6 +23,7 @@ class GlobalView extends Observable {
       }
 
       on_addNode (idn) {
+        console.log("global addddd"); 
         const ele = this.gv.cy.add({
           group: 'nodes',
           position: {},
@@ -39,17 +40,13 @@ class GlobalView extends Observable {
         let isInCyto = true
         if (this.gv.edgesInCy[ide] == undefined) isInCyto = false
         if (!isInCyto) {
-          console.log('on gv add')
           const idC = this.gv.cy.add({ group: 'edges', data: { source: src, target: dest } })
-          console.log(idC)
           this.gv.edgesInCy[ide] = idC.id()
           this.gv.edgesInGraph[idC.id()] = ide
-          console.log(this.gv.cy.elements())
         }
       }
 
       on_removeEdge (id) {
-        console.log('on remove edge')
         this.gv.cy.remove(this.gv.cy.getElementById(this.gv.edgesInCy[id]))
       }
 
@@ -80,8 +77,10 @@ class GlobalView extends Observable {
         style: [{
           selector: 'node',
           style: {
-            shape: 'rectangle'
-
+            'shape': 'rectangle',
+            'border-width': 2,
+            'background-color':'blue',
+            'border-color': 'black'
           }
         },
         {
@@ -95,6 +94,8 @@ class GlobalView extends Observable {
         {
           selector: 'edge',
           style: {
+            'line-color': 'red',
+            'target-arrow-color': 'red',
             'curve-style': 'bezier',
             'target-arrow-shape': 'triangle'
           }
@@ -102,8 +103,8 @@ class GlobalView extends Observable {
         {
           selector: '.eh_edited',
           style: {
-            'line-color': 'black',
-            'target-arrow-color': 'black'
+            'line-color': 'green',
+            'target-arrow-color': 'green'
 
           }
         },
@@ -171,11 +172,6 @@ class GlobalView extends Observable {
         }
       })
       this.cy.zoomingEnabled(false)
-
-      this.eh = this.cy.edgehandles(options)
-      this.eh.enable()
-      this.eh.enableDrawMode()
-
       this.addListener(idComp)
     }
 
@@ -190,6 +186,8 @@ class GlobalView extends Observable {
 
     // precond graph in Graph
     updateGraph (graph) {
+      console.log("iciopqsifsod")
+      console.log(graph)
       this.destroyObserver()
       this.graph = graph
       this.graphObs = new GlobalView.GraphObs(this, graph)
@@ -206,6 +204,8 @@ class GlobalView extends Observable {
 
     reloadCy () {
       for (const node in this.graph.nodes) {
+        console.log("reload")
+        console.log(this.graph.nodes[node])
         const id = this.cy.add({
           group: 'nodes',
           data: {

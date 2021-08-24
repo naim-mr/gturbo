@@ -83,36 +83,38 @@ class GraphInclusionComponent {
         }
       }
 
-      constructor (graphI, idComp) {
+      constructor (graphI, idComp,editable) {
         this.selectedEle = null
         this.graphI = graphI
         this.graphIobs = new GraphInclusionComponent.GraphIObs(this, graphI)
-        this.domComp = new GraphComponent(graphI.dom, idComp[0])
-        this.codComp = new GraphComponent(graphI.cod, idComp[1])
+        this.domComp = new GraphComponent(graphI.dom, idComp[0],false)
+        this.codComp = new GraphComponent(graphI.cod, idComp[1],false)
         new GraphInclusionComponent.DomComponentObs(this.domComp, this)
         new GraphInclusionComponent.CodComponentObs(this.codComp, this)
 
-        this.codComp.cy.on('click', 'node', (event) => {
-          const id = parseInt(event.target.id())
-          if (event.target.hasClass('inclusion')) {
-            this.graphI.unsetNode(this.graphI.nodeInvMap[id])
-            event.target.removeClass('inclusion')
-            event.target.unselect()
-          } else if (this.selectedEle != null && this.selectedEle.isNode()) {
-            this.graphI.setNode((this.selectedEle.id()), id)
-            this.lastInclusion = event.target
-          }
-        })
-        this.codComp.cy.on('click', 'edge', (event) => {
-          const id = event.target.id()
-          if (event.target.hasClass('inclusion')) {
-            this.graphI.unsetEdge(this.graphI.edgeInvMap[this.codComp.edgesInGraph[id]])
-            event.target.removeClass('inclusion')
-            event.target.unselect()
-          } else if (this.selectedEle != null && this.selectedEle.isEdge()) {
-            this.graphI.setEdge(this.domComp.edgesInGraph[(this.selectedEle.id())], this.codComp.edgesInGraph[id])
-          }
-        })
+       if(editable){
+          this.codComp.cy.on('click', 'node', (event) => {
+            const id = parseInt(event.target.id())
+            if (event.target.hasClass('inclusion')) {
+              this.graphI.unsetNode(this.graphI.nodeInvMap[id])
+              event.target.removeClass('inclusion')
+              event.target.unselect()
+            } else if (this.selectedEle != null && this.selectedEle.isNode()) {
+              this.graphI.setNode((this.selectedEle.id()), id)
+              this.lastInclusion = event.target
+            }
+          })
+          this.codComp.cy.on('click', 'edge', (event) => {
+            const id = event.target.id()
+            if (event.target.hasClass('inclusion')) {
+              this.graphI.unsetEdge(this.graphI.edgeInvMap[this.codComp.edgesInGraph[id]])
+              event.target.removeClass('inclusion')
+              event.target.unselect()
+            } else if (this.selectedEle != null && this.selectedEle.isEdge()) {
+              this.graphI.setEdge(this.domComp.edgesInGraph[(this.selectedEle.id())], this.codComp.edgesInGraph[id])
+            }
+          })
+        }
       }
 
       destructor () {
@@ -208,7 +210,6 @@ class GraphInclusionComponent {
       }
 
       loadInclusion () {
-        console.log(this.codComp.cy.elements('').length)
         this.codComp.inc = true
         this.domComp.inc = true
         var rgb
@@ -268,9 +269,6 @@ class GraphInclusionComponent {
           })
 
           if (this.graphI.edgeMap[edge] != undefined) {
-            console.log('po')
-            console.log(edge)
-            console.log(this.codComp.edgesInCy)
             ele = this.codComp.cy.add({
               group: 'edges',
               data: {
@@ -304,12 +302,8 @@ class GraphInclusionComponent {
             })
           }
         }
-        console.log(this.codComp.cy.elements(''))
         for (const edge in this.graphI.cod.edges) {
           if (!check[edge]) {
-            console.log('po2')
-            console.log(edge)
-            console.log(this.codComp.edgesInCy)
             const ele = this.codComp.cy.add({
               group: 'edges',
               data: {

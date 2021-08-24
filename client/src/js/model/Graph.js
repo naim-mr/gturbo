@@ -1,6 +1,5 @@
 const removeElement = (array, elem) => {
   var index = array.indexOf(elem)
-  console.log(index)
   if (index > -1) {
     array.splice(index, 1)
   }
@@ -15,9 +14,10 @@ class GraphObserver extends Observer {
   }
 
   on_addNode (id) {}
+  on_loadNode (id,data) {}
 
   on_addEdge (id, src, dst) {}
-
+  on_loadEdge (id,data) {}
   on_removeNode (id) {}
 
   on_removeEdge (id) {}
@@ -72,7 +72,6 @@ class Graph extends Observable {
   // pre-cond:
   //   src, dst in this.nodes
   addEdge (src, dst) {
-    console.log('add edge')
     const id = this.edgeCpt
     this.edgeCpt++
     this.edges[id] = {
@@ -99,11 +98,11 @@ class Graph extends Observable {
     delete this.nodes[id]
   }
 
+
   // pre-cond:
   //   id in this.edges
   removeEdge (id) {
     this.notify('on_removeEdge', id)
-
     removeElement(this.nodes[this.edges[id].src].outgoing, id)
     removeElement(this.nodes[this.edges[id].dst].incoming, id)
     delete this.edges[id]
@@ -112,6 +111,8 @@ class Graph extends Observable {
   // pre-cond:
   //   id in this.nodes
   updateNode (id, update) {
+    console.log(this.nodes)
+    console.log(id)
     this.nodes[id].data = update(this.nodes[id].data)
     this.notify('on_updateNode', id, this.nodes[id].data)
     /*
@@ -157,26 +158,45 @@ class Graph extends Observable {
 
   static ofJSON (str, ofJSONNodeData, ofJSONEdgeData) {
     const o = JSON.parse(str)
-    const g = new Graph()
-    g.nodeCpt = o.nodeCpt
-    g.edgeCpt = o.edgeCpt
+  
+    const g = new Graph( )
+    g.nodeCpt = parseInt(o.nodeCpt)
+    g.edgeCpt = parseInt(o.edgeCpt)
+    
+    
     g.nodes = Object.keys(o.nodes).reduce((result, key) => {
-      result[key] = {
-        incoming: o.nodes[key].incoming,
-        outgoing: o.nodes[key].outgoing,
+      result[parseInt(key)] =   {
+        incoming: o.nodes[key].incoming.map((value,index,array)=>parseInt(value)),
+        outgoing: o.nodes[key].outgoing.map((value,index,array)=>parseInt(value)),
         data: ofJSONNodeData(o.nodes[key].data)
       }
+      
       return result
     }, {}),
     g.edges = Object.keys(o.edges).reduce((result, key) => {
-      result[key] = {
-        src: o.edges[key].src,
-        dst: o.edges[key].dst,
-        data: ofJSONEdgeData(o.edges[key].data)
+      result[parseInt(key)] = {
+        src: parseInt(o.edges[key].src),
+        dst: parseInt(o.edges[key].dst),
+        data: ofJSONEdgeData(o.edges[key].data,g.nodes[parseInt(o.edges[key].src)].data,g.nodes[parseInt(o.edges[key].dst)].data)
       }
       return result
     }, {})
+    
     return g
+  }
+  refresh(){
+    
+    for(let n in this.nodes){
+
+        console.log(this.nodes[n]);
+        this.notify("on_addNode",parseInt(n));
+        this.notify("on_loadNode",parseInt(n),this.nodes[n].data);
+    }
+    for(let e in this.edges){
+      
+      this.notify("on_addEdge",e, this.edges[e].src,this.edges[e].dst);
+      this.notify("on_loadEdge",e,this.edges[e].data);
+    }
   }
 }
 

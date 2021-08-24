@@ -2,6 +2,14 @@ module.exports = {
   lintOnSave: false,
 
   transpileDependencies: [
-    'vuetify'
-  ]
+    'vuetify',
+    'quasar'
+  ],
+
+  pluginOptions: {
+    quasar: {
+      importStrategy: 'kebab',
+      rtlSupport: false
+    }
+  }
 }

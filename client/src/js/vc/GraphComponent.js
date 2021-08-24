@@ -59,10 +59,10 @@ class GraphComponent extends Observable {
     }
 
     // g in Graph
-    constructor (g, idComp, fixed) {
+    constructor (g, idComp, editable) {
       super()
       this.updateGraph(g)
-
+      this.editable=editable;
       this.edgesInCy = {}
       this.edgesInGraph = {}
       this.lastClick = {}
@@ -154,9 +154,12 @@ class GraphComponent extends Observable {
       })
 
       this.cy.zoomingEnabled(false)
-      this.eh = this.cy.edgehandles(options)
-      this.eh.enableDrawMode()
-      if (fixed == undefined || !fixed) this.addListener(idComp)
+      
+      if (editable) { 
+        this.addListener(idComp)
+        this.eh = this.cy.edgehandles(options)
+        this.eh.enableDrawMode()
+      }
     }
 
     deleteEdges () {
@@ -297,6 +300,7 @@ class GraphComponent extends Observable {
     reloadCy () {
       this.removeEles()
       for (const node in this.graph.nodes) {
+        console.log("ocoucou");
         const id = this.cy.add({
 
           group: 'nodes',

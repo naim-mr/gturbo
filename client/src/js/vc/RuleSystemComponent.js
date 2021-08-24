@@ -20,6 +20,7 @@ class RuleSystemComponentObserver extends Observer {
   on_deleteRule (n) {};
   on_editRule (id) {};
   on_editInclusion (id) {};
+  on_editAutoInclusion (id) {};
   on_save (json) {};
 }
 
@@ -32,7 +33,7 @@ class RuleSystemComponent extends Observable {
       }
 
       on_createRule (rule) {
-        if (this.rsc.rc == undefined) this.rsc.rc = new RuleComponent(new GraphComponent(rule.lhs, 'lhs'), new GraphComponent(rule.rhs, 'rhs'), rule)
+        if (this.rsc.rc == undefined) this.rsc.rc = new RuleComponent(new GraphComponent(rule.lhs, 'lhs',true), new GraphComponent(rule.rhs, 'rhs',true), rule)
         this.rsc.pushEdgesIds()
         this.rsc.rc.updateRule(rule)
         this.rsc.onCreate = true
@@ -73,14 +74,34 @@ class RuleSystemComponent extends Observable {
       on_editRule (id) {
         this.rsc.saveEdgesIds()
         this.rsc.switch(parseInt(id))
+        
         this.rsc.notify('on_editRule', id)
       }
 
       on_editInclusion (id) {
         this.rsc.saveEdgesIds()
-        this.rsc.loadInclusion(id)
-        this.rsc.notify('on_editInclusion', id)
+        
+        if(this.rsc.rs.inclusions[id].sub==this.rsc.rs.inclusions[id].over ){
+          
+          if (this.rsc.aic == undefined) {
+            this.rsc.aic = new AutoInclusionComponent(this.rsc.rs.rules[this.rsc.getCurrentRule()],this.rsc.rs.inclusions[id])
+            this.rsc.aic.loadInclusion()
+          }
+          else {
+            
+            this.rsc.aic.update(this.rsc.rs.rules[this.rsc.getCurrentRule()],this.rsc.rs.inclusions[id])
+            this.rsc.aic.loadInclusion()
+            
+          }
+          this.rsc.notify('on_editAutoInclusion',id)
+          
+        }
+        else{
+          this.rsc.loadInclusion(id)
+          this.rsc.notify('on_editInclusion', id)
+        }
       }
+
     }
 
     // precond rs in RuleSystem
@@ -88,30 +109,31 @@ class RuleSystemComponent extends Observable {
       super()
       this.onCreate = true
       this.onDelete = false
-
+      this.edgesInCyList = []
+      this.edgesInGraphList = []
       this.rs = rs
       this.globalView = new GlobalView(rs.graph, 'rcomp')
       new RuleSystemComponent.GlobalViewObs(this.globalView, this)
-
-      this.edgesInCyList = []
-      this.edgesInGraphList = []
-
       new RuleSystemComponent.RuleSystemObs(this, rs)
     }
 
     pushEdgesIds () {
+      console.log("puuuuuush")
       this.edgesInGraphList.push(this.rc.edgesInGraph())
       this.edgesInCyList.push(this.rc.edgesInCy())
     }
 
     saveEdgesIds () {
       const n = this.rc.cur
-      this.edgesInCyList[n] = this.rc.edgesInCy()
+      this.edgesInCyList[n] = this.rc.  edgesInCy()
       this.edgesInGraphList[n] = this.rc.edgesInGraph()
     }
 
     switch (n) {
+      
       const rule = this.getRule(n)
+      console.log(n);
+      console.log(JSON.stringify(rule));
       this.rc.update(n, rule, this.edgesInGraphList, this.edgesInCyList)
     }
 
@@ -145,14 +167,6 @@ class RuleSystemComponent extends Observable {
     }
 
     printNewInclusion (n) {
-      /* this.removeElesI();
-        if (this.rs.inclusions[n] != this.ric.inc) {
-            let inc = this.rs.inclusions[n];
-            this.ric.update(inc);
-        }
-        this.ric.cur = n;
-        this.ric.printNewInclusion();
-        */
       this.loadInclusion(n)
     }
 
@@ -164,28 +178,21 @@ class RuleSystemComponent extends Observable {
       }
     }
 
-    async generateAutoInclusion () {
-      await this.rs.generateInclusion(this.getCurrentRule(), this.getCurrentRule())
-        .then(() => {
-          if (this.aic == undefined) this.aic = new AutoInclusionComponent(this.rs.rules[this.getCurrentRule()])
-          else this.aic.update(this.rs.rules[this.getCurrentRule()])
-        }
-        )
+    
+    getAutoRight () {   
+      return this.rs.rules[this.getCurrentRule()].rautoInclusions.length
     }
 
-    getBaseLeft () {
-      return this.rs.rules[this.getCurrentRule()].base.length
-    }
-
-    updateInclusion () {
-      this.rs.updateInclusion(this.getCurrentRule())
+    updateInclusion (toDelete) {
+      this.rs.updateInclusion(this.getCurrentRule(),toDelete)
     }
 
     prevLAuto () {
       this.aic.prevL()
     }
 
-    prevRAuto () {
+    prevRAuto 
+    () {
       this.aic.prevR()
     }
 
@@ -196,21 +203,17 @@ class RuleSystemComponent extends Observable {
     nextRAuto () {
       this.aic.nextR()
     }
+    goToRight(id){
+      this.aic.goToRight(id);
+    }
 
     confirmAuto () {
-      const tab = this.aic.confirmAuto()
-      const lgraphI = tab[0]
-      const rgraphI = tab[1]
-      const inc = this.rs.createInclusion(this.getCurrentRule(), this.getCurrentRule())
-      this.globalView.stylizedRule(this.getCurrentRule())
-      inc.lgraphI = lgraphI
-      inc.rgraphI = rgraphI
-      console.log('tab')
-      console.log(tab)
-      this.ric.update(inc)
-      let full = true
-      for (let i = 0; i < this.aic.checkListLeft.length; i++) if (!this.aic.checkListLeft[i]) full = false
-      return full
+      this.aic.confirmAuto();
+      this.ric.update(this.aic.inc)
+      console.log(this.aic.inc.isComplete())
+      this.globalView.stylizedInc(Object.keys(this.rs.inclusions).find(key => 
+        this.rs.inclusions[key] === this.aic.inc));
+
     }
 
     save () {
@@ -218,8 +221,54 @@ class RuleSystemComponent extends Observable {
     }
 
     stylized (id) {
-      this.globalView.stylizedInc(id)
+      if(this.rs.inclusions[id].isComplete()){
+        this.globalView.stylizedInc(id);
+      }
+    
+    }
+    toJSON(){
+      console.log("save")
+      console.log(this.edgesInCyList)
+      return { rs: this.rs.toJSON(),edgesInCyList:this.edgesInCyList,edgesInGraphList:this.edgesInGraphList}
+    }
+    saveAsFile(){
+      var FileSaver = require('../util/FileSaver');
+      var blob = new Blob([JSON.stringify(this.toJSON())], {type: "text/plain;charset=utf-8"});
+      FileSaver.saveAs(blob, "rs.txt");      
+    }
+    loadFile() {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.onchange = e => { 
+
+        // getting a hold of the file reference
+        var file = e.target.files[0]; 
+
+        // setting up the reader
+
+        var reader = new FileReader();
+        
+        reader.readAsText(file,'UTF-8');
+            // here we tell the reader what to do when it's done reading...
+            reader.onload =  readerEvent => {
+            var content = readerEvent.target.result; // this is the content!
+            content=JSON.parse(content.replace(/(?:\\[r,n])+/g, ''))
+            this.edgesInGraphList=content["edgesInGraphList"];
+            this.edgesInCyList=content["edgesInCyList"];
+            this.rs.ofJSON(content["rs"]);
+            this.globalView.updateGraph(this.rs.graph);
+            this.rs.refreshGraph();
+            console.log(this.rs.inclusions)
+            this.ric.loadInclusion();
+            
+
+          }
+        
+        
+      } 
+      input.click();
     }
 }
 
 module.exports = { RuleSystemComponent, RuleSystemComponentObserver }
+

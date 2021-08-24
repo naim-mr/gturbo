@@ -103,8 +103,28 @@ class RuleInclusion extends Observable {
     }
 
     toJSON () {
-      return {
+      return JSON.stringify({
+        lgraphI: JSON.parse(this.lgraphI.toJSON((data) => { return data }, (data) => { return data })),
+        rgraphI: JSON.parse(this.rgraphI.toJSON((data) => { return data }, (data) => { return data })),
+      })
+    }
 
+
+    isComplete(){
+        
+       return Object.keys(this.lgraphI.nodeMap).length == Object.keys(this.sub.lhs.nodes).length && Object.keys(this.rgraphI.nodeMap).length == Object.keys(this.sub.rhs.nodes).length
+
+    }
+    static ofJSON (json,dom,cod) {
+      
+      console.log(json);
+      let jlgI=  JSON.stringify(JSON.parse(json)["lgraphI"]);
+      let jrgI=  JSON.stringify(JSON.parse(json)["rgraphI"]);      
+      let lgraphI= GraphInclusion.ofJSON(jlgI,dom.lhs,cod.lhs);
+      let rgraphI=GraphInclusion.ofJSON(jrgI,dom.lhs,cod.rhs);
+      return {
+        lgraphI: lgraphI,
+        rgraphI: rgraphI,
       }
     }
 }
