@@ -16,7 +16,7 @@ method; this editor is meant to make it manageable. The theory is presented in
 > *International Conference on Unconventional Computation and Natural Computation
 > (UCNC 2019)*, pp. 65-78, Springer, 2019.
 
-and the computation is done by [gran_turismo](gran_turismo-master) (`libgt`), the
+and the computation is done by [gran_turismo](gran_turismo-master (https://github.com/Alexandre-Fernandez-dev/Global-Transformations)) (`libgt`), the
 Python implementation of the framework by Alexandre Fernandez (see the
 [references](gran_turismo-master/README.md#references) of its README, which also
 covers the follow-up papers on Kan extensions, accretive computation and
