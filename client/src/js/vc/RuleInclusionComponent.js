@@ -9,7 +9,7 @@ class RuleInclusionComponent {
         this.ric = ric
       }
 
-      // Sinon rajouter un paramètre définissant gauche ou droite
+      // otherwise add a parameter telling left from right
       on_setNodeL (idx, idy) {}
 
       on_setEdgeL (idx, idy) {}
@@ -32,6 +32,8 @@ class RuleInclusionComponent {
       this.rgcI = new GraphInclusionComponent(inc.rgraphI, ['rhs2', 'rhs1'],true)
       this.inc = inc
       this.incObs = new RuleInclusionComponent.IncObs(this, inc)
+      this.onChange = null
+      this.lgcI.onChange = this.rgcI.onChange = () => { if (this.onChange) this.onChange() }
       this.cur = 0
       this.cpt = 0
       this.create = true

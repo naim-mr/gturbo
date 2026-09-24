@@ -5,6 +5,7 @@ var { Graph, GraphObserver } = require('../model/Graph')
 var cytoscape = require('cytoscape')
 var edgehandles = require('cytoscape-edgehandles')
 var options = require('./defaultcxt.js')
+var { nodeRanks } = require('../util/numbering.js')
 cytoscape.use(edgehandles)
 
 class GraphComponentObserver extends Observer {
@@ -30,6 +31,7 @@ class GraphComponent extends Observable {
           position: {},
           data: { id: idn }
         })
+        this.gc.relabel()
       }
 
       on_updateNode (idn, data) {
@@ -46,14 +48,18 @@ class GraphComponent extends Observable {
           this.gc.edgesInCy[ide] = idC.id()
           this.gc.edgesInGraph[idC.id()] = ide
         }
+        this.gc.relabel()
       }
 
       on_removeEdge (id) {
         this.gc.cy.remove(this.gc.cy.getElementById(this.gc.edgesInCy[id]))
+        // the edge is still in the graph while this is announced
+        this.gc.relabel()
       }
 
       on_removeNode (id) {
         this.gc.cy.remove(this.gc.cy.getElementById(id))
+        this.gc.relabel()
         this.gc.notify('on_update')
       }
     }
@@ -86,13 +92,14 @@ class GraphComponent extends Observable {
           selector: 'edge',
           style: {
             'curve-style': 'bezier',
-            'target-arrow-shape': 'triangle'
+            // the graphs of the rules are undirected
+            'target-arrow-shape': 'none'
           }
         },
         {
           selector: '.eh-handle',
           style: {
-            'background-color': 'red',
+            'background-color': '#882255',
             width: 12,
             height: 12,
             shape: 'ellipse',
@@ -103,21 +110,21 @@ class GraphComponent extends Observable {
         {
           selector: '.eh-hover',
           style: {
-            'border-color': 'red'
+            'border-color': '#882255'
           }
         },
         {
           selector: '.eh-source',
           style: {
             'border-width': 2,
-            'border-color': 'red'
+            'border-color': '#882255'
           }
         },
         {
           selector: '.eh-target',
           style: {
             'border-width': 2,
-            'border-color': 'red'
+            'border-color': '#882255'
           }
         },
         {
@@ -178,32 +185,19 @@ class GraphComponent extends Observable {
       this.edgesInGraph = edgesInGraph
     }
 
+    // Delete the selection. The ids are taken first: removing an element
+    // changes the collections, and walking a live one skipped every other element.
     onDelete () {
-      for (let i = 0; i < this.cy.edges('').length; i++) {
-        if (this.cy.edges('')[i].selected()) {
-          this.graph.removeEdge(this.edgesInGraph[this.cy.edges('')[i].id()])
-        }
+      const edges = this.cy.edges(':selected').map((e) => e.id())
+      const nodes = this.cy.nodes(':selected').map((n) => n.id())
+      for (const id of edges) {
+        const eid = this.edgesInGraph[id]
+        if (eid !== undefined && this.graph.edges[eid] !== undefined) this.graph.removeEdge(eid)
       }
-      for (let i = 0; i < this.cy.nodes('').length; i++) {
-        if (this.cy.nodes('')[i].selected()) {
-          this.graph.removeNode(this.cy.nodes('')[i].id())
-        }
+      for (const id of nodes) {
+        if (this.graph.nodes[id] !== undefined) this.graph.removeNode(id)
       }
     }
-
-    onDelete () {
-      for (let i = 0; i < this.cy.edges('').length; i++) {
-        if (this.cy.edges('')[i].selected()) {
-          this.graph.removeEdge(this.edgesInGraph[this.cy.edges('')[i].id()])
-        }
-      }
-      for (let i = 0; i < this.cy.nodes('').length; i++) {
-        if (this.cy.nodes('')[i].selected()) {
-          this.graph.removeNode(this.cy.nodes('')[i].id())
-        }
-      }
-    }
-
     addListener (idComp) {
       this.cy.on('mouseover', 'node', (event) => {
         const ele = event.target
@@ -300,7 +294,6 @@ class GraphComponent extends Observable {
     reloadCy () {
       this.removeEles()
       for (const node in this.graph.nodes) {
-        console.log("ocoucou");
         const id = this.cy.add({
 
           group: 'nodes',
@@ -324,10 +317,45 @@ class GraphComponent extends Observable {
 
         })
       }
+      this.relabel()
     }
 
     removeEles () {
       this.cy.remove(this.cy.elements(''))
+    }
+
+    // number the nodes in breadth-first order (see numbering.js); the work
+    // is postponed so that a burst of changes is numbered once
+    relabel () {
+      if (this.relabelPending) return
+      this.relabelPending = true
+      setTimeout(() => {
+        this.relabelPending = false
+        this.relabelNow()
+      })
+    }
+
+    relabelNow () {
+      if (!this.cy || this.cy.destroyed()) return
+      const ranks = nodeRanks(this.graph)
+      for (const id of Object.keys(ranks)) {
+        const ele = this.cy.getElementById(id)
+        const label = String(ranks[id])
+        if (ele.length > 0 && ele.data('rank') !== label) {
+          ele.data('rank', label)
+          ele.style('label', label)
+        }
+      }
+    }
+
+    // center and scale the graph in its window (which must be visible)
+    fit () {
+      this.cy.resize()
+      if (this.cy.elements().length === 0) return
+      this.cy.zoomingEnabled(true)
+      this.cy.maxZoom(1.5)
+      this.cy.fit(this.cy.elements(), 40)
+      this.cy.zoomingEnabled(false)
     }
 }
 

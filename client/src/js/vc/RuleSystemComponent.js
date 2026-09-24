@@ -21,7 +21,6 @@ class RuleSystemComponentObserver extends Observer {
   on_editRule (id) {};
   on_editInclusion (id) {};
   on_editAutoInclusion (id) {};
-  on_save (json) {};
 }
 
 class RuleSystemComponent extends Observable {
@@ -63,6 +62,10 @@ class RuleSystemComponent extends Observable {
       on_deleteInclusion (id) {
         this.rsc.notify('on_deleteInclusion', id)
       }
+
+      on_validateInclusion (id) {
+        this.rsc.stylized(id)
+      }
     }
 
     static GlobalViewObs= class extends GlobalViewObserver {
@@ -82,17 +85,11 @@ class RuleSystemComponent extends Observable {
         this.rsc.saveEdgesIds()
         
         if(this.rsc.rs.inclusions[id].sub==this.rsc.rs.inclusions[id].over ){
-          
-          if (this.rsc.aic == undefined) {
-            this.rsc.aic = new AutoInclusionComponent(this.rsc.rs.rules[this.rsc.getCurrentRule()],this.rsc.rs.inclusions[id])
-            this.rsc.aic.loadInclusion()
-          }
-          else {
-            
-            this.rsc.aic.update(this.rsc.rs.rules[this.rsc.getCurrentRule()],this.rsc.rs.inclusions[id])
-            this.rsc.aic.loadInclusion()
-            
-          }
+          const inc = this.rsc.rs.inclusions[id]
+          // the rule of the inclusion itself, not the last edited one
+          if (this.rsc.aic == undefined) this.rsc.aic = new AutoInclusionComponent(inc.sub, inc)
+          else this.rsc.aic.update(inc.sub, inc)
+          this.rsc.aic.incId = id
           this.rsc.notify('on_editAutoInclusion',id)
           
         }
@@ -118,7 +115,6 @@ class RuleSystemComponent extends Observable {
     }
 
     pushEdgesIds () {
-      console.log("puuuuuush")
       this.edgesInGraphList.push(this.rc.edgesInGraph())
       this.edgesInCyList.push(this.rc.edgesInCy())
     }
@@ -132,8 +128,6 @@ class RuleSystemComponent extends Observable {
     switch (n) {
       
       const rule = this.getRule(n)
-      console.log(n);
-      console.log(JSON.stringify(rule));
       this.rc.update(n, rule, this.edgesInGraphList, this.edgesInCyList)
     }
 
@@ -159,7 +153,6 @@ class RuleSystemComponent extends Observable {
       this.removeElesI()
       if (this.rs.inclusions[n] != this.ric.inc) {
         const inc = this.rs.inclusions[n]
-        console.log(inc)
         this.ric.update(inc)
       }
       this.ric.cur = n
@@ -179,56 +172,49 @@ class RuleSystemComponent extends Observable {
     }
 
     
-    getAutoRight () {   
-      return this.rs.rules[this.getCurrentRule()].rautoInclusions.length
+    getAutoRight () {
+      return this.aic.rule.rgraphI.length
     }
 
     updateInclusion (toDelete) {
       this.rs.updateInclusion(this.getCurrentRule(),toDelete)
     }
 
-    prevLAuto () {
-      this.aic.prevL()
+    goToRight (i) {
+      this.aic.goToRight(i)
     }
 
-    prevRAuto 
-    () {
-      this.aic.prevR()
-    }
-
-    nextLAuto () {
-      this.aic.nextL()
-    }
-
-    nextRAuto () {
-      this.aic.nextR()
-    }
-    goToRight(id){
-      this.aic.goToRight(id);
-    }
-
+    // validate the auto-inclusion being edited
     confirmAuto () {
-      this.aic.confirmAuto();
-      this.ric.update(this.aic.inc)
-      console.log(this.aic.inc.isComplete())
-      this.globalView.stylizedInc(Object.keys(this.rs.inclusions).find(key => 
-        this.rs.inclusions[key] === this.aic.inc));
-
+      this.aic.confirmAuto()
+      this.stylized(this.aic.incId)
     }
 
-    save () {
-      this.notify('on_save', this.rs.toJSON())
-    }
-
+    // green when the inclusion has been validated, orange dashed otherwise
     stylized (id) {
-      if(this.rs.inclusions[id].isComplete()){
-        this.globalView.stylizedInc(id);
-      }
-    
+      this.globalView.stylizedInc(id, this.rs.inclusions[id].validated)
     }
+
+    // called once the inclusion window is visible
+    fitInclusion () {
+      if (this.ric != undefined) {
+        this.ric.lgcI.fit()
+        this.ric.rgcI.fit()
+      }
+    }
+
+    // Validate the inclusion being edited. Returns the list of what is missing.
+    validateInclusion () {
+      const inc = this.ric.inc
+      if (!inc.isComplete()) return inc.missing()
+      inc.validated = true
+      this.stylized(this.ric.cur)
+      return null
+    }
+
     toJSON(){
-      console.log("save")
-      console.log(this.edgesInCyList)
+      // keep the maps of the rule being displayed up to date
+      if (this.rc != undefined && this.rc.lgc && this.rs.rules[this.rc.cur] !== undefined) this.saveEdgesIds()
       return { rs: this.rs.toJSON(),edgesInCyList:this.edgesInCyList,edgesInGraphList:this.edgesInGraphList}
     }
     saveAsFile(){
@@ -236,37 +222,87 @@ class RuleSystemComponent extends Observable {
       var blob = new Blob([JSON.stringify(this.toJSON())], {type: "text/plain;charset=utf-8"});
       FileSaver.saveAs(blob, "rs.txt");      
     }
+
+    // rebuild the rule system from what toJSON produced
+    loadJSON (content) {
+      const n = content.edgesInCyList.length
+      this.edgesInGraphList = content.edgesInGraphList
+      this.edgesInCyList = content.edgesInCyList
+      this.rs.loading = true
+      try {
+        this.rs.ofJSON(content.rs)
+        this.globalView.updateGraph(this.rs.graph)
+        this.rs.refreshGraph()
+      } finally {
+        this.rs.loading = false
+      }
+      this.rs.autoValidateAll()
+      for (const id of Object.keys(this.rs.inclusions)) this.stylized(id)
+      for (const id of Object.keys(this.rs.rules)) this.globalView.setLabel(id, this.rs.rules[id].name)
+      // refreshing announced every rule again, which appended empty maps
+      this.edgesInGraphList.length = n
+      this.edgesInCyList.length = n
+      if (this.ric != undefined) this.ric.loadInclusion()
+    }
+
     loadFile() {
       var input = document.createElement('input');
       input.type = 'file';
       input.onchange = e => { 
-
-        // getting a hold of the file reference
         var file = e.target.files[0]; 
-
-        // setting up the reader
-
         var reader = new FileReader();
-        
         reader.readAsText(file,'UTF-8');
-            // here we tell the reader what to do when it's done reading...
-            reader.onload =  readerEvent => {
-            var content = readerEvent.target.result; // this is the content!
-            content=JSON.parse(content.replace(/(?:\\[r,n])+/g, ''))
-            this.edgesInGraphList=content["edgesInGraphList"];
-            this.edgesInCyList=content["edgesInCyList"];
-            this.rs.ofJSON(content["rs"]);
-            this.globalView.updateGraph(this.rs.graph);
-            this.rs.refreshGraph();
-            console.log(this.rs.inclusions)
-            this.ric.loadInclusion();
-            
-
-          }
-        
-        
+        reader.onload = readerEvent => {
+          this.loadJSON(JSON.parse(readerEvent.target.result.replace(/(?:\\[r,n])+/g, '')))
+        }
       } 
       input.click();
+    }
+
+    setRuleName (id, name) {
+      this.rs.rules[id].name = name
+      this.globalView.setLabel(id, name)
+    }
+
+    // one line per rule, for the "Rules Set" tab
+    ruleSummaries () {
+      const count = (o) => Object.keys(o).length
+      return Object.keys(this.rs.rules).map((id) => {
+        const r = this.rs.rules[id]
+        return {
+          id,
+          name: r.name || '',
+          lhsNodes: count(r.lhs.nodes),
+          lhsEdges: count(r.lhs.edges),
+          rhsNodes: count(r.rhs.nodes),
+          rhsEdges: count(r.rhs.edges)
+        }
+      })
+    }
+
+    // windows created while hidden have no size until they are shown
+    resizeWindows (view) {
+      const resize = (gc) => { if (gc && gc.cy) gc.cy.resize() }
+      if (view === 'global') resize(this.globalView)
+      if (view === 'rule' && this.rc) { resize(this.rc.lgc); resize(this.rc.rgc) }
+    }
+
+    // release the windows (before the system is replaced by another one)
+    destroy () {
+      const kill = (gc) => {
+        if (!gc) return
+        gc.mouseover = false
+        gc.ctrlKey = false
+        // the document keeps the listeners of this window: make them harmless
+        gc.onDelete = () => {}
+        gc.onClick = () => {}
+        try { gc.cy.destroy() } catch (e) {}
+      }
+      kill(this.globalView)
+      if (this.rc) { kill(this.rc.lgc); kill(this.rc.rgc) }
+      for (const c of [this.ric, this.aic]) {
+        if (c) for (const g of [c.lgcI, c.rgcI]) { kill(g.domComp); kill(g.codComp) }
+      }
     }
 }
 

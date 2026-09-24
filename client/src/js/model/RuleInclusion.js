@@ -9,7 +9,7 @@ class RuleInclusionObserver extends Observer {
     super(rinc)
   }
 
-  // Sinon rajouter un paramètre définissant gauche ou droite
+  // otherwise add a parameter telling left from right
   on_setNodeL (idx, idy) {}
 
   on_setEdgeL (idx, idy) {}
@@ -35,18 +35,22 @@ class RuleInclusion extends Observable {
       }
 
       on_setNode (idx, idy) {
+        this.rinc.validated = false
         this.rinc.notify('on_setNodeL', idx, idy)
       }
 
       on_setEdge (idx, idy) {
+        this.rinc.validated = false
         this.rinc.notify('on_setEdgeL', idx, idy)
       }
 
       on_unsetNode (idx, idy) {
+        this.rinc.validated = false
         this.rinc.notify('on_setNodeL', idx, idy)
       }
 
       on_unsetEdge (idx, idy) {
+        this.rinc.validated = false
         this.rinc.notify('on_setEdgeL', idx, idy)
       }
     }
@@ -58,19 +62,23 @@ class RuleInclusion extends Observable {
       }
 
       on_setNode (idx, idy) {
+        this.rinc.validated = false
         this.rinc.notify('on_setNodeR', idx, idy)
       }
 
       on_setEdge (idx, idy) {
+        this.rinc.validated = false
         this.rinc.notify('on_setEdgeR', idx, idy)
       }
 
       on_unsetNode (idx, idy) {
+        this.rinc.validated = false
         // revenir ici attention
         // this.rinc.notify("on_undesetNodeR", idx,idy);
       }
 
       on_unsetEdge (idx, idy) {
+        this.rinc.validated = false
         // this.rinc.notify("on_undesetEdgeR", idx,idy);
       }
     }
@@ -94,6 +102,8 @@ class RuleInclusion extends Observable {
       super()
       this.sub = sub
       this.over = over
+      // an inclusion is only valid once the user has confirmed it
+      this.validated = false
       this.lgraphI = new GraphInclusion(sub.lhs, over.lhs)
       this.rgraphI = new GraphInclusion(sub.rhs, over.rhs)
       new RuleInclusion.Sub(this, sub)
@@ -106,25 +116,36 @@ class RuleInclusion extends Observable {
       return JSON.stringify({
         lgraphI: JSON.parse(this.lgraphI.toJSON((data) => { return data }, (data) => { return data })),
         rgraphI: JSON.parse(this.rgraphI.toJSON((data) => { return data }, (data) => { return data })),
+        validated: this.validated
       })
     }
 
 
-    isComplete(){
-        
-       return Object.keys(this.lgraphI.nodeMap).length == Object.keys(this.sub.lhs.nodes).length && Object.keys(this.rgraphI.nodeMap).length == Object.keys(this.sub.rhs.nodes).length
-
+    // what is still unbound in the source rule (lhs and rhs, nodes and edges)
+    missing () {
+      const count = (o) => Object.keys(o).length
+      return {
+        lhsNodes: count(this.sub.lhs.nodes) - count(this.lgraphI.nodeMap),
+        lhsEdges: count(this.sub.lhs.edges) - count(this.lgraphI.edgeMap),
+        rhsNodes: count(this.sub.rhs.nodes) - count(this.rgraphI.nodeMap),
+        rhsEdges: count(this.sub.rhs.edges) - count(this.rgraphI.edgeMap)
+      }
     }
+
+    isComplete () {
+      return Object.values(this.missing()).every((n) => n === 0)
+    }
+
     static ofJSON (json,dom,cod) {
       
-      console.log(json);
       let jlgI=  JSON.stringify(JSON.parse(json)["lgraphI"]);
       let jrgI=  JSON.stringify(JSON.parse(json)["rgraphI"]);      
       let lgraphI= GraphInclusion.ofJSON(jlgI,dom.lhs,cod.lhs);
-      let rgraphI=GraphInclusion.ofJSON(jrgI,dom.lhs,cod.rhs);
+      let rgraphI=GraphInclusion.ofJSON(jrgI,dom.rhs,cod.rhs);
       return {
         lgraphI: lgraphI,
         rgraphI: rgraphI,
+        validated: JSON.parse(json)['validated'] === true
       }
     }
 }

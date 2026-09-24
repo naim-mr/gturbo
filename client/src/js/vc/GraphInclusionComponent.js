@@ -1,6 +1,7 @@
 
 var { GraphInclusion, GraphInclusionObserver } = require('../model/GraphInclusion')
 var { GraphComponent, GraphComponentObserver } = require('./GraphComponent')
+var { nodeRanks } = require('../util/numbering.js')
 
 class GraphInclusionComponent {
      static DomComponentObs= class extends GraphComponentObserver {
@@ -55,31 +56,29 @@ class GraphInclusionComponent {
 
         on_setNode (idx, idy) {
           const nodeDom = this.gic.domComp.cy.getElementById(idx)
-          this.gic.codComp.cy.getElementById(idy).style('background-color', nodeDom.style('background-color'))
-          this.gic.codComp.cy.getElementById(idy).addClass('inclusion')
+          const nodeCod = this.gic.codComp.cy.getElementById(idy)
+          nodeCod.style('background-color', nodeDom.style('background-color'))
+          nodeCod.addClass('inclusion')
         }
 
         on_setEdge (idx, idy) {
-          const edgex = this.gic.domComp.edgesInCy[idx]
-          const edgeDom = this.gic.domComp.cy.getElementById(edgex)
-          const edgey = this.gic.codComp.edgesInCy[idy]
-          this.gic.codComp.cy.getElementById(edgey).style('line-color', edgeDom.style('line-color'))
-          this.gic.codComp.cy.getElementById(edgey).style('target-arrow-color', edgeDom.style('target-arrow-color'))
-          this.gic.codComp.cy.getElementById(edgey).addClass('inclusion')
+          const edgeDom = this.gic.domComp.cy.getElementById(this.gic.domComp.edgesInCy[idx])
+          const edgeCod = this.gic.codComp.cy.getElementById(this.gic.codComp.edgesInCy[idy])
+          edgeCod.style('line-color', edgeDom.style('line-color'))
+          edgeCod.style('target-arrow-color', edgeDom.style('target-arrow-color'))
+          edgeCod.addClass('inclusion')
         }
 
         on_unsetNode (idx, idy) {
           const nodeCod = this.gic.codComp.cy.getElementById(idy)
           nodeCod.style({ 'background-color': '' })
+          nodeCod.removeClass('inclusion')
         }
 
         on_unsetEdge (idx, idy) {
-          const id = this.gic.codComp.edgesInCy[idy]
-          const edgeCod = this.gic.codComp.cy.getElementById(id)
-          edgeCod.style({
-            'line-color': '',
-            'target-arrow-color': ''
-          })
+          const edgeCod = this.gic.codComp.cy.getElementById(this.gic.codComp.edgesInCy[idy])
+          edgeCod.style({ 'line-color': '', 'target-arrow-color': '' })
+          edgeCod.removeClass('inclusion')
         }
       }
 
@@ -100,9 +99,11 @@ class GraphInclusionComponent {
               event.target.removeClass('inclusion')
               event.target.unselect()
             } else if (this.selectedEle != null && this.selectedEle.isNode()) {
-              this.graphI.setNode((this.selectedEle.id()), id)
+              this.graphI.setNode(this.selectedEle.id(), id)
               this.lastInclusion = event.target
+              this.clearSelection()
             }
+            this.changed()
           })
           this.codComp.cy.on('click', 'edge', (event) => {
             const id = event.target.id()
@@ -111,8 +112,10 @@ class GraphInclusionComponent {
               event.target.removeClass('inclusion')
               event.target.unselect()
             } else if (this.selectedEle != null && this.selectedEle.isEdge()) {
-              this.graphI.setEdge(this.domComp.edgesInGraph[(this.selectedEle.id())], this.codComp.edgesInGraph[id])
+              this.graphI.setEdge(this.domComp.edgesInGraph[this.selectedEle.id()], this.codComp.edgesInGraph[id])
+              this.clearSelection()
             }
+            this.changed()
           })
         }
       }
@@ -140,193 +143,115 @@ class GraphInclusionComponent {
         this.selectedEle = null
       }
 
-      // Diminuer ?
-
-      printNewInclusion () {
-        this.codComp.inc = true
-        this.domComp.inc = true
-        var rgb
-        for (const node in this.graphI.dom.nodes) {
-          rgb = getRandomRgb()
-          const ele = this.domComp.cy.add({
-            group: 'nodes',
-            data: {
-              id: node
-            },
-            position: { x: this.graphI.dom.nodes[node].data.x, y: this.graphI.dom.nodes[node].data.y }
-          }).on('click', (event) => {
-            this.selectedEle = event.target
-            this.selectedEle.addClass('highlight')
-          })
-          this.domComp.cy.getElementById(ele).removeListener('mouseout')
-          ele.style({ 'background-color': rgb })
-        }
-        for (const edge in this.graphI.dom.edges) {
-          rgb = getRandomRgb()
-          const ele = this.domComp.cy.add({
-            group: 'edges',
-            data: {
-              id: this.domComp.edgesInCy[edge],
-              source: this.graphI.dom.edges[edge].src,
-              target: this.graphI.dom.edges[edge].dst
-            }
-          }).on('click', (event) => {
-            this.selectedEle = event.target
-            this.selectedEle.addClass('highlight')
-          })
-          this.domComp.cy.getElementById(ele).removeListener('mouseout')
-          ele.style({
-            'line-color': rgb,
-            'target-arrow-color': rgb
-          })
-        }
-        for (const node in this.graphI.cod.nodes) {
-          const id = this.codComp.cy.add({
-            group: 'nodes',
-            data: {
-
-              id: node
-            },
-            position: { x: this.graphI.cod.nodes[node].data.x, y: this.graphI.cod.nodes[node].data.y }
-          }).on('click', (event) => {
-            this.codSelectedEle = event.target
-            this.codSelectedEle.addClass('highlight')
-          })
-        }
-        for (const edge in this.graphI.cod.edges) {
-          const id = this.codComp.cy.add({
-            group: 'edges',
-            data: {
-              id: this.codComp.edgesInCy[edge],
-              source: this.graphI.cod.edges[edge].src,
-              target: this.graphI.cod.edges[edge].dst
-            }
-
-          }).on('click', (event) => {
-            this.codSelectedEle = event.target
-            this.codSelectedEle.addClass('highlight')
-          })
-        }
+      // hook used by the owner to know that the user changed a binding
+      changed () {
+        if (this.onChange) this.onChange()
       }
 
+      clearSelection () {
+        if (this.selectedEle != null) this.selectedEle.removeClass('highlight')
+        this.selectedEle = null
+      }
+
+      // center and scale both graphs in their (visible) window
+      fit () {
+        this.domComp.fit()
+        this.codComp.fit()
+      }
+
+      printNewInclusion () {
+        this.loadInclusion()
+      }
+
+      // Draws dom and cod. Every dom element gets its own color; the cod
+      // element it is bound to gets the same one.
       loadInclusion () {
-        this.codComp.inc = true
+        const dom = this.graphI.dom
+        const cod = this.graphI.cod
         this.domComp.inc = true
-        var rgb
-        const check = []
-        for (const edge in this.graphI.cod.edges) {
-          check[edge] = false
-        }
+        this.codComp.inc = true
+        this.selectedEle = null
+        this.codSelectedEle = null
+        initEdgeMaps(this.domComp, dom)
+        initEdgeMaps(this.codComp, cod)
 
-        for (const node in this.graphI.dom.nodes) {
-          rgb = getRandomRgb()
-          let ele = this.domComp.cy.add({
+        const domRanks = nodeRanks(dom)
+        const codRanks = nodeRanks(cod)
+        const addNode = (comp, g, ranks, id, onClick) => {
+          const ele = comp.cy.add({
             group: 'nodes',
-            data: {
-              id: node
-
-            },
-            position: { x: this.graphI.dom.nodes[node].data.x, y: this.graphI.dom.nodes[node].data.y }
-          }).on('click', (event) => {
-            this.selectedEle = event.target
-            this.selectedEle.addClass('highlight')
+            data: { id: String(id) },
+            position: { x: g.nodes[id].data.x || 0, y: g.nodes[id].data.y || 0 }
           })
-          this.domComp.cy.getElementById(ele).removeListener('mouseout')
-          ele.style({ 'background-color': rgb })
-          if (this.graphI.nodeMap[node] != undefined) {
-            ele = this.codComp.cy.add({
-              group: 'nodes',
-              data: {
-                id: this.graphI.nodeMap[node]
-
-              },
-              position: { x: this.graphI.cod.nodes[this.graphI.nodeMap[node]].data.x, y: this.graphI.cod.nodes[this.graphI.nodeMap[node]].data.y }
-            })
-            ele.style({ 'background-color': rgb })
-            ele.addClass('inclusion')
-          }
+          ele.style('label', String(ranks[id]))
+          ele.on('click', onClick)
+          return ele
         }
-        for (let edge in this.graphI.dom.edges) {
-          if (typeof (edge) === 'string')edge = parseInt(edge)
-          rgb = getRandomRgb()
-          let ele = this.domComp.cy.add({
+        const addEdge = (comp, g, id, onClick) => {
+          const ele = comp.cy.add({
             group: 'edges',
             data: {
-              id: this.domComp.edgesInCy[edge],
-              source: this.graphI.dom.edges[edge].src,
-              target: this.graphI.dom.edges[edge].dst
+              id: comp.edgesInCy[id],
+              source: String(g.edges[id].src),
+              target: String(g.edges[id].dst)
             }
-
-          }).on('click', (event) => {
-            this.selectedEle = event.target
-            this.selectedEle.addClass('highlight')
           })
-          this.domComp.cy.getElementById(ele).removeListener('mouseout')
+          ele.on('click', onClick)
+          return ele
+        }
+        const selectDom = (event) => {
+          this.selectedEle = event.target
+          this.selectedEle.addClass('highlight')
+        }
+        const selectCod = (event) => {
+          this.codSelectedEle = event.target
+          this.codSelectedEle.addClass('highlight')
+        }
 
-          ele.style({
-            'line-color': rgb,
-            'target-arrow-color': rgb
+        let k = 0
+        for (const node of Object.keys(dom.nodes)) {
+          addNode(this.domComp, dom, domRanks, node, selectDom).style('background-color', PALETTE[k++ % PALETTE.length])
+        }
+        for (const edge of Object.keys(dom.edges)) {
+          const color = PALETTE[k++ % PALETTE.length]
+          addEdge(this.domComp, dom, edge, selectDom).style({ 'line-color': color, 'target-arrow-color': color })
+        }
+        for (const node of Object.keys(cod.nodes)) addNode(this.codComp, cod, codRanks, node, selectCod)
+        for (const edge of Object.keys(cod.edges)) addEdge(this.codComp, cod, edge, selectCod)
+
+        for (const node of Object.keys(this.graphI.nodeMap)) {
+          const target = this.codComp.cy.getElementById(String(this.graphI.nodeMap[node]))
+          if (target.length === 0) continue
+          target.style('background-color', this.domComp.cy.getElementById(String(node)).style('background-color'))
+          target.addClass('inclusion')
+        }
+        for (const edge of Object.keys(this.graphI.edgeMap)) {
+          const target = this.codComp.cy.getElementById(this.codComp.edgesInCy[this.graphI.edgeMap[edge]])
+          if (target.length === 0) continue
+          const source = this.domComp.cy.getElementById(this.domComp.edgesInCy[edge])
+          target.style({
+            'line-color': source.style('line-color'),
+            'target-arrow-color': source.style('target-arrow-color')
           })
-
-          if (this.graphI.edgeMap[edge] != undefined) {
-            ele = this.codComp.cy.add({
-              group: 'edges',
-              data: {
-                id: this.codComp.edgesInCy[this.graphI.edgeMap[edge]],
-                source: this.graphI.cod.edges[this.graphI.edgeMap[edge]].src,
-                target: this.graphI.cod.edges[this.graphI.edgeMap[edge]].dst
-              }
-
-            })
-            ele.style({
-              'line-color': rgb,
-              'target-arrow-color': rgb
-            })
-            ele.addClass('inclusion')
-            check[this.graphI.edgeMap[edge]] = true
-          }
-        }
-        for (const node in this.graphI.cod.nodes) {
-          if (!this.codComp.cy.getElementById(node).length) {
-            const ele = this.codComp.cy.add({
-              group: 'nodes',
-              data: {
-
-                id: node
-              },
-
-              position: { x: this.graphI.cod.nodes[node].data.x, y: this.graphI.cod.nodes[node].data.y }
-            }).on('click', (event) => {
-              this.codSelectedEle = event.target
-              this.codSelectedEle.addClass('highlight')
-            })
-          }
-        }
-        for (const edge in this.graphI.cod.edges) {
-          if (!check[edge]) {
-            const ele = this.codComp.cy.add({
-              group: 'edges',
-              data: {
-                id: this.codComp.edgesInCy[edge],
-                source: this.graphI.cod.edges[edge].src,
-                target: this.graphI.cod.edges[edge].dst
-              }
-
-            }).on('click', (event) => {
-              this.codSelectedEle = event.target
-              this.codSelectedEle.addClass('highlight')
-            })
-          }
+          target.addClass('inclusion')
         }
       }
 }
 
-function getRandomRgb () {
-  var num = Math.round(0xffffff * Math.random())
-  var r = num >> 16
-  var g = num >> 8 & 255
-  var b = num & 255
-  return 'rgb(' + r + ', ' + g + ', ' + b + ')'
+// Paul Tol's muted qualitative scheme (colour-blind safe), then three more
+// muted hues; sober enough for a paper, still easy to tell apart
+const PALETTE = ['#CC6677', '#332288', '#DDCC77', '#117733', '#88CCEE', '#882255',
+  '#44AA99', '#999933', '#AA4499', '#661100', '#6699CC', '#AA4466']
+
+// Edge ids of the two windows are derived from the model ids ('e' + id), so
+// they never depend on the maps kept by the rule editors.
+function initEdgeMaps (comp, g) {
+  comp.edgesInCy = {}
+  comp.edgesInGraph = {}
+  for (const e of Object.keys(g.edges)) {
+    comp.edgesInCy[e] = 'e' + e
+    comp.edgesInGraph['e' + e] = parseInt(e)
+  }
 }
 
 module.exports = { GraphInclusionComponent }
