@@ -1,9 +1,47 @@
 # GT WebEditor
 
-A web editor for graph rewriting systems. Each node of the *global view* is a
-rewriting rule (a left-hand side and a right-hand side); each edge is an
-inclusion between two rules. The inclusions forced by a rule are computed by
-[gran_turismo](gran_turismo-master) (`libgt`) on the server.
+A web editor to **define a graph rewriting system and apply it to a whole graph at
+once**, based on the framework of *global transformations*.
+
+In a global transformation, a system of local rules (a left-hand side rewritten
+into a right-hand side) is extended to a synchronous rewriting of an entire
+structure. What makes the extension well defined is how the rules relate to each
+other: a rule can be included in another one, and the rewriting of the bigger
+pattern has to be compatible with the rewriting of the smaller ones. Defining
+these inclusions correctly by hand is the tedious and error-prone part of the
+method; this editor is meant to make it manageable. The theory is presented in
+
+> Alexandre Fernandez, Luidnel Maignan, Antoine Spicher.
+> "Lindenmayer systems and global transformations."
+> *International Conference on Unconventional Computation and Natural Computation
+> (UCNC 2019)*, pp. 65-78, Springer, 2019.
+
+and the computation is done by [gran_turismo](gran_turismo-master) (`libgt`), the
+Python implementation of the framework by Alexandre Fernandez (see the
+[references](gran_turismo-master/README.md#references) of its README, which also
+covers the follow-up papers on Kan extensions, accretive computation and
+non-determinism).
+
+## What the editor does
+
+- **Rewriting systems.** You keep several named systems; each one is made of
+  rewriting rules (graphs, drawn in a window) shown as nodes of a *global view*,
+  where an arrow is an inclusion of a rule into another.
+- **Inclusions computed for you.** When a rule is edited, gran_turismo computes the
+  inclusions it forces on the lhs. Only a *base* is shown: the other inclusions
+  are obtained by composing the ones you see with automorphisms.
+- **Validation.** You bind the rhs of each inclusion (and choose what each
+  automorphism becomes in the rhs) by matching elements with colours, then
+  validate it. Trivial cases are validated automatically. A system whose
+  inclusions are all validated is *fully defined*.
+- **Playground.** For a fully defined system, draw a graph and apply the system
+  to it: the server closes the inclusions under composition, checks that they are
+  compatible, and runs the global transformation with gran_turismo, step by step.
+
+## Context
+
+Developed during a bachelor research internship, as a graphical front end for
+gran_turismo.
 
 ```
 client/              Vue 3 + Quasar + Cytoscape front end   (http://localhost:8080)
@@ -103,3 +141,8 @@ VUE_APP_SERVER_URL=http://host:port NODE_OPTIONS=--openssl-legacy-provider npm r
 | `ERR_OSSL_EVP_UNSUPPORTED` when building the client | Missing `NODE_OPTIONS=--openssl-legacy-provider` |
 | Port 8080 or 5000 already used | Stop the old process, e.g. `pkill -f vue-cli-service` |
 | Inclusions are not created, console shows `Inclusion server unreachable` | The Flask server is not running, or `VUE_APP_SERVER_URL` is wrong |
+
+## Reference
+
+Fernandez A., Maignan L., Spicher A. "Lindenmayer systems and global
+transformations." UCNC 2019, pp. 65-78. Springer, Cham, 2019.
