@@ -16,11 +16,12 @@ method; this editor is meant to make it manageable. The theory is presented in
 > *International Conference on Unconventional Computation and Natural Computation
 > (UCNC 2019)*, pp. 65-78, Springer, 2019.
 
-and the computation is done by [gran_turismo](gran_turismo-master (https://github.com/Alexandre-Fernandez-dev/Global-Transformations)) (`libgt`), the
-Python implementation of the framework by Alexandre Fernandez (see the
-[references](gran_turismo-master/README.md#references) of its README, which also
-covers the follow-up papers on Kan extensions, accretive computation and
-non-determinism).
+and the computation is done by **gran_turismo** (`libgt`), the Python implementation
+of the framework written by Alexandre Fernandez:
+<https://github.com/Alexandre-Fernandez-dev/Global-Transformations>. A copy of it is
+included in this repository (see [Third-party code](#third-party-code)). Its README
+also lists the follow-up papers on Kan extensions, accretive computation and
+non-determinism.
 
 ## What the editor does
 
@@ -41,13 +42,25 @@ non-determinism).
 ## Context
 
 Developed during a bachelor research internship, as a graphical front end for
-gran_turismo.
+gran_turismo (by Alexandre Fernandez, see above).
 
 ```
 client/              Vue 3 + Quasar + Cytoscape front end   (http://localhost:8080)
 server/app/          Flask back end, calls libgt            (http://127.0.0.1:5000)
-gran_turismo-master/ the libgt library
+gran_turismo-master/ copy of gran_turismo (libgt) by Alexandre Fernandez, see below
 ```
+
+## Third-party code
+
+`gran_turismo-master/` is an **unmodified copy of gran_turismo (`libgt`) 2.1.0** by
+Alexandre Fernandez, taken from
+<https://github.com/Alexandre-Fernandez-dev/Global-Transformations> (commit
+`cab4929`, 2024-06-14) and distributed under its own licence
+([gran_turismo-master/LICENCE](gran_turismo-master/LICENCE)). It is included only so
+that the editor runs without an extra download; see
+[gran_turismo-master/UPSTREAM.md](gran_turismo-master/UPSTREAM.md). All credit for the
+global transformation engine goes to its author; this editor only uses it. For
+updates, refer to the original repository.
 
 ## Prerequisites
 
@@ -142,7 +155,9 @@ VUE_APP_SERVER_URL=http://host:port NODE_OPTIONS=--openssl-legacy-provider npm r
 | Port 8080 or 5000 already used | Stop the old process, e.g. `pkill -f vue-cli-service` |
 | Inclusions are not created, console shows `Inclusion server unreachable` | The Flask server is not running, or `VUE_APP_SERVER_URL` is wrong |
 
-## Reference
+## References
 
-Fernandez A., Maignan L., Spicher A. "Lindenmayer systems and global
-transformations." UCNC 2019, pp. 65-78. Springer, Cham, 2019.
+- Fernandez A., Maignan L., Spicher A. "Lindenmayer systems and global
+  transformations." UCNC 2019, pp. 65-78. Springer, Cham, 2019.
+- Fernandez A. *gran_turismo*, Python implementation of global transformations:
+  <https://github.com/Alexandre-Fernandez-dev/Global-Transformations>.
