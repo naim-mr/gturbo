@@ -1,0 +1,57 @@
+# # This file is a template, and might need editing before it works on your project.
+# Official language image. Look for the different tagged releases at:
+# https://hub.docker.com/r/library/python/tags/
+image: "python:3.9"
+
+#commands to run in the Docker container before starting each job.
+before_script:
+  - python --version
+  - pip install -r requirements.txt
+  - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+#  - echo "$SSH_PRIVATE_KEY"
+#  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add
+  - ssh-add <(echo "$SSH_PRIVATE_KEY" | tr -d '\r')  
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+
+# different stages in the pipeline
+stages:
+  - Static Analysis
+  - Test
+
+#defines the job in Static Analysis
+pylint:
+  stage: Static Analysis
+  script:
+  - pylint --disable=C0103,C0114,C0115,C0116,C0123,C0200,C0301,C0303,R0801,R0912,R0914,R1702,R0201,R0902,R0915,R1710,R1721,R0903,W0212,W0603,W0622,W0102,W0511,W0640 src/libgt/*.py
+
+test-sequence:
+  stage: Test
+  script:
+  - python3 test/sequence.py
+
+test-gmap:
+  stage: Test
+  script:
+  - python3 test/gmap.py
+
+test-graph:
+  stage: Test
+  script:
+  - python3 test/graph.py
+
+test-sheaf:
+  stage: Test
+  script:
+  - python3 test/sheaf.py
+
+test-open:
+  stage: Test
+  script:
+  - python3 test/open.py
+
+test-tree:
+  stage: Test
+  script:
+  - python3 test/tree.py

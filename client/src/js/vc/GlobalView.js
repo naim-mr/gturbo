@@ -23,11 +23,10 @@ class GlobalView extends Observable {
       }
 
       on_addNode (idn) {
-        console.log("global addddd"); 
         const ele = this.gv.cy.add({
           group: 'nodes',
           position: {},
-          data: { id: idn }
+          data: { id: idn, label: String(idn) }
         })
       }
 
@@ -78,9 +77,21 @@ class GlobalView extends Observable {
           selector: 'node',
           style: {
             'shape': 'rectangle',
+            'label': 'data(label)',
+            'text-valign': 'center',
+            'text-halign': 'center',
             'border-width': 2,
-            'background-color':'blue',
-            'border-color': 'black'
+            'background-color': '#88CCEE',
+            'border-color': '#332288'
+          }
+        },
+        {
+          // a named rule grows to fit its name
+          selector: 'node[name]',
+          style: {
+            'width': 'label',
+            'height': 'label',
+            'padding': '10px'
           }
         },
         {
@@ -94,8 +105,9 @@ class GlobalView extends Observable {
         {
           selector: 'edge',
           style: {
-            'line-color': 'red',
-            'target-arrow-color': 'red',
+            'line-color': '#B8860B',
+            'line-style': 'dashed',
+            'target-arrow-color': '#B8860B',
             'curve-style': 'bezier',
             'target-arrow-shape': 'triangle'
           }
@@ -103,15 +115,16 @@ class GlobalView extends Observable {
         {
           selector: '.eh_edited',
           style: {
-            'line-color': 'green',
-            'target-arrow-color': 'green'
+            'line-style': 'solid',
+            'line-color': '#117733',
+            'target-arrow-color': '#117733'
 
           }
         },
         {
           selector: '.eh-handle',
           style: {
-            'background-color': 'red',
+            'background-color': '#882255',
             width: 12,
             height: 12,
             shape: 'ellipse',
@@ -122,21 +135,21 @@ class GlobalView extends Observable {
         {
           selector: '.eh-hover',
           style: {
-            'border-color': 'red'
+            'border-color': '#882255'
           }
         },
         {
           selector: '.eh-source',
           style: {
             'border-width': 2,
-            'border-color': 'red'
+            'border-color': '#882255'
           }
         },
         {
           selector: '.eh-target',
           style: {
             'border-width': 2,
-            'border-color': 'red'
+            'border-color': '#882255'
           }
         },
         {
@@ -172,6 +185,8 @@ class GlobalView extends Observable {
         }
       })
       this.cy.zoomingEnabled(false)
+      // edges (inclusions) are drawn by dragging the handle shown above a hovered rule
+      this.eh = this.cy.edgehandles(options)
       this.addListener(idComp)
     }
 
@@ -186,8 +201,6 @@ class GlobalView extends Observable {
 
     // precond graph in Graph
     updateGraph (graph) {
-      console.log("iciopqsifsod")
-      console.log(graph)
       this.destroyObserver()
       this.graph = graph
       this.graphObs = new GlobalView.GraphObs(this, graph)
@@ -204,13 +217,11 @@ class GlobalView extends Observable {
 
     reloadCy () {
       for (const node in this.graph.nodes) {
-        console.log("reload")
-        console.log(this.graph.nodes[node])
         const id = this.cy.add({
           group: 'nodes',
           data: {
-            id: node
-
+            id: node,
+            label: node
           },
           position: { x: this.graph.nodes[node].data.x, y: this.graph.nodes[node].data.y }
         })
@@ -224,6 +235,21 @@ class GlobalView extends Observable {
             target: this.graph.edges[edge].dst
           }
         })
+        const inc = this.graph.edges[edge].data.inc
+        if (inc && inc.validated) id.addClass('eh_edited')
+      }
+    }
+
+    // show the name of a rule (its number when it has none)
+    setLabel (id, name) {
+      const ele = this.cy.getElementById(String(id))
+      if (ele.length === 0) return
+      if (name) {
+        ele.data('name', name)
+        ele.data('label', name)
+      } else {
+        ele.removeData('name')
+        ele.data('label', String(id))
       }
     }
 
@@ -326,19 +352,19 @@ class GlobalView extends Observable {
       })
     }
 
+    // Delete the selection. The ids are taken first: removing an element
+    // changes the collections, and walking a live one skipped every other element.
     onDelete () {
-      for (let i = 0; i < this.cy.edges('').length; i++) {
-        if (this.cy.edges('')[i].selected()) {
-          this.graph.removeEdge(this.edgesInGraph[this.cy.edges('')[i].id()])
-        }
+      const edges = this.cy.edges(':selected').map((e) => e.id())
+      const nodes = this.cy.nodes(':selected').map((n) => n.id())
+      for (const id of edges) {
+        const eid = this.edgesInGraph[id]
+        if (eid !== undefined && this.graph.edges[eid] !== undefined) this.graph.removeEdge(eid)
       }
-      for (let i = 0; i < this.cy.nodes('').length; i++) {
-        if (this.cy.nodes('')[i].selected()) {
-          this.graph.removeNode(this.cy.nodes('')[i].id())
-        }
+      for (const id of nodes) {
+        if (this.graph.nodes[id] !== undefined) this.graph.removeNode(id)
       }
     }
-
     onClick (event) {
       this.lastClick = event.renderedPosition
       if (this.ctrlKey) {
@@ -354,17 +380,10 @@ class GlobalView extends Observable {
       }
     }
 
-    stylizedRule (id) {
-      const r = this.cy.getElementById(id)
-      r.addClass('edited')
-      for (const ed of this.cy.elements()) {
-        if (ed.isEdge() && ed.source().id() == id && ed.target().id() == id) ed.addClass('eh_edited')
-      }
-    }
-
-    stylizedInc (id) {
+    stylizedInc (id, validated = true) {
       const i = this.cy.getElementById(this.edgesInCy[id])
-      i.addClass('eh_edited')
+      if (validated) i.addClass('eh_edited')
+      else i.removeClass('eh_edited')
     }
 }
 

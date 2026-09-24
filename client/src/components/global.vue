@@ -1,13 +1,17 @@
   <template>
+    <div class="row">
+      <div class="col-md-8 offset-md-2 sysname">{{ name }}</div>
+    </div>
     <div class="row" >
       <div id="rcomp" class="col-md-8 offset-md-2 " ></div>
     </div>
     <div class="row">
-      <q-btn class="col-md-2 offset-md-5"  id="saveB"  @click="save" label="Save"></q-btn>
+      <q-btn class="col-md-2 offset-md-5"  id="saveB"  @click="save" label="Save (.txt)"></q-btn>
     </div>
     
 </template>
 <style>
+  .sysname { margin-top: 10px; font-weight: bold; color: #2b3a4a; }
   
   #rcomp{
         margin-top:10px;
@@ -31,18 +35,16 @@
 </style>
 <script>
 export default {
-  components: {
+  props: {
+    name: { type: String, default: '' }
   },
-  data () {
-    return {
+  methods: {
+    save () {
+      this.$emit('save')
     }
-  },
-  methods: {
-
   },
   mounted () {
     this.$emit('initRsc')
   }
-
 }
 </script>

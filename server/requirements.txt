@@ -1,0 +1,6 @@
+flask>=2.2
+flask-cors
+# libgt calls networkx.algorithms.tree.branchings.Edmonds, removed from newer releases
+networkx==3.1
+numpy
+matplotlib

@@ -94,16 +94,19 @@ class GraphInclusion extends Observable {
       if (idy in this.edgeInvMap) {
         this.unsetEdge(this.edgeInvMap[idy])
       }
-      let nidx = this.dom.edges[idx].src
-      let nidy = this.cod.edges[idy].src
-      if (this.nodeMap[nidx] != nidy) {
-        this.setNode(nidx, nidy)
-      }
-      nidx = this.dom.edges[idx].dst
-      nidy = this.cod.edges[idy].dst
-      if (this.nodeMap[nidx] != nidy) {
-        this.setNode(nidx, nidy)
-      }
+      // The graphs are undirected: the edge can be bound in the orientation it
+      // is drawn or in the opposite one. Keep the one that agrees with the nodes
+      // already bound; the drawn one when nothing decides.
+      const [a, b] = [this.dom.edges[idx].src, this.dom.edges[idx].dst]
+      const [c, d] = [this.cod.edges[idy].src, this.cod.edges[idy].dst]
+      const fits = (x, y, p, q) =>
+        (this.nodeMap[x] === undefined || this.nodeMap[x] == p) &&
+        (this.nodeMap[y] === undefined || this.nodeMap[y] == q) &&
+        (!(p in this.nodeInvMap) || this.nodeInvMap[p] == x) &&
+        (!(q in this.nodeInvMap) || this.nodeInvMap[q] == y)
+      const [p, q] = (!fits(a, b, c, d) && fits(a, b, d, c)) ? [d, c] : [c, d]
+      if (this.nodeMap[a] != p) this.setNode(a, p)
+      if (this.nodeMap[b] != q) this.setNode(b, q)
       this.edgeMap[idx] = idy
       this.edgeInvMap[idy] = idx
       this.notify('on_setEdge', idx, idy)

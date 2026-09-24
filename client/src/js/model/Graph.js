@@ -27,24 +27,6 @@ class GraphObserver extends Observer {
   on_updateEdge (id, data) {}
 }
 
-class LogGraphObserver extends GraphObserver {
-  constructor (g) {
-    super(g)
-  }
-
-  on_addNode (id) { console.log('') }
-
-  on_addEdge (id, src, dst) { console.log('') }
-
-  on_removeNode (id) { console.log('') }
-
-  on_removeEdge (id) { console.log('') }
-
-  on_updateNode (id, data) { console.log('') }
-
-  on_updateEdge (id, data) { console.log('') }
-}
-
 class Graph extends Observable {
   constructor () {
     super()
@@ -88,6 +70,9 @@ class Graph extends Observable {
   // pre-cond:
   //   id in this.nodes
   removeNode (id) {
+    // ids come as strings from the windows, numbers elsewhere
+    id = parseInt(id)
+    if (this.nodes[id] === undefined) return
     for (const eid of [].concat(this.nodes[id].outgoing)) {
       this.removeEdge(eid)
     }
@@ -102,6 +87,9 @@ class Graph extends Observable {
   // pre-cond:
   //   id in this.edges
   removeEdge (id) {
+    id = parseInt(id)
+    // an edge that is already gone (or never was) is not an error
+    if (this.edges[id] === undefined) return
     this.notify('on_removeEdge', id)
     removeElement(this.nodes[this.edges[id].src].outgoing, id)
     removeElement(this.nodes[this.edges[id].dst].incoming, id)
@@ -111,8 +99,6 @@ class Graph extends Observable {
   // pre-cond:
   //   id in this.nodes
   updateNode (id, update) {
-    console.log(this.nodes)
-    console.log(id)
     this.nodes[id].data = update(this.nodes[id].data)
     this.notify('on_updateNode', id, this.nodes[id].data)
     /*
@@ -182,20 +168,32 @@ class Graph extends Observable {
       return result
     }, {})
     
+    // The edges are the truth: rebuild what each node knows about them. Saved
+    // data could hold ids of edges that no longer exist, which made the node
+    // impossible to delete.
+    for (const n of Object.keys(g.nodes)) {
+      g.nodes[n].incoming = []
+      g.nodes[n].outgoing = []
+    }
+    for (const e of Object.keys(g.edges).map((k) => parseInt(k)).sort((a, b) => a - b)) {
+      const { src, dst } = g.edges[e]
+      g.nodes[src].outgoing.push(e)
+      g.nodes[dst].incoming.push(e)
+    }
     return g
   }
   refresh(){
     
     for(let n in this.nodes){
 
-        console.log(this.nodes[n]);
         this.notify("on_addNode",parseInt(n));
         this.notify("on_loadNode",parseInt(n),this.nodes[n].data);
     }
     for(let e in this.edges){
       
-      this.notify("on_addEdge",e, this.edges[e].src,this.edges[e].dst);
-      this.notify("on_loadEdge",e,this.edges[e].data);
+      // the ids of the edges are numbers, like the ones addEdge gives
+      this.notify("on_addEdge",parseInt(e), this.edges[e].src,this.edges[e].dst);
+      this.notify("on_loadEdge",parseInt(e),this.edges[e].data);
     }
   }
 }
